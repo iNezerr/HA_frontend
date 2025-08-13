@@ -1,6 +1,8 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { updateUserGoals } from "../services/profile";
+// import { updateUserGoals } from "../services/profile";
 
 const goals = [
   "Get Job Opportunities",

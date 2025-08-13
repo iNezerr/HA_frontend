@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { Education } from '../hooks/useProfileData';
+// import { Education } from '../hooks/// useProfileData';
 
 interface EducationTabProps {
   education: Education[];

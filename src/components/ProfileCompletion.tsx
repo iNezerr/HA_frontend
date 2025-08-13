@@ -1,7 +1,9 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, MapPin, User, Briefcase } from 'lucide-react';
-import { getProfileCompletionStatus } from '../services/profile';
+// import { getProfileCompletionStatus } from '../services/profile';
 
 interface ProfileCompletionProps {
   className?: string;

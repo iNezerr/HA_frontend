@@ -1,13 +1,17 @@
 import React from 'react';
 import { Bell, Mail, User } from 'lucide-react';
-import { useProfileData } from '../hooks/useProfileData';
-import { useAuth } from '../context/AuthContext';
+// UI-only interface - removed useProfileData hook
+import { useAuth } from '../auth/context/AuthContext';
 
 const Header: React.FC = () => {
-  const { profileData } = useProfileData();
   const { user } = useAuth();
 
-  const profilePic = user?.google_data?.picture || profileData?.profile_picture || '/hero/userprofile.svg';
+  // Mock profile data for UI
+  const mockProfileData = {
+    profile_picture: '/hero/userprofile.svg'
+  };
+
+  const profilePic = mockProfileData?.profile_picture || '/hero/userprofile.svg';
 
   return (
     <div className="w-full bg-white py-5 px-4 md:px-6 flex items-center justify-end gap-8 shadow-sm z-40">

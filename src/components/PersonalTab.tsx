@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PersonalInfo } from '../hooks/useProfileData';
+// import { PersonalInfo } from '../hooks/// useProfileData';
 import { validatePersonalInfo, sanitizeInput } from '../utils/validation';
 
 interface PersonalTabProps {

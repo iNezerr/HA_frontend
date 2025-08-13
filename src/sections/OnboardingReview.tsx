@@ -1,6 +1,8 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { updateParsedProfile, type ParsedCVData } from '../services/profile';
+// import { updateParsedProfile, type ParsedCVData } from '../services/profile';
 
 const OnboardingReview = () => {
   const [parsedData, setParsedData] = useState<ParsedCVData | null>(null);

@@ -1,6 +1,8 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import React, { useState } from 'react';
-import { CareerProfile } from '../hooks/useProfileData';
-import { uploadDocument } from '../services/profile';
+// import { CareerProfile } from '../hooks/// useProfileData';
+// import { uploadDocument } from '../services/profile';
 
 interface CareerProfileTabProps {
   careerProfile: CareerProfile;

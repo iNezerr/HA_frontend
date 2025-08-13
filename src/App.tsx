@@ -4,10 +4,11 @@ import { HelmetProvider } from 'react-helmet-async';
 // Layout components
 import Navbar from "./components/NavBar";
 import Footer from "./sections/Footer";
-import ProtectedRoute, { AdminRoute } from "./components/ProtectedRoute";
+import ProtectedRoute, { AdminRoute } from "./auth/components/ProtectedRoute";
 import SidebarWrapper from "./components/SidebarWrapper";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { AppProvider } from "./context/AppContext";
+import { AuthProvider } from "./auth/context/AuthContext";
 import { ToastProvider } from "./components/NotificationToast";
 
 // Homepage sections
@@ -19,15 +20,12 @@ import Testimonials from "./sections/Testimonials";
 import HowItWorks from "./sections/HowItWorks";
 
 // Authentication & onboarding pages
-import Login from "./sections/Login";
-import Signup from "./sections/Signup";
-import OnboardingReview from "./sections/OnboardingReview";
-import OnboardingComplete from "./sections/Onboarding";
+import Login from "./auth/pages/Login";
+import Signup from "./auth/pages/Signup";
+import UnifiedOnboarding from "./sections/UnifiedOnboarding";
+import UnifiedDashboard from "./sections/UnifiedDashboard";
 // Import placeholders for components that will be implemented later
 const VerifyEmail = () => <div>Email Verification</div>;
-import Onboarding1 from "./sections/Onboarding1";
-import Onboarding2 from "./sections/Onboarding2";
-import JobPortal from "./sections/JobPortal";
 import Profile from "./sections/Profile";
 import AdminDashboard from "./sections/AdminDashboard";
 import AdminScholarshipsList from "./components/AdminScholarshipsList";
@@ -69,11 +67,12 @@ const MainLayout = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <ToastProvider>
-          <Router>
-            <HelmetProvider>
-              <Routes>
+      <AuthProvider>
+        <AppProvider>
+          <ToastProvider>
+            <Router>
+              <HelmetProvider>
+                <Routes>
                 {/* Public routes - No authentication required */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
@@ -86,16 +85,12 @@ function App() {
 
                 {/* Protected routes - Require authentication */}
                 <Route element={<ProtectedRoute />}>
-                  {/* Onboarding routes */}
-                  <Route path="/onboarding/step-1" element={<Onboarding1 />} />
-                  <Route path="/onboarding/step-2" element={<Onboarding2 />} />
-                  <Route path="/onboarding/review" element={<OnboardingReview />} />
-                  <Route path="/onboarding/complete" element={<OnboardingComplete />} />
-                  <Route path="/onboarding/*" element={<ComingSoon />} />
+                  {/* Unified onboarding route */}
+                  <Route path="/onboarding" element={<UnifiedOnboarding />} />
 
                   {/* Dashboard routes - Require authentication */}
                   <Route element={<SidebarWrapper />}>
-                    <Route path="/dashboard" element={<JobPortal />} />
+                    <Route path="/dashboard" element={<UnifiedDashboard />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/dashboard/scholarships/:id" element={<ScholarshipDetails />} />
                     <Route path="/dashboard/*" element={<ComingSoon />} />
@@ -117,12 +112,11 @@ function App() {
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </HelmetProvider>
-          </Router>
-        </ToastProvider>
-      </AppProvider>
+              </HelmetProvider>
+            </Router>
+          </ToastProvider>
+        </AppProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
-}
-
-export default App;
+}export default App;

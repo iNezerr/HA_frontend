@@ -1,6 +1,8 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
-import { getAIMatches } from '../services/opportunities';
-import { Opportunity } from '../services/opportunities';
+// import { getAIMatches } from '../services/opportunities';
+// import { Opportunity } from '../services/opportunities';
 
 interface RecommendedOpportunitiesProps {
   className?: string;

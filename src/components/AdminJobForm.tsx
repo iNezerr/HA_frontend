@@ -1,7 +1,9 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-import { getJob, createJob, updateJob, JobFormData } from '../services/jobs';
+// import { getJob, createJob, updateJob, JobFormData } from '../services/jobs';
 
 const AdminJobForm: React.FC = () => {
   const { id } = useParams<{ id?: string }>();

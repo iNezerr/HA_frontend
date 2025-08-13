@@ -1,3 +1,5 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -17,7 +19,8 @@ import {
   BookOpen,
   Building
 } from 'lucide-react';
-import { LinkedInJobCrawler } from '../services/linkedinCrawler';
+import { FaBriefcase, FaEuroSign, FaSearch, FaRegStar, FaClock, FaBuilding, FaGlobe, FaLaptop } from 'react-icons/fa';
+// import { LinkedInJobCrawler } from '../services/linkedinCrawler';
 import JobPreviewModal from '../components/JobPreviewModal';
 
 interface CrawlStats {
@@ -30,7 +33,7 @@ interface CrawlStats {
 interface JobPlatform {
   id: string;
   name: string;
-  icon: string;
+  icon: React.ReactNode;
   color: string;
   status: 'active' | 'inactive' | 'crawling';
   stats: CrawlStats;
@@ -71,7 +74,7 @@ export default function AdminDashboard() {
     {
       id: 'linkedin',
       name: 'LinkedIn',
-      icon: '💼',
+      icon: <FaBriefcase />,
       color: 'bg-blue-600',
       status: 'active',
       stats: { total: 1250, success: 1200, failed: 50, lastRun: '2 hours ago' },
@@ -80,7 +83,7 @@ export default function AdminDashboard() {
     {
       id: 'nextlevel',
       name: 'Next Level Jobs EU',
-      icon: '🇪🇺',
+      icon: <FaEuroSign />,
       color: 'bg-purple-600',
       status: 'active',
       stats: { total: 850, success: 820, failed: 30, lastRun: '3 hours ago' },
@@ -89,7 +92,7 @@ export default function AdminDashboard() {
     {
       id: 'indeed',
       name: 'Indeed',
-      icon: '🔍',
+      icon: <FaSearch />,
       color: 'bg-green-600',
       status: 'active',
       stats: { total: 2100, success: 2050, failed: 50, lastRun: '1 hour ago' },
@@ -98,7 +101,7 @@ export default function AdminDashboard() {
     {
       id: 'monster',
       name: 'Monster',
-      icon: '👹',
+      icon: <FaRegStar />,
       color: 'bg-orange-600',
       status: 'inactive',
       stats: { total: 750, success: 700, failed: 50, lastRun: '1 day ago' },
@@ -107,7 +110,7 @@ export default function AdminDashboard() {
     {
       id: 'flexjobs',
       name: 'FlexJobs',
-      icon: '⏰',
+      icon: <FaClock />,
       color: 'bg-teal-600',
       status: 'active',
       stats: { total: 650, success: 630, failed: 20, lastRun: '4 hours ago' },
@@ -116,7 +119,7 @@ export default function AdminDashboard() {
     {
       id: 'glassdoor',
       name: 'Glassdoor',
-      icon: '🏢',
+      icon: <FaBuilding />,
       color: 'bg-emerald-600',
       status: 'active',
       stats: { total: 900, success: 870, failed: 30, lastRun: '2 hours ago' },
@@ -125,7 +128,7 @@ export default function AdminDashboard() {
     {
       id: 'remoteok',
       name: 'Remote OK',
-      icon: '🌍',
+      icon: <FaGlobe />,
       color: 'bg-indigo-600',
       status: 'active',
       stats: { total: 400, success: 395, failed: 5, lastRun: '1 hour ago' },
@@ -134,7 +137,7 @@ export default function AdminDashboard() {
     {
       id: 'weworkremotely',
       name: 'We Work Remotely',
-      icon: '💻',
+      icon: <FaLaptop />,
       color: 'bg-pink-600',
       status: 'inactive',
       stats: { total: 300, success: 290, failed: 10, lastRun: '6 hours ago' },

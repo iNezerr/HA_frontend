@@ -5,8 +5,8 @@ import {
   Clipboard,
   Camera,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useProfileData } from '../hooks/useProfileData';
+import { useAuth } from '../auth/context/AuthContext';
+// UI-only interface - removed useProfileData hook
 import PersonalTab from '../components/PersonalTab';
 import CareerProfileTab from '../components/CareerProfileTab';
 import EducationTab from '../components/EducationTab';
@@ -18,7 +18,59 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
   const { user } = useAuth();
 
-  // Use the custom hook for all profile data and logic
+  // Mock data for UI-only interface
+  const mockProfileHook = {
+    loading: false,
+    error: null,
+    validationErrors: {},
+    profileData: {
+      profile_picture: '/hero/userprofile.svg',
+      bio: 'Demo user profile',
+      linkedin_url: 'https://linkedin.com/in/demo',
+      github_url: 'https://github.com/demo',
+      website: 'https://demo.com'
+    },
+    personalInfo: {
+      first_name: user?.first_name || 'Demo',
+      last_name: user?.last_name || 'User',
+      email: user?.email || 'demo@huesapply.com',
+      phone: '+1234567890',
+      location: 'Demo City, Demo State',
+      bio: 'Demo user bio'
+    },
+    cvFile: null,
+    careerProfile: {
+      current_role: 'Software Developer',
+      career_level: 'Mid-level',
+      industry: 'Technology',
+      skills: ['React', 'TypeScript', 'Node.js'],
+      preferred_roles: ['Frontend Developer', 'Full Stack Developer']
+    },
+    education: [],
+    experience: [],
+    projects: [],
+    aiPreferences: {
+      ai_assistance_enabled: true,
+      preferred_communication_style: 'Professional',
+      job_alert_frequency: 'Weekly'
+    },
+    setPersonalInfo: () => {},
+    setCareerProfile: () => {},
+    setEducation: () => {},
+    setExperience: () => {},
+    setProjects: () => {},
+    setAIPreferences: () => {},
+    fetchProfileData: () => {},
+    handleSave: () => {},
+    addEducation: () => {},
+    deleteEducationEntry: () => {},
+    addExperience: () => {},
+    deleteExperienceEntry: () => {},
+    addProject: () => {},
+    deleteProjectEntry: () => {}
+  };
+
+  // Use the mock hook data
   const {
     loading,
     error,
@@ -45,7 +97,7 @@ export default function Profile() {
     deleteExperienceEntry,
     addProject,
     deleteProjectEntry
-  } = useProfileData();
+  } = mockProfileHook;
 
   const tabs = ['Personal', 'Career Profile', 'Education', 'Experience', 'Projects', 'AI'];
 

@@ -1,9 +1,12 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from "react";
 import OpportunityList from "../components/OpportunityList";
 import ScholarshipList from "../components/ScholarshipList";
 import ProfileCompletion from "../components/ProfileCompletion";
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
+import { FaSmile } from 'react-icons/fa';
 import {
   Clock,
   Bookmark as BookmarkIcon,
@@ -12,10 +15,10 @@ import {
   DollarSign,
   Star,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../auth/context/AuthContext';
 import RecommendedScholarships from '../components/RecommendedScholarships';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Opportunity } from '../services/opportunities';
+// import { Opportunity } from '../services/opportunities';
 
 const tabs = [
   {
@@ -157,7 +160,10 @@ export default function Dashboard() {
         <main className="flex-1 p-4 sm:p-6">
 
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Welcome back, Adam 😎</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center">
+              Welcome back, Adam 
+              <FaSmile className="ml-2 text-yellow-500" />
+            </h1>
           </div>
           <div className="mb-4">
             <p className="text-sm text-gray-600">Here's what is happening with your job search applications</p>

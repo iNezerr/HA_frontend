@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { Experience } from '../hooks/useProfileData';
+// import { Experience } from '../hooks/// useProfileData';
 
 interface ExperienceTabProps {
   experience: Experience[];

@@ -1,7 +1,9 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-import { getScholarship, createScholarship, updateScholarship, ScholarshipFormData } from '../services/scholarships';
+// import { getScholarship, createScholarship, updateScholarship, ScholarshipFormData } from '../services/scholarships';
 
 const AdminScholarshipForm: React.FC = () => {
   const { id } = useParams<{ id?: string }>();

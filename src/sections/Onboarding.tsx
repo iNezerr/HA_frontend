@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaCheck } from 'react-icons/fa';
 
 const OnboardingComplete: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const OnboardingComplete: React.FC = () => {
 
       {/* Success Icon */}
       <div className="w-48 h-60 bg-white rounded-md shadow-md mb-8 flex items-center justify-center">
-        <div className="text-green-500 text-6xl">✓</div>
+        <FaCheck className="text-green-500 text-6xl" />
       </div>
 
       {/* Success message */}

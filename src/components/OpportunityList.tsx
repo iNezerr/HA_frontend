@@ -1,6 +1,8 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Clock, Bookmark as BookmarkIcon, MapPin, Building2 } from 'lucide-react';
-import { getOpportunities } from '../services/opportunities';
+// import { getOpportunities } from '../services/opportunities';
 
 
 interface OpportunityFilters {

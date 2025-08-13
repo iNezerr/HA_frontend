@@ -1,10 +1,12 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud } from 'lucide-react';
 import { parseResumeFromPdf } from 'resume-parser-ts';
 import type { Resume } from 'resume-parser-ts';
-import { uploadDocument } from '../services/profile';
-import type { ParsedCVData } from '../services/profile';
+// import { uploadDocument } from '../services/profile';
+// import type { ParsedCVData } from '../services/profile';
 
 const UploadComponent = () => {
   const [file, setFile] = useState<File | null>(null);

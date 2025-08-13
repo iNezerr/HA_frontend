@@ -1,7 +1,9 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from "react";
 import { Clock, Bookmark as BookmarkIcon, MapPin, Building2, DollarSign, Star, Target } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import { getScholarshipApplicationStatus, getMatchedScholarships, getScholarships, Scholarship, toggleSaveScholarship } from '../services/scholarships';
+// import { getScholarshipApplicationStatus, getMatchedScholarships, getScholarships, Scholarship, toggleSaveScholarship } from '../services/scholarships';
 
 interface MatchedScholarship extends Scholarship {
     match_score?: number;

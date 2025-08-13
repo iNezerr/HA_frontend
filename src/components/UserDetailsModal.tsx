@@ -1,6 +1,9 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { X, Download, FileText, User, Mail, Phone, MapPin, Briefcase, GraduationCap, Building2, Calendar, ExternalLink, BookOpen } from 'lucide-react';
-import { getUserProfileById } from '../services/profile';
+import { FaCheck } from 'react-icons/fa';
+// import { getUserProfileById } from '../services/profile';
 
 interface UserDetailsModalProps {
   isOpen: boolean;
@@ -420,7 +423,10 @@ const UserDetailsModal = ({ isOpen, onClose, userId, userBasicInfo }: UserDetail
                           )}
                         </div>
                         {profileData.has_cv_in_gcs && (
-                          <p className="text-sm text-green-600">✓ CV is available for download</p>
+                          <p className="text-sm text-green-600 flex items-center">
+                            <FaCheck className="mr-1" />
+                            CV is available for download
+                          </p>
                         )}
                       </div>
                     ) : (

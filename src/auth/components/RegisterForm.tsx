@@ -1,5 +1,7 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../../types/mockData";
 import React, { useState } from 'react';
-import { registerUser } from '../services/auth';
+// import { registerUser } from '../../services/auth';
 import { useAuth } from '../context/AuthContext';
 
 interface RegisterFormProps {
@@ -115,9 +117,7 @@ export default function RegisterForm({ onSuccess, onError, className = '' }: Reg
         last_name: formData.lastName
       });
 
-      // Note: Signup response doesn't include tokens, user needs to login separately
-      // or we need to modify the backend to return tokens on signup
-
+     
       // Set user in context
       setUser(response.user);
 

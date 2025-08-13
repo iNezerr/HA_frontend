@@ -1,6 +1,8 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getScholarship, getScholarships, ScholarshipDetail, Scholarship, applyToScholarship } from '../services/scholarships';
+import { FaDollarSign, FaCalendar } from 'react-icons/fa';
 import SEO from '../components/SEO';
 
 const Tag = ({ children }: { children: React.ReactNode }) => (
@@ -150,8 +152,18 @@ const ScholarshipDetails: React.FC = () => {
                 <div key={s.id} className="border rounded-lg p-4 flex flex-col gap-2 bg-gray-50">
                   <div className="font-semibold text-gray-900 text-sm">{s.title}</div>
                   <div className="flex items-center text-xs text-gray-500 gap-4">
-                    {s.amount && <span>💰 {s.amount}</span>}
-                    {s.deadline && <span>🗓️ {s.deadline}</span>}
+                    {s.amount && (
+                      <span className="flex items-center">
+                        <FaDollarSign className="mr-1" />
+                        {s.amount}
+                      </span>
+                    )}
+                    {s.deadline && (
+                      <span className="flex items-center">
+                        <FaCalendar className="mr-1" />
+                        {s.deadline}
+                      </span>
+                    )}
                   </div>
                   <a href={`/dashboard/scholarships/${s.id}`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm font-semibold self-start">View Details</a>
                 </div>

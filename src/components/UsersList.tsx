@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaSave, FaTimes, FaEye, FaEdit, FaTrash, FaUsers } from 'react-icons/fa';
 import UserDetailsModal from './UserDetailsModal';
 
 interface GoogleUser {
@@ -425,7 +426,10 @@ const UsersList = () => {
                                     Saving...
                                   </>
                                 ) : (
-                                  '💾 Save'
+                                  <>
+                                    <FaSave className="mr-1" />
+                                    Save
+                                  </>
                                 )}
                               </button>
                               <button
@@ -433,7 +437,8 @@ const UsersList = () => {
                                 disabled={isUpdating}
                                 className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                               >
-                                ❌ Cancel
+                                <FaTimes className="mr-1" />
+                                Cancel
                               </button>
                             </>
                           ) : (
@@ -442,13 +447,15 @@ const UsersList = () => {
                                 onClick={() => openUserDetails(user)}
                                 className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
                               >
-                                👁️ View Details
+                                <FaEye className="mr-1" />
+                                View Details
                               </button>
                               <button
                                 onClick={() => startEditUser(user)}
                                 className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
                               >
-                                ✏️ Edit
+                                <FaEdit className="mr-1" />
+                                Edit
                               </button>
                               <button
                                 onClick={() => deleteUser(user.id)}
@@ -467,7 +474,10 @@ const UsersList = () => {
                                     Deleting...
                                   </>
                                 ) : (
-                                  '🗑️ Delete'
+                                  <>
+                                    <FaTrash className="mr-1" />
+                                    Delete
+                                  </>
                                 )}
                               </button>
                             </>
@@ -482,7 +492,7 @@ const UsersList = () => {
 
             {users.length === 0 && (
               <div className="text-center py-12">
-                <div className="text-gray-400 text-lg mb-2">👥</div>
+                <FaUsers className="text-gray-400 text-4xl mb-2 mx-auto" />
                 <p className="text-gray-500">No users found</p>
               </div>
             )}

@@ -1,8 +1,10 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { Clock, Bookmark, MapPin, Building2, DollarSign } from 'lucide-react';
-import { getScholarships } from '../services/scholarships';
+// import { getScholarships } from '../services/scholarships';
 import { useNavigate } from 'react-router-dom';
-import { getScholarshipApplicationStatus } from '../services/scholarships';
+// import { getScholarshipApplicationStatus } from '../services/scholarships';
 import ProfileCompletion from './ProfileCompletion';
 
 interface ScholarshipFilters {

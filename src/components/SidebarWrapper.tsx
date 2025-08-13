@@ -1,19 +1,15 @@
 import React from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import {
-  Home,
   LayoutDashboard,
-  Sparkles,
   FileText,
   Search,
   User,
-  Settings,
-  HelpCircle,
   LogOut,
   Menu,
   X,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../auth/context/AuthContext";
 import Header from "./Header";
 
 export default function SidebarWrapper() {
@@ -120,24 +116,10 @@ export default function SidebarWrapper() {
           <nav className="flex-1 overflow-y-auto px-3 py-4">
             <ul className="space-y-1">
               <SidebarItem
-                icon={<Home size={20} />}
-                text="Home"
-                link="/"
-                active={isActiveRoute("/")}
-                onClick={() => setMobileOpen(false)}
-              />
-              <SidebarItem
                 icon={<LayoutDashboard size={20} />}
                 text="Dashboard"
                 link="/dashboard"
                 active={isActiveRoute("/dashboard")}
-                onClick={() => setMobileOpen(false)}
-              />
-              <SidebarItem
-                icon={<Sparkles size={20} />}
-                text="My AI Matches"
-                link="/ai-matches"
-                active={isActiveRoute("/ai-matches")}
                 onClick={() => setMobileOpen(false)}
               />
               <SidebarItem
@@ -166,20 +148,6 @@ export default function SidebarWrapper() {
                 text="Profile"
                 link="/profile"
                 active={isActiveRoute("/profile")}
-                onClick={() => setMobileOpen(false)}
-              />
-              <SidebarItem
-                icon={<Settings size={20} />}
-                text="Settings"
-                link="/settings"
-                active={isActiveRoute("/settings")}
-                onClick={() => setMobileOpen(false)}
-              />
-              <SidebarItem
-                icon={<HelpCircle size={20} />}
-                text="Help Center"
-                link="/help"
-                active={isActiveRoute("/help")}
                 onClick={() => setMobileOpen(false)}
               />
               <SidebarItem

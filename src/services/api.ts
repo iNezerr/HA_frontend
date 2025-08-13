@@ -1,50 +1,105 @@
-// Base API services and constants for HuesApply
+/**
+ * Main API Services Export
+ * Central export point for all API services
+ */
 
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://backend.huesapply.com';
+// Base API Client
+export { default as apiClient } from './apiClient';
+export type { ApiResponse, ApiError } from './apiClient';
 
-// Helper to handle API responses consistently
-export const handleApiResponse = async (response: Response) => {
-  if (!response.ok) {
-    // Handle different error status codes
-    if (response.status === 401) {
-      // Clear tokens and redirect to login on auth failures
-      sessionStorage.removeItem('accessToken');
-      sessionStorage.removeItem('refreshToken');
-      sessionStorage.removeItem('user');
-      throw new Error('Authentication expired. Please log in again.');
-    }
+// Authentication
+export { default as AuthAPI } from '../auth/services/authAPI';
+export type { 
+  LoginRequest, 
+  RegisterRequest, 
+  AuthResponse,
+  PasswordResetRequest,
+  TokenRefreshRequest,
+  VerifyTokenRequest 
+} from '../auth/services/authAPI';
 
-    // Try to parse error response
-    try {
-      const errorData = await response.json();
-      throw new Error(errorData.message || errorData.error || `API error: ${response.status}`);
-    } catch (e) {
-      // If parsing fails, throw generic error with status
-      throw new Error(`API error: ${response.status}`);
-    }
-  }
+// User Profile
+export { default as UserAPI } from '../profile/services/userAPI';
+export type { 
+  UserProfile,
+  JobSeekerProfile,
+  ScholarshipSeekerProfile,
+  GrantSeekerProfile,
+  UpdateProfileRequest,
+  UploadResumeResponse 
+} from '../profile/services/userAPI';
 
-  return response.json();
-};
+// Jobs
+export { default as JobAPI } from '../jobs/services/jobAPI';
+export type { 
+  JobOpportunity,
+  JobApplication,
+  SavedJob,
+  JobSearchParams,
+  JobSearchResponse,
+  ApplyToJobRequest,
+  UpdateApplicationRequest 
+} from '../jobs/services/jobAPI';
 
-// Helper to get auth header for authenticated requests
-export const getAuthHeader = (): Record<string, string> => {
-  const token = sessionStorage.getItem('accessToken');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-};
+// Scholarships
+export { default as ScholarshipAPI } from '../scholarships/services/scholarshipAPI';
+export type { 
+  ScholarshipOpportunity,
+  ScholarshipApplication,
+  SavedScholarship,
+  ScholarshipSearchParams,
+  ScholarshipSearchResponse,
+  ApplyToScholarshipRequest,
+  UpdateScholarshipApplicationRequest 
+} from '../scholarships/services/scholarshipAPI';
 
-// Basic fetch wrapper with auth headers
-export const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${BASE_URL}${endpoint}`;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...getAuthHeader(),
-    ...(options.headers as Record<string, string>)
-  };
+// Grants
+export { default as GrantAPI } from '../grants/services/grantAPI';
+export type { 
+  GrantOpportunity,
+  GrantApplication,
+  SavedGrant,
+  GrantSearchParams,
+  GrantSearchResponse,
+  ApplyToGrantRequest,
+  UpdateGrantApplicationRequest 
+} from '../grants/services/grantAPI';
 
-  const response = await fetch(url, {
-    ...options,
-    headers
-  });
-  return handleApiResponse(response);
-};
+// Companies
+export { default as CompanyAPI } from '../companies/services/companyAPI';
+export type { 
+  Company,
+  CompanySearchParams,
+  CompanySearchResponse,
+  CompanyReview,
+  CreateReviewRequest 
+} from '../companies/services/companyAPI';
+
+// Onboarding
+export { default as OnboardingAPI } from './onboardingAPI';
+export type { 
+  OnboardingStep,
+  OnboardingFlow,
+  OnboardingSubmission,
+  OnboardingCompletion 
+} from './onboardingAPI';
+
+// Hooks
+export { default as useAPI } from '../hooks/useAPI';
+export type { UseAPIOptions, UseAPIResult } from '../hooks/useAPI';
+
+export { default as useMutation } from '../hooks/useMutation';
+export type { UseMutationOptions, UseMutationResult } from '../hooks/useMutation';
+
+// Feature-specific hooks
+export { default as useAuth } from '../auth/hooks/useAuth';
+export type { UseAuthOptions, UseAuthResult } from '../auth/hooks/useAuth';
+
+export { default as useJobApplications } from '../jobs/hooks/useJobApplications';
+export type { UseJobApplicationsOptions, UseJobApplicationsResult } from '../jobs/hooks/useJobApplications';
+
+export { default as useUserProfile } from '../profile/hooks/useUserProfile';
+export type { UseUserProfileOptions, UseUserProfileResult } from '../profile/hooks/useUserProfile';
+
+export { default as useCompanies } from '../companies/hooks/useCompanies';
+export type { UseCompaniesOptions, UseCompaniesResult } from '../companies/hooks/useCompanies';

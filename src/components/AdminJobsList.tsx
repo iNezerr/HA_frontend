@@ -1,7 +1,9 @@
+// Mock data for UI-only interface
+// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Plus, Search, Trash2, Eye, AlertCircle, RefreshCw } from 'lucide-react';
-import { getJobs } from '../services/jobs';
+// import { getJobs } from '../services/jobs';
 
 interface Job {
   id: string;

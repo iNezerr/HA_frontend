@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../auth/context/AuthContext";
 
 const Navbar: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -118,15 +118,7 @@ const Navbar: React.FC = () => {
                                 aria-haspopup="true"
                                 aria-label="User menu"
                             >
-                                {user?.google_data?.picture ? (
-                                    <img
-                                        src={user.google_data.picture}
-                                        alt="Profile"
-                                        className="w-8 h-8 rounded-full"
-                                    />
-                                ) : (
-                                    <FaUserCircle className="text-2xl text-gray-600" />
-                                )}
+                                <FaUserCircle className="text-2xl text-gray-600" />
                                 <span>{user?.first_name || 'User'}</span>
                             </button>
 
@@ -221,15 +213,7 @@ const Navbar: React.FC = () => {
                         {isAuthenticated ? (
                             <>
                                 <div className="flex items-center gap-2 px-4 py-2">
-                                    {user?.google_data?.picture ? (
-                                        <img
-                                            src={user.google_data.picture}
-                                            alt="Profile"
-                                            className="w-8 h-8 rounded-full"
-                                        />
-                                    ) : (
-                                        <FaUserCircle className="text-2xl text-gray-600" />
-                                    )}
+                                    <FaUserCircle className="text-2xl text-gray-600" />
                                     <span className="font-medium">{user?.first_name || 'User'}</span>
                                 </div>
                                 <Link to="/profile" className="w-full px-4 py-2 border border-gray-300 rounded-full text-center hover:bg-gray-50 transition" onClick={() => setIsOpen(false)}>
