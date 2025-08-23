@@ -233,13 +233,6 @@ export const mockOpportunities: Opportunity[] = [
 export const mockAPI = {
   // Auth functions
   registerUser: async (_data: any) => ({ success: true, user: mockUsers[0] }),
-  exchangeGoogleAuthCode: async (_code: string) => ({ 
-    data: { 
-      access_token: 'mock_token', 
-      refresh_token: 'mock_refresh', 
-      user: mockUsers[0] 
-    } 
-  }),
   getUserRole: async () => 'user',
   signOut: async () => ({ success: true }),
 

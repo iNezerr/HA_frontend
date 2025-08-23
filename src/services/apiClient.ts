@@ -33,6 +33,7 @@ const API_CONFIG = {
 class ApiClient {
   private instance: AxiosInstance;
   private static _instance: ApiClient;
+  private currentToken: string | null = null;
 
   private constructor() {
     this.instance = axios.create(API_CONFIG);
@@ -47,6 +48,16 @@ class ApiClient {
     return ApiClient._instance;
   }
 
+  // Method to set token from AuthContext
+  public setAuthToken(token: string | null): void {
+    this.currentToken = token;
+    if (token) {
+      console.log('🔑 Auth token updated in ApiClient');
+    } else {
+      console.log('🚫 Auth token cleared from ApiClient');
+    }
+  }
+
   private setupInterceptors(): void {
     // Request interceptor - attach auth token
     this.instance.interceptors.request.use(
@@ -56,16 +67,20 @@ class ApiClient {
           const token = await this.getAuthToken();
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+            console.log('🔐 Authorization header set with token preview:', token.substring(0, 50) + '...');
+          } else {
+            console.warn('⚠️ No auth token available for request to:', config.url);
           }
         } catch (error) {
-          console.warn('Failed to attach auth token:', error);
+          console.warn('❌ Failed to attach auth token:', error);
         }
         
         // Log request in development
         if (import.meta.env.VITE_DEBUG_MODE === 'true') {
-          console.log('API Request:', {
+          console.log('🌐 API Request:', {
             method: config.method?.toUpperCase(),
             url: config.url,
+            hasAuth: !!config.headers.Authorization,
             data: config.data,
           });
         }
@@ -100,12 +115,63 @@ class ApiClient {
 
   private async getAuthToken(): Promise<string | null> {
     try {
-      // This will be implemented when Firebase auth is fully integrated
-      // For now, try to get from localStorage or sessionStorage
-      const token = localStorage.getItem('firebase_token') || sessionStorage.getItem('firebase_token');
-      return token;
+      // Method 0: Use token set directly by AuthContext
+      if (this.currentToken && this.currentToken !== 'null' && this.currentToken !== 'undefined') {
+        console.log('🎯 Using token set by AuthContext');
+        return this.currentToken;
+      }
+      
+      // Method 1: Check sessionStorage for stored tokens
+      let token = sessionStorage.getItem('auth_token') || sessionStorage.getItem('firebase_token_temp');
+      
+      if (token && token !== 'null' && token !== 'undefined') {
+        console.log('📱 Using stored token from sessionStorage');
+        this.currentToken = token; // Cache it
+        return token;
+      }
+      
+      // Method 2: Try to get Firebase token directly
+      try {
+        const { firebaseAuth } = await import('../auth/config/firebase');
+        const currentUser = firebaseAuth.getCurrentUser();
+        
+        if (currentUser) {
+          console.log('🔥 Getting fresh Firebase token for user:', currentUser.email);
+          token = await firebaseAuth.getIdToken(true); // Force refresh
+          
+          if (token) {
+            // Store both tokens for future use
+            sessionStorage.setItem('firebase_token_temp', token);
+            sessionStorage.setItem('auth_token', token);
+            this.currentToken = token; // Cache it
+            console.log('✅ Fresh Firebase token obtained and stored');
+            return token;
+          }
+        } else {
+          console.warn('⚠️ No Firebase user found');
+        }
+      } catch (firebaseError) {
+        console.warn('❌ Could not get Firebase token:', firebaseError);
+      }
+      
+      // Method 3: Try to use AuthContext if available (in React components)
+      try {
+        // This won't work in the service layer, but let's try anyway
+        if (typeof window !== 'undefined' && (window as any).__authToken) {
+          token = (window as any).__authToken;
+          console.log('🪟 Using token from window.__authToken');
+          this.currentToken = token; // Cache it
+          return token;
+        }
+      } catch (contextError) {
+        console.warn('❌ Could not get token from context:', contextError);
+      }
+      
+      console.warn('🚫 No authentication token found through any method');
+      return null;
+      
     } catch (error) {
-      console.error('Error getting auth token:', error);
+      console.error('💥 Error getting auth token:', error);
       return null;
     }
   }
@@ -179,13 +245,22 @@ class ApiClient {
   }
 
   private handleAuthError(): void {
-    // Clear stored tokens
-    localStorage.removeItem('firebase_token');
-    sessionStorage.removeItem('firebase_token');
+    // Clear stored tokens from session storage
+    sessionStorage.clear();
     
-    // Redirect to login page
-    // This will be integrated with React Router
-    window.location.href = '/auth/login';
+    // Sign out from Firebase
+    try {
+      import('../auth/config/firebase').then(({ firebaseAuth }) => {
+        firebaseAuth.signOut();
+      });
+    } catch (error) {
+      console.warn('Could not sign out from Firebase:', error);
+    }
+    
+    // Redirect to login page (will be handled by React Router in the app)
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   }
 
   // HTTP Methods
@@ -217,6 +292,34 @@ class ApiClient {
   ): Promise<T> {
     const formData = new FormData();
     formData.append('file', file);
+
+    return this.instance.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onUploadProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onUploadProgress(progress);
+        }
+      },
+    });
+  }
+
+  // File upload method with additional data
+  public async uploadFileWithData<T = any>(
+    url: string, 
+    file: File, 
+    additionalData: Record<string, any> = {},
+    onUploadProgress?: (progress: number) => void
+  ): Promise<T> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Append additional data to form
+    Object.keys(additionalData).forEach(key => {
+      formData.append(key, additionalData[key]);
+    });
 
     return this.instance.post(url, formData, {
       headers: {

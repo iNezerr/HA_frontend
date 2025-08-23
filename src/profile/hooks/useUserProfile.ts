@@ -39,6 +39,7 @@ export interface UseUserProfileResult {
   deleteResume: () => Promise<void>;
   uploadProposal: (file: File, onProgress?: (progress: number) => void) => Promise<UploadResumeResponse>;
   deleteProposal: () => Promise<void>;
+  uploadDocument: (file: File, documentType?: 'cv' | 'resume' | 'proposal' | 'certificate' | 'transcript' | 'other', onProgress?: (progress: number) => void) => Promise<UploadResumeResponse>;
   completeOnboarding: () => Promise<{ success: boolean }>;
   deleteAccount: () => Promise<void>;
   updatePreferences: (preferences: any) => Promise<{ success: boolean }>;
@@ -220,6 +221,14 @@ export function useUserProfile(options: UseUserProfileOptions = {}): UseUserProf
     return deleteProposalMutation.mutate(undefined);
   }, [deleteProposalMutation.mutate]);
 
+  const uploadDocument = useCallback(async (
+    file: File, 
+    documentType: 'cv' | 'resume' | 'proposal' | 'certificate' | 'transcript' | 'other' = 'cv',
+    onProgress?: (progress: number) => void
+  ): Promise<UploadResumeResponse> => {
+    return UserAPI.uploadDocument(file, documentType, onProgress);
+  }, []);
+
   const completeOnboarding = useCallback(async (): Promise<{ success: boolean }> => {
     return onboardingMutation.mutate(undefined);
   }, [onboardingMutation.mutate]);
@@ -251,6 +260,7 @@ export function useUserProfile(options: UseUserProfileOptions = {}): UseUserProf
     deleteResume,
     uploadProposal,
     deleteProposal,
+    uploadDocument,
     completeOnboarding,
     deleteAccount,
     updatePreferences,

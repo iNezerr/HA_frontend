@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserType } from '../types/user';
 import OnboardingService from '../services/onboarding';
+import { useAuth } from '../auth/context/AuthContext';
 
 // Import step components
 import {
@@ -20,13 +21,27 @@ const UnifiedOnboarding: React.FC = () => {
   const [totalSteps, setTotalSteps] = useState(3);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      navigate('/auth/login', { replace: true });
+      return;
+    }
+
     // Check if user has already started onboarding
     const existingState = OnboardingService.getOnboardingState();
     const existingUserType = OnboardingService.getUserType();
     
-    if (existingState && existingUserType) {
+    // Check if user already has a user_type from backend
+    if (user?.user_type && !existingUserType) {
+      // User has already selected user type in backend, continue from where they left off
+      setUserType(user.user_type);
+      setTotalSteps(OnboardingService.getTotalSteps(user.user_type));
+      OnboardingService.initializeOnboarding(user.user_type);
+      setCurrentStep(1);
+    } else if (existingState && existingUserType) {
       // Continue existing onboarding
       setUserType(existingUserType);
       setCurrentStep(existingState.step);
@@ -43,20 +58,33 @@ const UnifiedOnboarding: React.FC = () => {
     }
     
     setLoading(false);
-  }, [navigate]);
+  }, [navigate, isAuthenticated, user]);
 
-  const handleUserTypeSelection = (selectedType: UserType) => {
-    setUserType(selectedType);
-    setTotalSteps(OnboardingService.getTotalSteps(selectedType));
+  const handleUserTypeSelection = async (selectedType: UserType) => {
+    setError('');
+    setLoading(true);
     
-    // Initialize onboarding state
-    OnboardingService.initializeOnboarding(selectedType);
-    
-    // Move to first step
-    setCurrentStep(1);
+    try {
+      // Save user type to backend
+      await OnboardingService.saveUserTypeToBackend(selectedType);
+      
+      setUserType(selectedType);
+      setTotalSteps(OnboardingService.getTotalSteps(selectedType));
+      
+      // Initialize onboarding state
+      OnboardingService.initializeOnboarding(selectedType);
+      
+      // Move to first step
+      setCurrentStep(1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save user type. Please try again.');
+      console.error('User type selection error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleStepComplete = (stepData: any) => {
+  const handleStepComplete = async (stepData: any) => {
     setError('');
     
     if (!userType) return;
@@ -78,9 +106,17 @@ const UnifiedOnboarding: React.FC = () => {
       const nextStep = currentStep + 1;
       
       if (nextStep > totalSteps) {
-        // Complete onboarding
-        OnboardingService.completeOnboarding();
-        navigate('/dashboard', { replace: true });
+        // Complete onboarding with backend integration
+        setLoading(true);
+        try {
+          await OnboardingService.completeOnboardingProcess();
+          
+          // Always redirect to dashboard - UnifiedDashboard will handle routing based on user type
+          navigate('/dashboard', { replace: true });
+        } catch (err: any) {
+          setError(err.message || 'Failed to complete onboarding. Please try again.');
+          setLoading(false);
+        }
       } else {
         setCurrentStep(nextStep);
         OnboardingService.updateStep(nextStep);
@@ -109,6 +145,7 @@ const UnifiedOnboarding: React.FC = () => {
         <UserTypeSelection 
           onUserTypeSelect={handleUserTypeSelection}
           error={error}
+          loading={loading}
         />
       );
     }

@@ -5,9 +5,10 @@ import { FaBriefcase, FaGraduationCap, FaDollarSign, FaCheck } from 'react-icons
 interface UserTypeSelectionProps {
   onUserTypeSelect: (userType: UserType) => void;
   error?: string;
+  loading?: boolean;
 }
 
-const UserTypeSelection: React.FC<UserTypeSelectionProps> = ({ onUserTypeSelect, error }) => {
+const UserTypeSelection: React.FC<UserTypeSelectionProps> = ({ onUserTypeSelect, error, loading = false }) => {
   const [selectedType, setSelectedType] = useState<UserType | null>(null);
 
   const userTypes = [
@@ -97,14 +98,21 @@ const UserTypeSelection: React.FC<UserTypeSelectionProps> = ({ onUserTypeSelect,
       <div className="text-center">
         <button
           onClick={handleContinue}
-          disabled={!selectedType}
+          disabled={!selectedType || loading}
           className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
-            selectedType
+            selectedType && !loading
               ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Continue with {selectedType ? userTypes.find(t => t.type === selectedType)?.title : 'Selection'}
+          {loading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Saving...
+            </div>
+          ) : (
+            `Continue with ${selectedType ? userTypes.find(t => t.type === selectedType)?.title : 'Selection'}`
+          )}
         </button>
       </div>
 

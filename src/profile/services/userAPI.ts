@@ -150,6 +150,22 @@ export class UserAPI {
   }
 
   /**
+   * Upload document file (general document upload)
+   */
+  static async uploadDocument(
+    file: File,
+    documentType: 'cv' | 'resume' | 'proposal' | 'certificate' | 'transcript' | 'other' = 'cv',
+    onUploadProgress?: (progress: number) => void
+  ): Promise<UploadResumeResponse> {
+    return apiClient.uploadFileWithData(
+      `${this.BASE_PATH}/upload-document-file`, 
+      file, 
+      { document_type: documentType },
+      onUploadProgress
+    );
+  }
+
+  /**
    * Update onboarding status
    */
   static async completeOnboarding(): Promise<{ success: boolean }> {

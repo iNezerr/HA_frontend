@@ -1,14 +1,21 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { FcGoogle } from 'react-icons/fc';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import SEO from '../../components/SEO';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
+import { LoginRequest } from '../services/authAPI';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { login, loginMutation } = useAuth({
+    onLoginSuccess: () => {
+      navigate('/dashboard');
+    },
+    onAuthError: (error) => {
+      setErrors({ email: error.message || 'Authentication failed' });
+    }
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -16,42 +23,12 @@ export default function Login() {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{email?: string; password?: string}>({});
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      // TODO: Implement Firebase Google authentication
-      console.log('Google login clicked');
-      
-      // Mock authentication for demo purposes
-      const mockUser = {
-        id: 1,
-        email: 'demo@huesapply.com',
-        first_name: 'Demo',
-        last_name: 'User',
-        is_active: true,
-        is_staff: false,
-        is_superuser: false,
-        date_joined: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-        user_type: undefined,
-        is_onboarding_complete: false,
-      };
-      
-      setUser(mockUser);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Google login error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isLoading = loginMutation.isLoading;
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrors({});
 
     // Basic validation
@@ -69,57 +46,28 @@ export default function Login() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setIsLoading(false);
       return;
     }
 
     try {
-      // TODO: Implement Firebase email/password authentication
-      console.log('Email login:', formData);
-      
-      // Mock authentication for demo purposes
-      const mockUser = {
-        id: 2,
+      const loginData: LoginRequest = {
         email: formData.email,
-        first_name: 'User',
-        last_name: 'Demo',
-        is_active: true,
-        is_staff: false,
-        is_superuser: false,
-        date_joined: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-        user_type: undefined,
-        is_onboarding_complete: false,
+        password: formData.password
       };
-      
-      setUser(mockUser);
-      navigate('/dashboard');
+      await login(loginData);
     } catch (error) {
       console.error('Email login error:', error);
-      setErrors({ email: 'Invalid email or password' });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleDemoLogin = () => {
-    // Set demo user for UI demonstration
-    const demoUser = {
-      id: 1,
+    // For demo purposes, you can either use a demo account
+    // or redirect to a demo page
+    setFormData({
       email: 'demo@huesapply.com',
-      first_name: 'Demo',
-      last_name: 'User',
-      is_active: true,
-      is_staff: false,
-      is_superuser: false,
-      date_joined: new Date().toISOString(),
-      last_login: new Date().toISOString(),
-      user_type: undefined,
-      is_onboarding_complete: false,
-    };
-    
-    setUser(demoUser);
-    navigate('/dashboard');
+      password: 'demo123'
+    });
+    // Optionally auto-submit the form
   };
   return (
     <>
@@ -174,28 +122,6 @@ export default function Login() {
             >
               Log In
             </button>
-          </div>
-
-          {/* Google Sign In Button */}
-          <div className="mb-6">
-            <button
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-              className="flex items-center justify-center gap-3 w-full px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FcGoogle className="text-xl" />
-              {isLoading ? 'Signing in...' : 'Continue with Google'}
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
           </div>
 
           {/* Email/Password Form */}

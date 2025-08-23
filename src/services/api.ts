@@ -9,6 +9,7 @@ export type { ApiResponse, ApiError } from './apiClient';
 
 // Authentication
 export { default as AuthAPI } from '../auth/services/authAPI';
+export { default as FirebaseAuthService } from '../auth/services/firebaseAuthService';
 export type { 
   LoginRequest, 
   RegisterRequest, 
@@ -17,6 +18,11 @@ export type {
   TokenRefreshRequest,
   VerifyTokenRequest 
 } from '../auth/services/authAPI';
+export type { 
+  FirebaseUser,
+  RegisterWithEmailParams,
+  LoginWithEmailParams 
+} from '../auth/services/firebaseAuthService';
 
 // User Profile
 export { default as UserAPI } from '../profile/services/userAPI';

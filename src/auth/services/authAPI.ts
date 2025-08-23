@@ -1,9 +1,10 @@
 /**
  * Authentication API Service
- * Handles all authentication-related API calls
+ * Handles authentication-related API calls between Firebase and backend
  */
 
 import { apiClient } from '../../services/apiClient';
+import FirebaseAuthService from './firebaseAuthService';
 
 // Types for authentication
 export interface LoginRequest {
@@ -25,9 +26,10 @@ export interface AuthResponse {
     displayName: string;
     userType: string;
     isOnboarded: boolean;
+    emailVerified: boolean;
   };
   token: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 export interface PasswordResetRequest {
@@ -42,79 +44,260 @@ export interface VerifyTokenRequest {
   token: string;
 }
 
+export interface BackendUserData {
+  user_type: 'job' | 'scholarship' | 'grant';
+  is_onboarding_complete: boolean;
+  profile_data?: any;
+  preferences?: any;
+}
+
 // Authentication API Service
 export class AuthAPI {
-  private static readonly BASE_PATH = '/auth';
+  private static readonly BASE_PATH = '';
 
   /**
-   * User login
+   * User login - Firebase auth + backend session creation
    */
   static async login(credentials: LoginRequest): Promise<AuthResponse> {
-    return apiClient.post(`${this.BASE_PATH}/login`, credentials);
+    try {
+      // First authenticate with Firebase
+      const firebaseUser = await FirebaseAuthService.loginWithEmail({
+        email: credentials.email,
+        password: credentials.password,
+      });
+
+      // Get Firebase ID token
+      const idToken = await FirebaseAuthService.getIdToken();
+
+      // Send Firebase token to backend for session creation
+      const response = await apiClient.post(`${this.BASE_PATH}/users/login/`, {
+        firebase_token: idToken,
+      });
+
+      // Backend returns session token and user data
+      if (response.session_token) {
+        sessionStorage.setItem('auth_token', response.session_token);
+      }
+
+      return {
+        user: {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: firebaseUser.displayName || '',
+          userType: response.user.user_type || 'job',
+          isOnboarded: response.user.is_onboarding_complete || false,
+          emailVerified: firebaseUser.emailVerified,
+        },
+        token: response.session_token,
+      };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw error;
+    }
   }
 
   /**
-   * User registration
+   * User registration - creates Firebase user and backend profile
    */
   static async register(userData: RegisterRequest): Promise<AuthResponse> {
-    return apiClient.post(`${this.BASE_PATH}/register`, userData);
+    try {
+      // First create user in Firebase
+      const firebaseUser = await FirebaseAuthService.registerWithEmail({
+        email: userData.email,
+        password: userData.password,
+        displayName: userData.displayName,
+      });
+
+      // Get Firebase ID token
+      const idToken = await FirebaseAuthService.getIdToken();
+
+      // Create user profile in backend and get session
+      const response = await apiClient.post(`${this.BASE_PATH}/users/register/`, {
+        firebase_token: idToken,
+        user_type: userData.userType,
+        display_name: userData.displayName,
+        email: userData.email,
+      });
+
+      // Backend returns session token and user data
+      if (response.session_token) {
+        sessionStorage.setItem('auth_token', response.session_token);
+      }
+
+      return {
+        user: {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: firebaseUser.displayName || '',
+          userType: userData.userType,
+          isOnboarded: false,
+          emailVerified: firebaseUser.emailVerified,
+        },
+        token: response.session_token,
+      };
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   }
 
   /**
-   * User logout
+   * User logout - clears session and signs out from Firebase
    */
   static async logout(): Promise<void> {
-    return apiClient.post(`${this.BASE_PATH}/logout`);
+    try {
+      // Notify backend to clear session
+      const token = sessionStorage.getItem('auth_token');
+      if (token) {
+        try {
+          await apiClient.post(`${this.BASE_PATH}/users/logout/`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (error) {
+          console.warn('Backend logout failed:', error);
+        }
+      }
+
+      // Clear session storage
+      sessionStorage.clear();
+
+      // Sign out from Firebase
+      await FirebaseAuthService.logout();
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   }
 
   /**
-   * Refresh authentication token
+   * Refresh authentication session
    */
-  static async refreshToken(refreshData: TokenRefreshRequest): Promise<AuthResponse> {
-    return apiClient.post(`${this.BASE_PATH}/refresh`, refreshData);
+  static async refreshToken(): Promise<AuthResponse> {
+    try {
+      // Get fresh Firebase token
+      const idToken = await FirebaseAuthService.getIdToken(true);
+      
+      // Send to backend for session refresh
+      const response = await apiClient.post(`${this.BASE_PATH}/users/refresh-session/`, {
+        firebase_token: idToken,
+      });
+
+      // Update session token
+      if (response.session_token) {
+        sessionStorage.setItem('auth_token', response.session_token);
+      }
+
+      const firebaseUser = FirebaseAuthService.getCurrentUser();
+      if (!firebaseUser) {
+        throw new Error('No authenticated user found');
+      }
+
+      return {
+        user: {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: firebaseUser.displayName || '',
+          userType: response.user.user_type || 'job',
+          isOnboarded: response.user.is_onboarding_complete || false,
+          emailVerified: firebaseUser.emailVerified,
+        },
+        token: response.session_token,
+      };
+    } catch (error: any) {
+      console.error('Token refresh error:', error);
+      throw error;
+    }
   }
 
   /**
-   * Send password reset email
+   * Send password reset email via Firebase
    */
   static async sendPasswordResetEmail(resetData: PasswordResetRequest): Promise<void> {
-    return apiClient.post(`${this.BASE_PATH}/password-reset`, resetData);
+    try {
+      await FirebaseAuthService.sendPasswordResetEmail(resetData.email);
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      throw error;
+    }
   }
 
   /**
-   * Verify authentication token
+   * Verify Firebase token with backend
    */
   static async verifyToken(tokenData: VerifyTokenRequest): Promise<{ valid: boolean; user?: any }> {
-    return apiClient.post(`${this.BASE_PATH}/verify-token`, tokenData);
+    try {
+      const response = await apiClient.post(`${this.BASE_PATH}/users/verify-firebase-token/`, tokenData);
+      return response;
+    } catch (error: any) {
+      console.error('Token verification error:', error);
+      return { valid: false };
+    }
   }
 
   /**
-   * Send email verification
+   * Send email verification via Firebase
    */
   static async sendEmailVerification(): Promise<void> {
-    return apiClient.post(`${this.BASE_PATH}/send-verification`);
+    try {
+      await FirebaseAuthService.sendEmailVerification();
+    } catch (error: any) {
+      console.error('Email verification error:', error);
+      throw error;
+    }
   }
 
   /**
-   * Verify email address
+   * Verify email address (handled by Firebase automatically)
    */
-  static async verifyEmail(verificationCode: string): Promise<void> {
-    return apiClient.post(`${this.BASE_PATH}/verify-email`, { code: verificationCode });
+  static async verifyEmail(_verificationCode: string): Promise<void> {
+    // Firebase handles email verification automatically when user clicks the link
+    // This method is kept for API compatibility but may not be needed
+    console.log('Email verification handled by Firebase');
   }
 
   /**
-   * Check if user exists by email
+   * Check if user exists by email (Firebase method)
    */
   static async checkUserExists(email: string): Promise<{ exists: boolean }> {
-    return apiClient.get(`${this.BASE_PATH}/check-user?email=${encodeURIComponent(email)}`);
+    try {
+      // This would need to be implemented via backend since Firebase doesn't
+      // provide a direct way to check user existence without authentication
+      const response = await apiClient.get(`${this.BASE_PATH}/users/check-user/?email=${encodeURIComponent(email)}`);
+      return response;
+    } catch (error: any) {
+      console.error('Check user exists error:', error);
+      return { exists: false };
+    }
   }
 
   /**
-   * Get current user info (requires authentication)
+   * Get current user info from backend session
    */
   static async getCurrentUser(): Promise<AuthResponse['user']> {
-    return apiClient.get(`${this.BASE_PATH}/me`);
+    try {
+      const token = sessionStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('No authentication session available');
+      }
+
+      const response = await apiClient.get(`${this.BASE_PATH}/users/me/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      return {
+        uid: response.firebase_uid,
+        email: response.email || '',
+        displayName: response.display_name || '',
+        userType: response.user_type || 'job',
+        isOnboarded: response.is_onboarding_complete || false,
+        emailVerified: response.email_verified || false,
+      };
+    } catch (error: any) {
+      console.error('Get current user error:', error);
+      throw error;
+    }
   }
+
 }
 
 export default AuthAPI;

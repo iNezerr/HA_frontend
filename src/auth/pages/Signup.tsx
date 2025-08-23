@@ -1,13 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { FcGoogle } from 'react-icons/fc';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import SEO from '../../components/SEO';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
+import { RegisterRequest } from '../services/authAPI';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { register, registerMutation } = useAuth({
+    onLoginSuccess: () => {
+      navigate('/onboarding');
+    },
+    onAuthError: (error) => {
+      setErrors({ email: error.message || 'Registration failed' });
+    }
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -15,47 +22,18 @@ export default function Signup() {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    userType: 'job' as 'job' | 'scholarship' | 'grant'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const handleGoogleSignup = async () => {
-    setIsLoading(true);
-    try {
-      // TODO: Implement Firebase Google authentication
-      console.log('Google signup clicked');
-      
-      // Mock authentication for demo purposes
-      const mockUser = {
-        id: 1,
-        email: 'demo@huesapply.com',
-        first_name: 'Demo',
-        last_name: 'User',
-        is_active: true,
-        is_staff: false,
-        is_superuser: false,
-        date_joined: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-        user_type: undefined,
-        is_onboarding_complete: false,
-      };
-      
-      setUser(mockUser);
-      navigate('/onboarding/step-1');
-    } catch (error) {
-      console.error('Google signup error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isLoading = registerMutation.isLoading;
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrors({});
 
     // Validation
@@ -87,36 +65,19 @@ export default function Signup() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setIsLoading(false);
       return;
     }
 
     try {
-      // TODO: Implement Firebase email/password registration
-      console.log('Email signup:', formData);
-      
-      // Mock authentication for demo purposes
-      const mockUser = {
-        id: 2,
+      const registerData: RegisterRequest = {
         email: formData.email,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        is_active: true,
-        is_staff: false,
-        is_superuser: false,
-        date_joined: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-        user_type: undefined,
-        is_onboarding_complete: false,
+        password: formData.password,
+        displayName: `${formData.firstName} ${formData.lastName}`,
+        userType: formData.userType
       };
-      
-      setUser(mockUser);
-      navigate('/onboarding/step-1');
+      await register(registerData);
     } catch (error) {
       console.error('Email signup error:', error);
-      setErrors({ email: 'Registration failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
     }
   };
   return (
@@ -169,28 +130,6 @@ export default function Signup() {
             >
               Log In
             </Link>
-          </div>
-
-          {/* Google Sign Up Button */}
-          <div className="mb-6">
-            <button
-              onClick={handleGoogleSignup}
-              disabled={isLoading}
-              className="flex items-center justify-center gap-3 w-full px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FcGoogle className="text-xl" />
-              {isLoading ? 'Creating account...' : 'Continue with Google'}
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
           </div>
 
           {/* Email/Password Form */}
@@ -308,6 +247,22 @@ export default function Signup() {
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
               )}
+            </div>
+
+            <div>
+              <label htmlFor="userType" className="block text-sm font-medium text-gray-700 mb-1">
+                I'm interested in
+              </label>
+              <select
+                id="userType"
+                value={formData.userType}
+                onChange={(e) => setFormData({ ...formData, userType: e.target.value as 'job' | 'scholarship' | 'grant' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="job">Jobs & Career Opportunities</option>
+                <option value="scholarship">Scholarships & Educational Funding</option>
+                <option value="grant">Grants & Research Funding</option>
+              </select>
             </div>
 
             <div className="flex items-start">

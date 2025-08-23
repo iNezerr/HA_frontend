@@ -1,4 +1,5 @@
 import { UserType, UserProfile, OnboardingState } from '../types/user';
+import { apiClient } from './apiClient';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -67,6 +68,69 @@ export class OnboardingService {
     this.saveUserType(userType);
     
     return initialState;
+  }
+
+  // Save user type to backend and local storage
+  static async saveUserTypeToBackend(userType: UserType): Promise<void> {
+    try {
+      console.log('Saving user type to backend:', userType);
+      
+      await apiClient.patch('/users/me/update/', {
+        user_type: userType,
+        onboarded: false // Mark as not yet onboarded, will be set to true when complete
+      });
+      
+      console.log('Successfully saved user type to backend');
+      
+      // Save to local storage as well
+      this.saveUserType(userType);
+    } catch (error: any) {
+      console.error('Failed to save user type to backend:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save user type');
+    }
+  }
+
+  // Complete onboarding process
+  static async completeOnboardingProcess(): Promise<void> {
+    const state = this.getOnboardingState();
+    const userType = this.getUserType();
+    const profileData = this.getProfileData();
+
+    if (!state || !userType || !profileData) {
+      throw new Error('Missing onboarding data');
+    }
+
+    try {
+      console.log('Completing onboarding process for user type:', userType);
+      
+      // Update user as onboarded in backend
+      await apiClient.patch('/users/me/update/', {
+        onboarded: true,
+        profile_data: profileData
+      });
+
+      console.log('Successfully marked user as onboarded in backend');
+
+      // Update profile if needed
+      if (profileData.personal_info) {
+        await apiClient.patch('/users/profile/update/', {
+          summary: (profileData as any).summary || '',
+          skills: (profileData as any).skills || [],
+          location: profileData.personal_info.address || '',
+          // Add other profile fields as needed
+        });
+        
+        console.log('Successfully updated user profile');
+      }
+
+      // Mark as complete locally
+      this.completeOnboarding();
+      
+      console.log('Onboarding process completed successfully');
+    } catch (error: any) {
+      console.error('Failed to complete onboarding in backend:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to complete onboarding');
+    }
   }
 
   // Get current onboarding state
@@ -157,23 +221,6 @@ export class OnboardingService {
   static getProfileData(): Partial<UserProfile> | null {
     const state = this.getOnboardingState();
     return state?.current_data || null;
-  }
-
-  // Save CV file data (mock for now)
-  static saveCVFile(file: File): Promise<string> {
-    return new Promise((resolve) => {
-      // Mock CV upload - in real implementation, this would upload to backend
-      const mockUrl = `mock://cv/${file.name}`;
-      
-      const currentState = this.getOnboardingState();
-      if (currentState) {
-        currentState.current_data.cv_file_url = mockUrl;
-        this.saveOnboardingState(currentState);
-      }
-      
-      // Simulate upload delay
-      setTimeout(() => resolve(mockUrl), 1000);
-    });
   }
 
   // Validate required fields for current step
