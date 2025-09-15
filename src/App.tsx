@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
-import { HelmetProvider } from 'react-helmet-async';
 
 // Layout components
 import Navbar from "./components/NavBar";
@@ -25,7 +24,7 @@ import Signup from "./auth/pages/Signup";
 import UnifiedOnboarding from "./sections/UnifiedOnboarding";
 import UnifiedDashboard from "./sections/UnifiedDashboard";
 // Import placeholders for components that will be implemented later
-const VerifyEmail = () => <div>Email Verification</div>;
+import VerifyEmail from "./auth/pages/VerifyEmail";
 import Profile from "./sections/Profile";
 import AdminDashboard from "./sections/AdminDashboard";
 import AdminScholarshipsList from "./components/AdminScholarshipsList";
@@ -71,7 +70,6 @@ function App() {
         <AppProvider>
           <ToastProvider>
             <Router>
-              <HelmetProvider>
                 <Routes>
                 {/* Public routes - No authentication required */}
                 <Route path="/login" element={<Login />} />
@@ -112,7 +110,6 @@ function App() {
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              </HelmetProvider>
             </Router>
           </ToastProvider>
         </AppProvider>

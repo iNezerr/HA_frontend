@@ -34,3 +34,6 @@ dist-ssr
 context_documents
 ./context_documents
 
+.github/copilot-instructions.md
+.cursorrules
+.cursor/rules/cursorrules.mdc

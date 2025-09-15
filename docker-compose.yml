@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        # Backend API URL for local development
+        - VITE_API_BASE_URL=http://localhost:8000/api
+        # Firebase Configuration
+        - VITE_FIREBASE_API_KEY=AIzaSyAhPYQiDkyeL7fH2_eHrp5no0EMMQveSEs
+        - VITE_FIREBASE_AUTH_DOMAIN=hues-apply-docs.firebaseapp.com
+        - VITE_FIREBASE_PROJECT_ID=hues-apply-docs
+        - VITE_FIREBASE_STORAGE_BUCKET=hues-apply-docs.firebasestorage.app
+        - VITE_FIREBASE_MESSAGING_SENDER_ID=919270650937
+        - VITE_FIREBASE_APP_ID=1:919270650937:web:e6d6232e44a5bd3c8e49e8
+        - VITE_FIREBASE_MEASUREMENT_ID=G-RVJ9DN6WHH
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      # Backend API URL for local development
+      - VITE_API_BASE_URL=http://localhost:8000/api
+      # Firebase Configuration
+      - VITE_FIREBASE_API_KEY=AIzaSyAhPYQiDkyeL7fH2_eHrp5no0EMMQveSEs
+      - VITE_FIREBASE_AUTH_DOMAIN=hues-apply-docs.firebaseapp.com
+      - VITE_FIREBASE_PROJECT_ID=hues-apply-docs
+      - VITE_FIREBASE_STORAGE_BUCKET=hues-apply-docs.firebasestorage.app
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=919270650937
+      - VITE_FIREBASE_APP_ID=1:919270650937:web:e6d6232e44a5bd3c8e49e8
+      - VITE_FIREBASE_MEASUREMENT_ID=G-RVJ9DN6WHH
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development service (optional)
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        # Backend API URL for local development
+        - VITE_API_BASE_URL=http://localhost:8000/api
+        # Firebase Configuration
+        - VITE_FIREBASE_API_KEY=AIzaSyAhPYQiDkyeL7fH2_eHrp5no0EMMQveSEs
+        - VITE_FIREBASE_AUTH_DOMAIN=hues-apply-docs.firebaseapp.com
+        - VITE_FIREBASE_PROJECT_ID=hues-apply-docs
+        - VITE_FIREBASE_STORAGE_BUCKET=hues-apply-docs.firebasestorage.app
+        - VITE_FIREBASE_MESSAGING_SENDER_ID=919270650937
+        - VITE_FIREBASE_APP_ID=1:919270650937:web:e6d6232e44a5bd3c8e49e8
+        - VITE_FIREBASE_MEASUREMENT_ID=G-RVJ9DN6WHH
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      # Backend API URL for local development
+      - VITE_API_BASE_URL=http://localhost:8000/api
+      # Firebase Configuration
+      - VITE_FIREBASE_API_KEY=AIzaSyAhPYQiDkyeL7fH2_eHrp5no0EMMQveSEs
+      - VITE_FIREBASE_AUTH_DOMAIN=hues-apply-docs.firebaseapp.com
+      - VITE_FIREBASE_PROJECT_ID=hues-apply-docs
+      - VITE_FIREBASE_STORAGE_BUCKET=hues-apply-docs.firebasestorage.app
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=919270650937
+      - VITE_FIREBASE_APP_ID=1:919270650937:web:e6d6232e44a5bd3c8e49e8
+      - VITE_FIREBASE_MEASUREMENT_ID=G-RVJ9DN6WHH
+    command: npm run dev
+    profiles:
+      - dev
+
+  # Nginx reverse proxy (optional, for production-like setup)
+  nginx-proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+    profiles:
+      - production
+    restart: unless-stopped
+
+networks:
+  default:
+    name: hues-apply-frontend
