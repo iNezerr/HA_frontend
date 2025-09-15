@@ -4,75 +4,212 @@ import {
   ExternalLink,
   Clipboard,
   Camera,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../auth/context/AuthContext';
-// UI-only interface - removed useProfileData hook
-import PersonalTab from '../components/PersonalTab';
-import CareerProfileTab from '../components/CareerProfileTab';
-import EducationTab from '../components/EducationTab';
-import ExperienceTab from '../components/ExperienceTab';
-import ProjectsTab from '../components/ProjectsTab';
-import AITab from '../components/AITab';
+import { useProfile } from '../profile/hooks/useProfile';
+import PersonalTab from '../profile/components/PersonalTab';
+import CareerProfileTab from '../profile/components/CareerProfileTab';
+import EducationTab from '../profile/components/EducationTab';
+import ExperienceTab from '../profile/components/ExperienceTab';
+import ProjectsTab from '../profile/components/ProjectsTab';
+import AITab from '../profile/components/AITab';
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
-  const { user } = useAuth();
-
-  const mockProfileHook = {
-    loading: false,
-    error: null,
-    validationErrors: {},
-    profileData: {
-      profile_picture: '/hero/userprofile.svg',
-      bio: 'Demo user profile',
-      linkedin_url: 'https://linkedin.com/in/demo',
-      github_url: 'https://github.com/demo',
-      website: 'https://demo.com'
-    },
-    personalInfo: {
-      first_name: user?.first_name || 'Demo',
-      last_name: user?.last_name || 'User',
-      email: user?.email || 'demo@huesapply.com',
-      phone: '+1234567890',
-      location: 'Demo City, Demo State',
-      bio: 'Demo user bio'
-    },
-    cvFile: null,
-    careerProfile: {
-      current_role: 'Software Developer',
-      career_level: 'Mid-level',
-      industry: 'Technology',
-      skills: ['React', 'TypeScript', 'Node.js'],
-      preferred_roles: ['Frontend Developer', 'Full Stack Developer']
-    },
-    education: [],
-    experience: [],
-    projects: [],
-    aiPreferences: {
-      ai_assistance_enabled: true,
-      preferred_communication_style: 'Professional',
-      job_alert_frequency: 'Weekly'
-    },
-    setPersonalInfo: () => {},
-    setCareerProfile: () => {},
-    setEducation: () => {},
-    setExperience: () => {},
-    setProjects: () => {},
-    setAIPreferences: () => {},
-    fetchProfileData: () => {},
-    handleSave: () => {},
-    addEducation: () => {},
-    deleteEducationEntry: () => {},
-    addExperience: () => {},
-    deleteExperienceEntry: () => {},
-    addProject: () => {},
-    deleteProjectEntry: () => {}
-  };
-
-  // Use the mock hook data
+  const { user: _authUser } = useAuth();
+  
+  // Use the profile hook from the profile module
   const {
+    user,
+    profileCompletion,
+    documents,
+    loading,
+    uploading,
+    error,
+    refreshProfile,
+    updateProfile,
+    updateUser,
+    uploadDocument,
+  } = useProfile();
+
+  // Transform the backend data to match the component expectations
+  const transformedData = {
     loading,
     error,
+    validationErrors: {} as Record<string, string[]>,
+    profileData: {
+      profile_picture: '/hero/userprofile.svg', // TODO: Add profile picture support
+      bio: user?.profile?.summary || '',
+      linkedin_url: user?.profile_data?.linkedin_url || '',
+      github_url: user?.profile_data?.github_url || '',
+      website: user?.profile_data?.website || ''
+    },
+    personalInfo: {
+      first_name: user?.name?.split(' ')[0] || '',
+      last_name: user?.name?.split(' ').slice(1).join(' ') || '',
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.profile_data?.phone || '',
+      location: user?.profile?.location || '',
+      country: user?.profile?.location || '',
+      bio: user?.profile?.summary || '',
+      goal: user?.profile_data?.career_goal || ''
+    },
+    cvFile: documents.find(doc => doc.document_type === 'cv') ? {
+      filename: documents.find(doc => doc.document_type === 'cv')?.filename || '',
+      uploadedAt: documents.find(doc => doc.document_type === 'cv')?.uploaded_at || '',
+      downloadUrl: documents.find(doc => doc.document_type === 'cv')?.gcs_url || ''
+    } : undefined,
+    careerProfile: {
+      current_role: user?.profile_data?.current_role || '',
+      career_level: user?.profile_data?.career_level || '',
+      industry: user?.profile_data?.industry || '',
+      skills: user?.profile?.skills || [],
+      preferred_roles: user?.profile_data?.preferred_roles || []
+    },
+    education: user?.profile?.education || [],
+    experience: user?.profile_data?.experience || [],
+    projects: user?.profile_data?.projects || [],
+    aiPreferences: {
+      ai_assistance_enabled: user?.profile_data?.ai_assistance_enabled ?? true,
+      preferred_communication_style: user?.profile_data?.preferred_communication_style || 'Professional',
+      job_alert_frequency: user?.profile_data?.job_alert_frequency || 'Weekly',
+      opportunities: user?.profile_data?.opportunities || [],
+      prioritizeBy: user?.profile_data?.prioritizeBy || [],
+      salaryExpectation: user?.profile_data?.salaryExpectation || ''
+    },
+    // Optimized action functions following the new API pattern
+    setPersonalInfo: async (newPersonalInfo: any) => {
+      try {
+        // Handle name field - use either the combined name or construct from first/last
+        const name = newPersonalInfo.name || 
+          [newPersonalInfo.first_name, newPersonalInfo.last_name].filter(Boolean).join(' ');
+        
+        // Update user basic info
+        await updateUser({ 
+          name: name,
+        });
+        
+        // Update profile summary and location
+        await updateProfile({
+          location: newPersonalInfo.location || newPersonalInfo.country,
+          summary: newPersonalInfo.bio,
+        });
+
+        // Update additional profile_data fields through user update
+        if (newPersonalInfo.phone || newPersonalInfo.goal) {
+          const updatedProfileData = {
+            ...user?.profile_data,
+            phone: newPersonalInfo.phone,
+            career_goal: newPersonalInfo.goal,
+          };
+          
+          await updateUser({
+            profile_data: updatedProfileData,
+          });
+        }
+        
+      } catch (err) {
+        console.error('Failed to update personal info:', err);
+        throw err;
+      }
+    },
+    setCareerProfile: async (newCareerProfile: any) => {
+      try {
+        await updateProfile({
+          skills: newCareerProfile.skills,
+        });
+        
+        // Update profile_data for other career fields
+        const updatedProfileData = {
+          ...user?.profile_data,
+          current_role: newCareerProfile.current_role,
+          career_level: newCareerProfile.career_level,
+          industry: newCareerProfile.industry,
+          preferred_roles: newCareerProfile.preferred_roles,
+        };
+        
+        await updateUser({
+          profile_data: updatedProfileData,
+        });
+      } catch (err) {
+        console.error('Failed to update career profile:', err);
+        throw err;
+      }
+    },
+    setEducation: async (newEducation: any) => {
+      try {
+        await updateProfile({
+          education: newEducation,
+        });
+      } catch (err) {
+        console.error('Failed to update education:', err);
+        throw err;
+      }
+    },
+    setExperience: async (newExperience: any) => {
+      try {
+        const updatedProfileData = {
+          ...user?.profile_data,
+          experience: newExperience,
+        };
+        
+        await updateUser({
+          profile_data: updatedProfileData,
+        });
+      } catch (err) {
+        console.error('Failed to update experience:', err);
+        throw err;
+      }
+    },
+    setProjects: async (newProjects: any) => {
+      try {
+        const updatedProfileData = {
+          ...user?.profile_data,
+          projects: newProjects,
+        };
+        
+        await updateUser({
+          profile_data: updatedProfileData,
+        });
+      } catch (err) {
+        console.error('Failed to update projects:', err);
+        throw err;
+      }
+    },
+    setAIPreferences: async (newAIPreferences: any) => {
+      try {
+        const updatedProfileData = {
+          ...user?.profile_data,
+          ai_assistance_enabled: newAIPreferences.ai_assistance_enabled,
+          preferred_communication_style: newAIPreferences.preferred_communication_style,
+          job_alert_frequency: newAIPreferences.job_alert_frequency,
+        };
+        
+        await updateUser({
+          profile_data: updatedProfileData,
+        });
+      } catch (err) {
+        console.error('Failed to update AI preferences:', err);
+        throw err;
+      }
+    },
+    fetchProfileData: refreshProfile,
+    handleSave: (_tab?: string) => {}, // Individual saves are handled by each setter
+    addEducation: () => {},
+    deleteEducationEntry: async (_id: string, _index: number) => {},
+    addExperience: () => {},
+    deleteExperienceEntry: async (_id: string, _index: number) => {},
+    addProject: () => {},
+    deleteProjectEntry: (_id: string, _index: number) => {}
+  };
+
+  // Use the transformed data
+  const {
+    loading: isLoading,
+    error: profileError,
     validationErrors,
     profileData,
     personalInfo,
@@ -96,11 +233,11 @@ export default function Profile() {
     deleteExperienceEntry,
     addProject,
     deleteProjectEntry
-  } = mockProfileHook;
+  } = transformedData;
 
   const tabs = ['Personal', 'Career Profile', 'Education', 'Experience', 'Projects', 'AI'];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gray-100 items-center justify-center p-4">
         <div className="text-center">
@@ -111,21 +248,20 @@ export default function Profile() {
     );
   }
 
-  if (error) {
+  if (profileError) {
     return (
       <div className="flex min-h-screen bg-gray-100 items-center justify-center p-4">
         <div className="text-center bg-white p-6 sm:p-8 rounded-lg shadow-md max-w-md w-full">
           <div className="text-red-500 mb-4">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+            <AlertCircle className="w-12 h-12 mx-auto" />
           </div>
           <h3 className="text-lg font-semibold text-gray-800 mb-2">Error Loading Profile</h3>
-          <p className="text-gray-600 mb-4 text-sm">{error}</p>
+          <p className="text-gray-600 mb-4 text-sm">{profileError}</p>
           <button
             onClick={fetchProfileData}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full sm:w-auto transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full sm:w-auto transition-colors flex items-center justify-center gap-2"
           >
+            <RefreshCw className="w-4 h-4" />
             Try Again
           </button>
         </div>
@@ -158,13 +294,36 @@ export default function Profile() {
 
         {/* Name & Title */}
         <h3 className="mt-3 sm:mt-4 font-semibold text-base sm:text-lg text-gray-900">
-          {`${personalInfo.first_name || user?.first_name || ''} ${personalInfo.last_name || user?.last_name || ''}`.trim() || 'User'}
+          {user?.name || 'User'}
         </h3>
-        <p className="text-xs sm:text-sm text-gray-500">{(careerProfile as any).jobTitle || (careerProfile as any).current_role || 'Job Title'}</p>
+        <p className="text-xs sm:text-sm text-gray-500">
+          {careerProfile.current_role || `${user?.user_type || 'User'} Seeker`}
+        </p>
+        
+        {/* Profile Completion Progress */}
+        {profileCompletion && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-blue-900">Profile Completion</span>
+              <span className="text-xs font-bold text-blue-600">{profileCompletion.percentage}%</span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${profileCompletion.percentage}%` }}
+              ></div>
+            </div>
+            {profileCompletion.missingFields.length > 0 && (
+              <p className="text-xs text-blue-700 mt-2">
+                Complete {profileCompletion.missingFields.length} more sections to boost your profile
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* CV File Section */}
-      {cvFile && (cvFile as any).filename && (
+      {cvFile && (
         <div className="mt-6 sm:mt-8 p-3 bg-gray-50 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -196,20 +355,64 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Upload CV Section - Show if no CV uploaded */}
+      {!cvFile && (
+        <div className="mt-6 sm:mt-8 p-3 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="text-center">
+            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
+              <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <p className="text-xs text-orange-700 mb-2">Upload your CV/Resume</p>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  try {
+                    await uploadDocument(file, 'cv');
+                  } catch (error) {
+                    console.error('Upload failed:', error);
+                  }
+                }
+              }}
+              className="hidden"
+              id="cv-upload"
+            />
+            <label
+              htmlFor="cv-upload"
+              className="text-xs text-orange-600 hover:text-orange-700 cursor-pointer font-medium"
+            >
+              Choose File
+            </label>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="mt-6 sm:mt-12 space-y-3 sm:space-y-5 text-xs sm:text-sm">
         <div className="flex justify-between text-gray-700">
-          <span>Opportunities applied</span>
-          <span className="font-medium text-orange-500">32</span>
+          <span>Profile completion</span>
+          <span className="font-medium text-blue-600">{profileCompletion?.percentage || 0}%</span>
         </div>
         <div className="flex justify-between text-gray-700">
-          <span>Opportunities won</span>
-          <span className="font-medium text-green-600">26</span>
+          <span>Account type</span>
+          <span className="font-medium text-green-600 capitalize">{user?.user_type || 'User'}</span>
         </div>
         <div className="flex justify-between text-gray-700">
-          <span>Current Opportunities</span>
-          <span className="font-medium text-blue-600">06</span>
+          <span>Member since</span>
+          <span className="font-medium text-gray-600">
+            {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Recently'}
+          </span>
         </div>
+        {user?.profile?.skills && user.profile.skills.length > 0 && (
+          <div className="flex justify-between text-gray-700">
+            <span>Skills listed</span>
+            <span className="font-medium text-purple-600">{user.profile.skills.length}</span>
+          </div>
+        )}
       </div>
 
       {/* View Profile Button */}
@@ -235,8 +438,21 @@ export default function Profile() {
         style={{ backgroundImage: "url('/hero/path-to-star-texture.png')" }}>
         <div className="absolute inset-0 bg-gradient-to-r"></div>
         <div className="relative z-10">
-          <h1 className="text-xl font-semibold text-white">Welcome, I'm your AI buddy</h1>
-          <p className="text-blue-100 text-sm">Complete your profile</p>
+          <h1 className="text-xl font-semibold text-white">
+            Welcome, {user?.name?.split(' ')[0] || 'User'}
+          </h1>
+          <p className="text-blue-100 text-sm">
+            {profileCompletion && profileCompletion.percentage < 100 
+              ? 'Complete your profile for better matches'
+              : 'Your profile is complete!'
+            }
+          </p>
+          {uploading && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span className="text-blue-100 text-xs">Uploading...</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -247,8 +463,21 @@ export default function Profile() {
           <div className="h-56 relative bg-gradient-to-r from-blue-600 to-blue-400 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/hero/path-to-star-texture.png')" }}>
             <div className="absolute inset-0 bg-gradient-to-r"></div>
             <div className="relative z-10 px-12 pt-10">
-              <h1 className="text-3xl font-semibold text-white">Welcome, I'm your AI buddy</h1>
-              <p className="text-blue-100 mt-1 text-sm">Complete your profile</p>
+              <h1 className="text-3xl font-semibold text-white">
+                Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+              </h1>
+              <p className="text-blue-100 mt-1 text-sm">
+                {profileCompletion && profileCompletion.percentage < 100 
+                  ? `Your profile is ${profileCompletion.percentage}% complete`
+                  : 'Your profile is looking great!'
+                }
+              </p>
+              {uploading && (
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span className="text-blue-100">Uploading document...</span>
+                </div>
+              )}
             </div>
 
             {/* Desktop Content */}
@@ -454,3 +683,4 @@ export default function Profile() {
     </div>
   );
 }
+

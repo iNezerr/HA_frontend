@@ -38,7 +38,7 @@ export default function Profile() {
   const transformedData = {
     loading,
     error,
-    validationErrors: {},
+    validationErrors: {} as Record<string, string[]>,
     profileData: {
       profile_picture: '/hero/userprofile.svg', // TODO: Add profile picture support
       bio: user?.profile?.summary || '',
@@ -61,7 +61,7 @@ export default function Profile() {
       filename: documents.find(doc => doc.document_type === 'cv')?.filename || '',
       uploadedAt: documents.find(doc => doc.document_type === 'cv')?.uploaded_at || '',
       downloadUrl: documents.find(doc => doc.document_type === 'cv')?.gcs_url || ''
-    } : null,
+    } : undefined,
     careerProfile: {
       current_role: user?.profile_data?.current_role || '',
       career_level: user?.profile_data?.career_level || '',
@@ -75,7 +75,10 @@ export default function Profile() {
     aiPreferences: {
       ai_assistance_enabled: user?.profile_data?.ai_assistance_enabled ?? true,
       preferred_communication_style: user?.profile_data?.preferred_communication_style || 'Professional',
-      job_alert_frequency: user?.profile_data?.job_alert_frequency || 'Weekly'
+      job_alert_frequency: user?.profile_data?.job_alert_frequency || 'Weekly',
+      opportunities: user?.profile_data?.opportunities || [],
+      prioritizeBy: user?.profile_data?.prioritizeBy || [],
+      salaryExpectation: user?.profile_data?.salaryExpectation || ''
     },
     // Optimized action functions following the new API pattern
     setPersonalInfo: async (newPersonalInfo: any) => {
@@ -194,13 +197,13 @@ export default function Profile() {
       }
     },
     fetchProfileData: refreshProfile,
-    handleSave: () => {}, // Individual saves are handled by each setter
+    handleSave: (_tab?: string) => {}, // Individual saves are handled by each setter
     addEducation: () => {},
-    deleteEducationEntry: () => {},
+    deleteEducationEntry: async (_id: string, _index: number) => {},
     addExperience: () => {},
-    deleteExperienceEntry: () => {},
+    deleteExperienceEntry: async (_id: string, _index: number) => {},
     addProject: () => {},
-    deleteProjectEntry: () => {}
+    deleteProjectEntry: (_id: string, _index: number) => {}
   };
 
   // Use the transformed data

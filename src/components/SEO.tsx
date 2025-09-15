@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import React, { useEffect } from 'react';
 
 interface SEOProps {
   title?: string;
@@ -23,37 +23,59 @@ const SEO: React.FC<SEOProps> = ({
   const fullUrl = canonical || `${url}${window.location.pathname}`;
   const fullImageUrl = image.startsWith('http') ? image : `${url}${image}`;
 
-  return (
-    <Helmet>
-      {/* Primary Meta Tags */}
-      <title>{title}</title>
-      <meta name="title" content={title} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      {canonical && <link rel="canonical" href={canonical} />}
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
 
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={fullUrl} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={fullImageUrl} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="Hues Apply" />
-      <meta property="og:locale" content="en_US" />
+    // Helper to upsert meta tags by name or property
+    const upsertMeta = (attr: 'name' | 'property', key: string, content: string) => {
+      let element = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attr, key);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
 
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={fullUrl} />
-      <meta property="twitter:title" content={title} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={fullImageUrl} />
+    // Title
+    document.title = title;
+    upsertMeta('name', 'title', title);
+    upsertMeta('name', 'description', description);
+    upsertMeta('name', 'keywords', keywords);
 
-      {/* Additional SEO Meta Tags */}
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    </Helmet>
-  );
+    // Canonical link
+    let linkCanonical = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!linkCanonical) {
+      linkCanonical = document.createElement('link');
+      linkCanonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.setAttribute('href', canonical ? canonical : fullUrl);
+
+    // Open Graph
+    upsertMeta('property', 'og:type', type);
+    upsertMeta('property', 'og:url', fullUrl);
+    upsertMeta('property', 'og:title', title);
+    upsertMeta('property', 'og:description', description);
+    upsertMeta('property', 'og:image', fullImageUrl);
+    upsertMeta('property', 'og:image:width', '1200');
+    upsertMeta('property', 'og:image:height', '630');
+    upsertMeta('property', 'og:site_name', 'Hues Apply');
+    upsertMeta('property', 'og:locale', 'en_US');
+
+    // Twitter
+    upsertMeta('property', 'twitter:card', 'summary_large_image');
+    upsertMeta('property', 'twitter:url', fullUrl);
+    upsertMeta('property', 'twitter:title', title);
+    upsertMeta('property', 'twitter:description', description);
+    upsertMeta('property', 'twitter:image', fullImageUrl);
+
+    // Robots
+    upsertMeta('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  }, [title, description, keywords, image, url, type, canonical, fullUrl, fullImageUrl]);
+
+  // This component does not render anything. It only updates the head.
+  return null;
 };
 
 export default SEO;

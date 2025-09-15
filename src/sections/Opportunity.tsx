@@ -1,14 +1,14 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 
 const Opportunity: React.FC = () => {
   return (
     <>
-      <Helmet>
-        <title>Find Your Next Opportunity | Hues Apply</title>
-        <meta name="description" content="Discover tailored opportunities and get started with your career journey on Hues Apply." />
-        <link rel="canonical" href="https://huesapply.com/opportunity" />
-      </Helmet>
+      <SEO
+        title="Find Your Next Opportunity | Hues Apply"
+        description="Discover tailored opportunities and get started with your career journey on Hues Apply."
+        canonical="https://huesapply.com/opportunity"
+      />
       <section className="bg-white py-16 px-4 sm:px-6 lg:px-8" aria-labelledby="opportunity-title">
         <div className="max-w-3xl mx-auto text-center">
           <h2
