@@ -3,7 +3,16 @@
  * Handles Firebase authentication operations
  */
 
-import { User } from 'firebase/auth';
+import { 
+  User, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateProfile,
+  onAuthStateChanged
+} from 'firebase/auth';
 import { firebaseAuth } from '../config/firebase';
 
 export interface FirebaseUser {
@@ -32,16 +41,16 @@ export class FirebaseAuthService {
    */
   static async registerWithEmail({ email, password, displayName }: RegisterWithEmailParams): Promise<FirebaseUser> {
     try {
-      const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
       const user = userCredential.user;
       
       // Update user profile with display name
       if (displayName) {
-        await firebaseAuth.updateProfile(user, { displayName });
+        await updateProfile(user, { displayName });
       }
       
       // Send email verification
-      await firebaseAuth.sendEmailVerification(user);
+      await sendEmailVerification(user);
       
       return this.formatUser(user);
     } catch (error: any) {
@@ -55,7 +64,7 @@ export class FirebaseAuthService {
    */
   static async loginWithEmail({ email, password }: LoginWithEmailParams): Promise<FirebaseUser> {
     try {
-      const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
+      const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
       return this.formatUser(userCredential.user);
     } catch (error: any) {
       console.error('Firebase login error:', error);
@@ -68,7 +77,7 @@ export class FirebaseAuthService {
    */
   static async logout(): Promise<void> {
     try {
-      await firebaseAuth.signOut();
+      await signOut(firebaseAuth);
     } catch (error: any) {
       console.error('Firebase logout error:', error);
       throw new Error('Failed to sign out. Please try again.');
@@ -80,7 +89,7 @@ export class FirebaseAuthService {
    */
   static async sendPasswordResetEmail(email: string): Promise<void> {
     try {
-      await firebaseAuth.sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(firebaseAuth, email);
     } catch (error: any) {
       console.error('Firebase password reset error:', error);
       throw new Error(this.getErrorMessage(error.code));
@@ -92,11 +101,11 @@ export class FirebaseAuthService {
    */
   static async sendEmailVerification(): Promise<void> {
     try {
-      const user = firebaseAuth.getCurrentUser();
+      const user = firebaseAuth.currentUser;
       if (!user) {
         throw new Error('No authenticated user found');
       }
-      await firebaseAuth.sendEmailVerification(user);
+      await sendEmailVerification(user);
     } catch (error: any) {
       console.error('Firebase email verification error:', error);
       throw new Error('Failed to send verification email. Please try again.');
@@ -108,7 +117,11 @@ export class FirebaseAuthService {
    */
   static async getIdToken(forceRefresh = false): Promise<string> {
     try {
-      return await firebaseAuth.getIdToken(forceRefresh);
+      const user = firebaseAuth.currentUser;
+      if (!user) {
+        throw new Error('No authenticated user found');
+      }
+      return await user.getIdToken(forceRefresh);
     } catch (error: any) {
       console.error('Firebase get token error:', error);
       throw new Error('Failed to get authentication token');
@@ -119,7 +132,7 @@ export class FirebaseAuthService {
    * Get current user
    */
   static getCurrentUser(): FirebaseUser | null {
-    const user = firebaseAuth.getCurrentUser();
+    const user = firebaseAuth.currentUser;
     return user ? this.formatUser(user) : null;
   }
 
@@ -127,7 +140,7 @@ export class FirebaseAuthService {
    * Listen to auth state changes
    */
   static onAuthStateChanged(callback: (user: FirebaseUser | null) => void): () => void {
-    return firebaseAuth.onAuthStateChanged((user: User | null) => {
+    return onAuthStateChanged(firebaseAuth, (user: User | null) => {
       callback(user ? this.formatUser(user) : null);
     });
   }

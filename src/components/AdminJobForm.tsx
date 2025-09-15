@@ -1,9 +1,8 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-// import { getJob, createJob, updateJob, JobFormData } from '../services/jobs';
+import { JobFormData } from '../services/additionalTypes';
+import { getJob, createJob, updateJob } from '../services/placeholderAPI';
 
 const AdminJobForm: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -22,9 +21,13 @@ const AdminJobForm: React.FC = () => {
     experience_level: '',
     skills: '',
     description: '',
+    requirements: '',
     salary_range: '',
     application_url: '',
     is_active: true,
+    salary_min: 0,
+    salary_max: 0,
+    remote_option: false,
   });
 
   useEffect(() => {
@@ -37,10 +40,10 @@ const AdminJobForm: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getJob(id!);
+      const data = await getJob(parseInt(id!));
 
       setFormData({
-        id: data.id ? parseInt(data.id) : undefined,
+        id: typeof data.id === 'number' ? data.id : undefined,
         title: data.title || '',
         company: data.company || '',
         location: data.location || '',
@@ -48,6 +51,7 @@ const AdminJobForm: React.FC = () => {
         experience_level: data.experience_level || '',
         skills: data.skills || '',
         description: data.description || '',
+        requirements: data.requirements || '',
         salary_range: data.salary_range || '',
         application_url: data.application_url || '',
         is_active: data.is_active ?? true,

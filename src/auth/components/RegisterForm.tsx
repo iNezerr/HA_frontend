@@ -1,7 +1,5 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../../types/mockData";
 import React, { useState } from 'react';
-// import { registerUser } from '../../services/auth';
+import { registerUser } from '../../services/placeholderAPI';
 import { useAuth } from '../context/AuthContext';
 
 interface RegisterFormProps {

@@ -1,9 +1,54 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaDollarSign, FaCalendar } from 'react-icons/fa';
 import SEO from '../components/SEO';
+
+// Define missing types
+interface ScholarshipDetail {
+  id: number;
+  title: string;
+  description: string;
+  full_description?: string;
+  amount: string | null;
+  deadline: string;
+  created_at: string;
+  updated_at: string;
+  course?: string;
+  location?: string;
+  gpa?: string;
+  application_link?: string;
+  overview?: string;
+  provider_details?: {
+    website?: string;
+  };
+  application_process?: string;
+  benefits?: string[];
+  source?: string;
+}
+
+interface Scholarship {
+  id: number;
+  title: string;
+  organization: string;
+  amount: string;
+  deadline: string;
+}
+
+// Placeholder functions
+const getScholarship = async (_id: string): Promise<ScholarshipDetail> => {
+  // TODO: Implement actual API call
+  throw new Error('Scholarship not found');
+};
+
+const getScholarships = async (_params: any): Promise<{ results: Scholarship[] }> => {
+  // TODO: Implement actual API call
+  return { results: [] };
+};
+
+const applyToScholarship = async (id: string): Promise<void> => {
+  // TODO: Implement actual API call
+  console.log('Applying to scholarship:', id);
+};
 
 const Tag = ({ children }: { children: React.ReactNode }) => (
   <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">{children}</span>
@@ -22,18 +67,18 @@ const ScholarshipDetails: React.FC = () => {
     setLoading(true);
     setError(null);
     getScholarship(id)
-      .then(data => {
+      .then((data: ScholarshipDetail) => {
         setScholarship(data);
         setLoading(false);
         // Fetch similar scholarships by source, excluding current
         if (data.source) {
           getScholarships({ page_size: 3 })
-            .then(res => setSimilar(res.results || []));
+            .then((res: { results: Scholarship[] }) => setSimilar(res.results || []));
         }
         // If the user has already applied, set applied to true (if this info is available in data)
         // For now, default to false; you can enhance this with backend info later
       })
-      .catch(_err => {
+      .catch((_err: any) => {
         setError('Failed to load scholarship details.');
         setLoading(false);
       });
@@ -120,7 +165,7 @@ const ScholarshipDetails: React.FC = () => {
             <section className="mb-6">
               <h3 className="font-semibold text-gray-800 mb-1">Benefits</h3>
               <ul className="list-disc ml-6 text-gray-700">
-                {scholarship.benefits.map((item, i) => <li key={i}>{item}</li>)}
+                {scholarship.benefits.map((item: string, i: number) => <li key={i}>{item}</li>)}
               </ul>
             </section>
           )}

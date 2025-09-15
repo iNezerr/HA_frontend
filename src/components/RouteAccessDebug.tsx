@@ -27,7 +27,7 @@ const RouteAccessDebug = () => {
             No
           </span>
         )}</div>
-        <div><strong>User Role:</strong> {user?.role || 'None'}</div>
+        <div><strong>User Role:</strong> {user?.user_type || 'None'}</div>
         <div><strong>User ID:</strong> {user?.id || 'None'}</div>
         <div><strong>Email:</strong> {user?.email || 'None'}</div>
       </div>
@@ -61,7 +61,7 @@ const RouteAccessDebug = () => {
           </div>
           <div>
             <strong>Can Access Admin:</strong>
-            {isAdmin(user?.role) ? (
+            {isAdmin(user?.user_type) ? (
               <span className="inline-flex items-center ml-1">
                 <FaCheck className="text-green-500 mr-1" />
                 Yes

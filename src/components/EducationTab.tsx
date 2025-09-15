@@ -1,6 +1,16 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-// import { Education } from '../hooks/// useProfileData';
+
+// Define local non-optional type to match working implementation
+interface Education {
+  id: string;
+  degree: string;
+  school: string;
+  startDate: string;
+  endDate: string;
+  isStudying: boolean;
+  description: string;
+}
 
 interface EducationTabProps {
   education: Education[];
@@ -33,7 +43,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Degree</label>
               <input
                 type="text"
-                value={edu.degree}
+                value={edu.degree || ''}
                 onChange={(e) => {
                   const updated = [...education];
                   updated[index].degree = e.target.value;
@@ -46,7 +56,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">School</label>
               <input
                 type="text"
-                value={edu.school}
+                value={edu.school || ''}
                 onChange={(e) => {
                   const updated = [...education];
                   updated[index].school = e.target.value;
@@ -61,7 +71,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
               <input
                 type="date"
-                value={edu.startDate}
+                value={edu.startDate || ''}
                 onChange={(e) => {
                   const updated = [...education];
                   updated[index].startDate = e.target.value;
@@ -74,7 +84,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
                 type="date"
-                value={edu.endDate}
+                value={edu.endDate || ''}
                 onChange={(e) => {
                   const updated = [...education];
                   updated[index].endDate = e.target.value;
@@ -103,7 +113,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Describe your extra curricular activities in college</label>
             <textarea
-              value={edu.description}
+              value={edu.description || ''}
               onChange={(e) => {
                 const updated = [...education];
                 updated[index].description = e.target.value;

@@ -4,7 +4,7 @@ import { Bell, Mail, User } from 'lucide-react';
 import { useAuth } from '../auth/context/AuthContext';
 
 const Header: React.FC = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
 
   // Mock profile data for UI
   const mockProfileData = {

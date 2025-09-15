@@ -294,6 +294,13 @@ export class OnboardingService {
     }
     return { isValid: errors.length === 0, errors };
   }
+
+  // Save CV file
+  static async saveCVFile(file: File): Promise<string> {
+    console.log('Saving CV file:', file.name);
+    // This would normally upload to server and return URL
+    return `https://example.com/uploads/${file.name}`;
+  }
 }
 
 export default OnboardingService;

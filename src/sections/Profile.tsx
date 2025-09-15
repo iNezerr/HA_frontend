@@ -18,7 +18,6 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
   const { user } = useAuth();
 
-  // Mock data for UI-only interface
   const mockProfileHook = {
     loading: false,
     error: null,
@@ -159,13 +158,13 @@ export default function Profile() {
 
         {/* Name & Title */}
         <h3 className="mt-3 sm:mt-4 font-semibold text-base sm:text-lg text-gray-900">
-          {personalInfo.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'User'}
+          {`${personalInfo.first_name || user?.first_name || ''} ${personalInfo.last_name || user?.last_name || ''}`.trim() || 'User'}
         </h3>
-        <p className="text-xs sm:text-sm text-gray-500">{careerProfile.jobTitle || 'Job Title'}</p>
+        <p className="text-xs sm:text-sm text-gray-500">{(careerProfile as any).jobTitle || (careerProfile as any).current_role || 'Job Title'}</p>
       </div>
 
       {/* CV File Section */}
-      {cvFile.filename && (
+      {cvFile && (cvFile as any).filename && (
         <div className="mt-6 sm:mt-8 p-3 bg-gray-50 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">

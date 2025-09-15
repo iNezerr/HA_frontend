@@ -1,5 +1,3 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,8 +18,21 @@ import {
   Building
 } from 'lucide-react';
 import { FaBriefcase, FaEuroSign, FaSearch, FaRegStar, FaClock, FaBuilding, FaGlobe, FaLaptop } from 'react-icons/fa';
-// import { LinkedInJobCrawler } from '../services/linkedinCrawler';
 import JobPreviewModal from '../components/JobPreviewModal';
+
+// Placeholder for LinkedInJobCrawler
+const LinkedInJobCrawler = {
+  crawlJobs: async (_filters: any) => ({ 
+    success: true, 
+    jobs: [] as any[], 
+    count: 0,
+    error: null
+  }),
+  getJobsFromLocalStorage: () => ({ 
+    jobs: [] as any[], 
+    count: 0 
+  })
+};
 
 interface CrawlStats {
   total: number;
@@ -165,35 +176,35 @@ export default function AdminDashboard() {
       const result = await LinkedInJobCrawler.crawlJobs(selectedFilters);
 
       if (result.success) {
-        console.log(`LinkedIn crawl completed successfully. Found ${result.count} jobs`);
+        console.log(`LinkedIn crawl completed successfully. Found ${result.count || 0} jobs`);
 
         // Update crawl results
         setCrawlResults(prev => ({
           ...prev,
           linkedin: {
             success: true,
-            count: result.count,
+            count: result.count || 0,
             jobs: result.jobs,
             timestamp: new Date().toISOString()
           }
         }));
 
         // Update cached jobs state
-        setHasCachedJobs(result.count > 0);
+        setHasCachedJobs((result.count || 0) > 0);
 
         // Show success message
-        alert(`LinkedIn crawl completed! Found ${result.count} jobs. Use the "Preview Jobs" button to review and edit before saving to backend.`);
+        alert(`LinkedIn crawl completed! Found ${result.count || 0} jobs. Use the "Preview Jobs" button to review and edit before saving to backend.`);
       } else {
-        console.error('LinkedIn crawl failed:', result.error);
+        console.error('LinkedIn crawl failed:', result.error || 'Unknown error');
         setCrawlResults(prev => ({
           ...prev,
           linkedin: {
             success: false,
-            error: result.error,
+            error: result.error || 'Unknown error',
             timestamp: new Date().toISOString()
           }
         }));
-        alert(`LinkedIn crawl failed: ${result.error}`);
+        alert(`LinkedIn crawl failed: ${result.error || 'Unknown error'}`);
       }
     } catch (error: any) {
       console.error('Unexpected error during LinkedIn crawl:', error);

@@ -152,14 +152,14 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
             Profile Summary <span className="text-red-500">*</span>
           </label>
           <textarea
-            value={careerProfile.profileSummary || ''}
-            onChange={(e) => handleFieldChange('profileSummary', e.target.value)}
+            value={(careerProfile as any).profileSummary || ''}
+            onChange={(e) => handleFieldChange('profileSummary' as keyof CareerProfileData, e.target.value)}
             rows={5}
             className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Write a brief summary of your professional background, skills, and career objectives..."
           />
           <p className="mt-1 text-xs text-gray-500">
-            {(careerProfile.profileSummary || '').length}/2000 characters
+            {((careerProfile as any).profileSummary || '').length}/2000 characters
           </p>
         </div>
       </div>

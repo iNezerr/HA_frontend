@@ -1,9 +1,13 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { X, Download, FileText, User, Mail, Phone, MapPin, Briefcase, GraduationCap, Building2, Calendar, ExternalLink, BookOpen } from 'lucide-react';
 import { FaCheck } from 'react-icons/fa';
-// import { getUserProfileById } from '../services/profile';
+
+// Placeholder function
+const getUserProfileById = async (userId: number): Promise<any> => {
+  // TODO: Implement actual API call
+  console.log('Getting user profile for ID:', userId);
+  return { success: false, message: 'Not implemented' };
+};
 
 interface UserDetailsModalProps {
   isOpen: boolean;

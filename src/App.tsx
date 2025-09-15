@@ -26,6 +26,7 @@ import UnifiedDashboard from "./sections/UnifiedDashboard";
 // Import placeholders for components that will be implemented later
 import VerifyEmail from "./auth/pages/VerifyEmail";
 import Profile from "./sections/Profile";
+// import ProfileTest from "./components/ProfileTest";
 import AdminDashboard from "./sections/AdminDashboard";
 import AdminScholarshipsList from "./components/AdminScholarshipsList";
 import AdminScholarshipForm from "./components/AdminScholarshipForm";

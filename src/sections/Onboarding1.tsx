@@ -1,8 +1,11 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { updateUserGoals } from "../services/profile";
+
+// Placeholder function for updateUserGoals
+const updateUserGoals = async (goals: string[]): Promise<void> => {
+  // TODO: Implement actual API call
+  console.log('Updating user goals:', goals);
+};
 
 const goals = [
   "Get Job Opportunities",

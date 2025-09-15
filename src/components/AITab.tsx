@@ -1,7 +1,7 @@
 interface AIPreferences {
-  opportunities: string[];
-  prioritizeBy: string[];
-  salaryExpectation: string;
+  opportunities?: string[];
+  prioritizeBy?: string[];
+  salaryExpectation?: string | number;
 }
 
 interface AITabProps {
@@ -19,17 +19,17 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
             <label key={opportunity} className="flex items-center">
               <input
                 type="checkbox"
-                checked={aiPreferences.opportunities.includes(opportunity)}
+                checked={!!aiPreferences.opportunities && aiPreferences.opportunities.includes(opportunity)}
                 onChange={(e) => {
                   if (e.target.checked) {
                     setAIPreferences({
                       ...aiPreferences,
-                      opportunities: [...aiPreferences.opportunities, opportunity]
+                      opportunities: [...(aiPreferences.opportunities || []), opportunity]
                     });
                   } else {
                     setAIPreferences({
                       ...aiPreferences,
-                      opportunities: aiPreferences.opportunities.filter(o => o !== opportunity)
+                      opportunities: (aiPreferences.opportunities || []).filter(o => o !== opportunity)
                     });
                   }
                 }}
@@ -48,17 +48,17 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
             <label key={priority} className="flex items-center">
               <input
                 type="checkbox"
-                checked={aiPreferences.prioritizeBy.includes(priority)}
+                checked={!!aiPreferences.prioritizeBy && aiPreferences.prioritizeBy.includes(priority)}
                 onChange={(e) => {
                   if (e.target.checked) {
                     setAIPreferences({
                       ...aiPreferences,
-                      prioritizeBy: [...aiPreferences.prioritizeBy, priority]
+                      prioritizeBy: [...(aiPreferences.prioritizeBy || []), priority]
                     });
                   } else {
                     setAIPreferences({
                       ...aiPreferences,
-                      prioritizeBy: aiPreferences.prioritizeBy.filter(p => p !== priority)
+                      prioritizeBy: (aiPreferences.prioritizeBy || []).filter(p => p !== priority)
                     });
                   }
                 }}
@@ -73,7 +73,7 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Additional preferences</label>
         <textarea
-          value={aiPreferences.salaryExpectation}
+          value={String(aiPreferences.salaryExpectation ?? '')}
           onChange={(e) => setAIPreferences({...aiPreferences, salaryExpectation: e.target.value})}
           rows={2}
           className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

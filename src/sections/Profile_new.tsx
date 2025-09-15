@@ -18,7 +18,7 @@ import AITab from '../profile/components/AITab';
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
-  const { user: authUser } = useAuth();
+  const { user: _authUser } = useAuth();
   
   // Use the profile hook from the profile module
   const {

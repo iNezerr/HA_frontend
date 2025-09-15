@@ -1,6 +1,17 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-// import { Experience } from '../hooks/// useProfileData';
+
+// Define local non-optional type to match working implementation
+interface Experience {
+  id: string;
+  jobTitle: string;
+  companyName: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  isCurrentlyWorking: boolean;
+  description: string;
+}
 
 interface ExperienceTabProps {
   experience: Experience[];
@@ -33,7 +44,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
               <input
                 type="text"
-                value={exp.jobTitle}
+                value={exp.jobTitle || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].jobTitle = e.target.value;
@@ -46,7 +57,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
               <input
                 type="text"
-                value={exp.companyName}
+                value={exp.companyName || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].companyName = e.target.value;
@@ -60,7 +71,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
             <input
               type="text"
-              value={exp.location}
+              value={exp.location || ''}
               onChange={(e) => {
                 const updated = [...experience];
                 updated[index].location = e.target.value;
@@ -74,7 +85,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
               <input
                 type="date"
-                value={exp.startDate}
+                value={exp.startDate || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].startDate = e.target.value;
@@ -87,7 +98,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
                 type="date"
-                value={exp.endDate}
+                value={exp.endDate || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].endDate = e.target.value;
@@ -116,7 +127,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Describe What you learnt from this company</label>
             <textarea
-              value={exp.description}
+              value={exp.description || ''}
               onChange={(e) => {
                 const updated = [...experience];
                 updated[index].description = e.target.value;

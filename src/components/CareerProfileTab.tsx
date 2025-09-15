@@ -1,8 +1,6 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import React, { useState } from 'react';
-// import { CareerProfile } from '../hooks/// useProfileData';
-// import { uploadDocument } from '../services/profile';
+import type { CareerProfile } from '../types';
+import { uploadDocument } from '../services/placeholderAPI';
 
 interface CareerProfileTabProps {
   careerProfile: CareerProfile;
@@ -33,7 +31,7 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
     try {
       setUploading(true);
       const response = await uploadDocument(file);
-      if (response.success && onCvUpload) {
+      if (response && onCvUpload) {
         onCvUpload(response);
       }
     } catch (error) {
@@ -155,14 +153,14 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
             Profile Summary <span className="text-red-500">*</span>
           </label>
           <textarea
-            value={careerProfile.profileSummary}
+            value={careerProfile.profileSummary || ''}
             onChange={(e) => handleFieldChange('profileSummary', e.target.value)}
             rows={5}
             className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Write a brief summary of your professional background, skills, and career objectives..."
           />
           <p className="mt-1 text-xs text-gray-500">
-            {careerProfile.profileSummary.length}/2000 characters
+            {(careerProfile.profileSummary || '').length}/2000 characters
           </p>
         </div>
       </div>

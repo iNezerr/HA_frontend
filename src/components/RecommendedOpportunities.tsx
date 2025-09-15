@@ -1,8 +1,15 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
-// import { getAIMatches } from '../services/opportunities';
-// import { Opportunity } from '../services/opportunities';
+// Local Opportunity shape for UI display
+type Opportunity = {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  salary_range?: string;
+  match_percentage?: number;
+  skills_required?: string[];
+};
+import { getAIMatches } from '../services/placeholderAPI';
 
 interface RecommendedOpportunitiesProps {
   className?: string;
@@ -30,7 +37,17 @@ export default function RecommendedOpportunities({
       setLoading(true);
       setError(null);
       const response = await getAIMatches(filters);
-      setOpportunities(response.results || []);
+      const incoming: any[] = Array.isArray((response as any)) ? (response as any) : (response?.results || []);
+      const mapped = incoming.map((it: any): Opportunity => ({
+        id: it.id != null ? String(it.id) : it.id_str,
+        title: it.title || it.job_title || '',
+        company: it.company || it.company_name || '',
+        location: it.location || it.city || it.country || '',
+        salary_range: it.salary_range || (it.salary_min && it.salary_max ? `${it.salary_min}-${it.salary_max} ${it.salary_currency || ''}`.trim() : undefined),
+        match_percentage: it.match_percentage,
+        skills_required: it.skills_required || it.skills,
+      }));
+      setOpportunities(mapped);
     } catch (err) {
       setError('Failed to load recommended opportunities');
       console.error('Error fetching recommended opportunities:', err);
@@ -183,7 +200,7 @@ export default function RecommendedOpportunities({
 
             <div className="flex items-center justify-between">
               <div className="flex flex-wrap gap-1">
-                {opportunity.skills_required?.slice(0, 3).map((skill, index) => (
+                {opportunity.skills_required?.slice(0, 3).map((skill: string, index: number) => (
                   <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
                     {skill}
                   </span>

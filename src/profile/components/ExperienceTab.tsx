@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-// import { Experience } from '../hooks/// useProfileData';
+import type { Experience } from '../../types/user';
 
 interface ExperienceTabProps {
   experience: Experience[];
@@ -21,7 +21,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
         <div key={exp.id} className="border border-gray-200 rounded-lg p-4 relative">
           {experience.length > 1 && (
             <button
-              onClick={() => deleteExperienceEntry(exp.id, index)}
+              onClick={() => deleteExperienceEntry(String(exp.id), index)}
               className="absolute top-2 right-2 text-red-500 hover:text-red-700"
               title="Delete experience entry"
             >
@@ -33,7 +33,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
               <input
                 type="text"
-                value={exp.jobTitle}
+                value={exp.jobTitle || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].jobTitle = e.target.value;
@@ -46,7 +46,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
               <input
                 type="text"
-                value={exp.companyName}
+                value={exp.companyName || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].companyName = e.target.value;
@@ -60,7 +60,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
             <input
               type="text"
-              value={exp.location}
+              value={exp.location || ''}
               onChange={(e) => {
                 const updated = [...experience];
                 updated[index].location = e.target.value;
@@ -74,7 +74,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
               <input
                 type="date"
-                value={exp.startDate}
+                value={exp.startDate || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].startDate = e.target.value;
@@ -87,14 +87,14 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
                 type="date"
-                value={exp.endDate}
+                value={exp.endDate || ''}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].endDate = e.target.value;
                   setExperience(updated);
                 }}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={exp.isCurrentlyWorking}
+                disabled={!!exp.isCurrentlyWorking}
               />
             </div>
           </div>
@@ -102,7 +102,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={exp.isCurrentlyWorking}
+                checked={!!exp.isCurrentlyWorking}
                 onChange={(e) => {
                   const updated = [...experience];
                   updated[index].isCurrentlyWorking = e.target.checked;
@@ -116,7 +116,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Describe What you learnt from this company</label>
             <textarea
-              value={exp.description}
+              value={exp.description || ''}
               onChange={(e) => {
                 const updated = [...experience];
                 updated[index].description = e.target.value;

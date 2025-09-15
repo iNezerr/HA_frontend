@@ -1,6 +1,5 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getJobs } from '../services/placeholderAPI';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Plus, Search, Trash2, Eye, AlertCircle, RefreshCw } from 'lucide-react';
 // import { getJobs } from '../services/jobs';
@@ -66,10 +65,11 @@ const AdminJobsList: React.FC = () => {
         setHasNext(false);
         setHasPrevious(false);
       } else if (data && typeof data === 'object') {
-        jobsList = Array.isArray(data.results) ? data.results : [];
-        setTotalCount(data.count || 0);
-        setHasNext(!!data.next);
-        setHasPrevious(!!data.previous);
+        const results = Array.isArray((data as any).results) ? (data as any).results : [];
+        jobsList = results as Job[];
+        setTotalCount((data as any).count || 0);
+        setHasNext(!!(data as any).next);
+        setHasPrevious(!!(data as any).previous);
       }
 
       const validJobs = jobsList.filter(

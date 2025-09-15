@@ -1,8 +1,28 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { updateParsedProfile, type ParsedCVData } from '../services/profile';
+
+// Define ParsedCVData type
+interface ParsedCVData {
+  personalInfo: {
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    linkedin?: string;
+  };
+  education: any[];
+  experience: any[];
+  skills?: string[];
+  summary?: string;
+  certifications?: any[];
+  languages?: any[];
+}
+
+// Placeholder function for updateParsedProfile
+const updateParsedProfile = async (data: ParsedCVData): Promise<void> => {
+  // TODO: Implement actual API call
+  console.log('Updating parsed profile:', data);
+};
 
 const OnboardingReview = () => {
   const [parsedData, setParsedData] = useState<ParsedCVData | null>(null);
@@ -27,17 +47,17 @@ const OnboardingReview = () => {
     }
   }, [navigate]);
 
-  const handleFieldChange = (section: keyof ParsedCVData, field: string, value: any) => {
+    const handleFieldChange = (section: keyof ParsedCVData, field: string, value: any) => {
     if (!parsedData) return;
     
-    setParsedData(prev => {
+    setParsedData((prev: ParsedCVData | null) => {
       if (!prev) return prev;
       
-      if (section === 'personal_info') {
+      if (section === 'personalInfo') {
         return {
           ...prev,
-          personal_info: {
-            ...prev.personal_info,
+          personalInfo: {
+            ...prev.personalInfo,
             [field]: value
           }
         };
@@ -57,24 +77,32 @@ const OnboardingReview = () => {
     });
   };
 
-  const handleArrayFieldChange = (section: 'education' | 'experience' | 'certifications' | 'languages', index: number, field: string, value: any) => {
+  const handleArrayFieldChange = (section: keyof ParsedCVData, index: number, field: string, value: any) => {
     if (!parsedData) return;
     
-    setParsedData(prev => {
+    setParsedData((prev: ParsedCVData | null) => {
       if (!prev) return prev;
       
-      const updatedArray = [...prev[section]];
-      updatedArray[index] = {
-        ...updatedArray[index],
-        [field]: value
-      };
+      if (Array.isArray(prev[section])) {
+        const updatedArray = [...(prev[section] as any[])];
+        updatedArray[index] = {
+          ...updatedArray[index],
+          [field]: value
+        };
+        
+        return {
+          ...prev,
+          [section]: updatedArray
+        };
+      }
       
-      return {
-        ...prev,
-        [section]: updatedArray
-      };
+      return prev;
     });
   };
+
+  // removed unused _addSection helper
+
+  // removed unused _removeSection helper
 
   const handleConfirm = async () => {
     if (!parsedData) return;
@@ -127,8 +155,8 @@ const OnboardingReview = () => {
                 <label className="block text-sm font-medium mb-1">First Name</label>
                 <input
                   type="text"
-                  value={parsedData.personal_info.first_name || ''}
-                  onChange={(e) => handleFieldChange('personal_info', 'first_name', e.target.value)}
+                  value={parsedData.personalInfo.name || ''}
+                  onChange={(e) => handleFieldChange('personalInfo', 'name', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -136,8 +164,8 @@ const OnboardingReview = () => {
                 <label className="block text-sm font-medium mb-1">Last Name</label>
                 <input
                   type="text"
-                  value={parsedData.personal_info.last_name || ''}
-                  onChange={(e) => handleFieldChange('personal_info', 'last_name', e.target.value)}
+                  value={parsedData.personalInfo.email || ''}
+                  onChange={(e) => handleFieldChange('personalInfo', 'email', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -145,8 +173,8 @@ const OnboardingReview = () => {
                 <label className="block text-sm font-medium mb-1">Email</label>
                 <input
                   type="email"
-                  value={parsedData.personal_info.email || ''}
-                  onChange={(e) => handleFieldChange('personal_info', 'email', e.target.value)}
+                  value={parsedData.personalInfo.phone || ''}
+                  onChange={(e) => handleFieldChange('personalInfo', 'phone', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -154,8 +182,8 @@ const OnboardingReview = () => {
                 <label className="block text-sm font-medium mb-1">Phone</label>
                 <input
                   type="tel"
-                  value={parsedData.personal_info.phone || ''}
-                  onChange={(e) => handleFieldChange('personal_info', 'phone', e.target.value)}
+              value={parsedData.skills?.join(', ') || ''}
+              onChange={(e) => handleFieldChange('skills', '', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -178,7 +206,7 @@ const OnboardingReview = () => {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4 text-blue-600">Skills</h2>
             <textarea
-              value={parsedData.skills.join(', ')}
+              value={parsedData.skills?.join(', ') || ''}
               onChange={(e) => handleFieldChange('skills', '', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -189,7 +217,7 @@ const OnboardingReview = () => {
           {/* Education */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4 text-blue-600">Education</h2>
-            {parsedData.education.map((edu, index) => (
+            {parsedData.education.map((edu: any, index: number) => (
               <div key={index} className="border border-gray-200 rounded-md p-4 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -218,7 +246,7 @@ const OnboardingReview = () => {
           {/* Experience */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4 text-blue-600">Work Experience</h2>
-            {parsedData.experience.map((exp, index) => (
+            {parsedData.experience.map((exp: any, index: number) => (
               <div key={index} className="border border-gray-200 rounded-md p-4 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

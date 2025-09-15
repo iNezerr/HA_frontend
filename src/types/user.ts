@@ -28,9 +28,16 @@ export interface PersonalInfo {
   address: string;
   linkedin?: string;
   portfolio?: string;
+  // Component compatibility fields
+  name?: string;
+  country?: string;
+  goal?: string;
+  location?: string;
+  bio?: string;
 }
 
 export interface Education {
+  id?: string;
   institution: string;
   degree: string;
   field_of_study: string;
@@ -38,9 +45,15 @@ export interface Education {
   end_date: string;
   gpa?: string;
   description?: string;
+  // Component compatibility fields
+  school?: string;
+  startDate?: string;
+  endDate?: string;
+  isStudying?: boolean;
 }
 
 export interface Experience {
+  id?: string;
   company: string;
   position: string;
   start_date: string;
@@ -48,6 +61,13 @@ export interface Experience {
   is_current: boolean;
   description: string;
   achievements?: string[];
+  // Component compatibility fields
+  jobTitle?: string;
+  companyName?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  isCurrentlyWorking?: boolean;
 }
 
 export interface Certification {

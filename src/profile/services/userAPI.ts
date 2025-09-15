@@ -5,6 +5,16 @@
 
 import { apiClient } from '../../services/apiClient';
 
+// Career Profile Data interface
+export interface CareerProfileData {
+  current_role: string;
+  career_level: string;
+  industry: string;
+  skills: string[];
+  preferred_roles: string[];
+  jobTitle?: string;
+}
+
 // Types for user profile
 export interface UserProfile {
   uid: string;
@@ -200,3 +210,6 @@ export class UserAPI {
 }
 
 export default UserAPI;
+
+// Export instance for convenience
+export const userAPI = UserAPI;

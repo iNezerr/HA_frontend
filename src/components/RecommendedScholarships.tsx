@@ -1,14 +1,42 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from "react";
 import { Clock, Bookmark as BookmarkIcon, MapPin, Building2, DollarSign, Star, Target } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-// import { getScholarshipApplicationStatus, getMatchedScholarships, getScholarships, Scholarship, toggleSaveScholarship } from '../services/scholarships';
+
+// Define Scholarship interface
+interface Scholarship {
+  id: number;
+  title: string;
+  organization: string;
+  amount: string;
+  deadline: string;
+  source?: string;
+}
+
+// Placeholder functions
+const getScholarshipApplicationStatus = async (): Promise<any> => {
+  return { appliedScholarships: new Set() };
+};
+
+const getMatchedScholarships = async (): Promise<{ results: Scholarship[] }> => {
+  return { results: [] };
+};
+
+const getScholarships = async (_params: any): Promise<{ results: Scholarship[] }> => {
+  return { results: [] };
+};
+
+const toggleSaveScholarship = async (scholarshipId: string): Promise<any> => {
+  console.log('Toggling save for scholarship:', scholarshipId);
+  return { success: true };
+};
 
 interface MatchedScholarship extends Scholarship {
     match_score?: number;
     matched_parameters?: string[];
     rank?: number;
+    location?: string;
+    course?: string;
+    gpa?: string;
 }
 
 interface RecommendedScholarshipsProps {
@@ -66,7 +94,7 @@ export default function RecommendedScholarships({ className = '' }: RecommendedS
                 return;
             }
 
-            const rankedData = data.results.map((scholarship, index) => ({
+            const rankedData = data.results.map((scholarship: any, index: number) => ({
                 ...scholarship,
                 rank: (scholarship as any).rank || index + 1,
                 match_score: (scholarship as any).match_score || Math.floor(Math.random() * 40 + 60),

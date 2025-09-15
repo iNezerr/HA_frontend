@@ -1,7 +1,7 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getScholarship, createScholarship, updateScholarship } from '../services/placeholderAPI';
+import { ScholarshipFormData } from '../services/additionalTypes';
 import { ArrowLeft, Save } from 'lucide-react';
 // import { getScholarship, createScholarship, updateScholarship, ScholarshipFormData } from '../services/scholarships';
 
@@ -16,15 +16,20 @@ const AdminScholarshipForm: React.FC = () => {
 
   const [formData, setFormData] = useState<ScholarshipFormData>({
     title: '',
-    source: '',
-    location: '',
+    organization: '',
     amount: '',
     deadline: '',
+    description: '',
+    requirements: '',
+    eligibility: '',
+    benefits: [],
+    application_process: '',
+    source: '',
+    location: '',
     course: '',
     gpa: '',
     application_link: '',
     overview: '',
-    scraped_at: '',
   });
 
   useEffect(() => {
@@ -42,7 +47,7 @@ const AdminScholarshipForm: React.FC = () => {
       setFormData({
         id: data.id ? (typeof data.id === 'string' ? parseInt(data.id) : data.id) : undefined,
         title: data.title || '',
-        source: data.source || '',
+        organization: data.organization || data.source || '',
         location: data.location || '',
         amount: data.amount || '',
         deadline: data.deadline ? data.deadline.split('T')[0] : '',
@@ -50,7 +55,12 @@ const AdminScholarshipForm: React.FC = () => {
         gpa: data.gpa || '',
         application_link: data.application_link || '',
         overview: data.overview || '',
-        scraped_at: data.scraped_at || '',
+        description: data.description || '',
+        requirements: data.requirements || '',
+        eligibility: data.eligibility || '',
+        benefits: Array.isArray(data.benefits) ? data.benefits : [],
+        application_process: data.application_process || '',
+        source: data.source || '',
       });
     } catch (err: any) {
       setError('Failed to load scholarship details');

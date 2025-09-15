@@ -1,12 +1,50 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud } from 'lucide-react';
 import { parseResumeFromPdf } from 'resume-parser-ts';
 import type { Resume } from 'resume-parser-ts';
-// import { uploadDocument } from '../services/profile';
-// import type { ParsedCVData } from '../services/profile';
+
+// Define ParsedCVData type (same as in OnboardingReview)
+interface ParsedCVData {
+  personal_info: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    address: string;
+    linkedin?: string;
+    portfolio?: string;
+  };
+  summary?: string;
+  education: Array<{
+    institution: string;
+    degree: string;
+    field_of_study?: string;
+    start_date?: string;
+    end_date?: string;
+    is_current?: boolean;
+    description?: string;
+  }>;
+  experience: Array<{
+    company: string;
+    position: string;
+    start_date?: string;
+    end_date?: string;
+    is_current?: boolean;
+    description?: string;
+    location?: string;
+  }>;
+  skills?: string[];
+  certifications?: any[];
+  languages?: any[];
+}
+
+// Placeholder function for uploadDocument
+const uploadDocument = async (file: File): Promise<any> => {
+  // TODO: Implement actual file upload
+  console.log('Uploading document:', file.name);
+  return { success: true, url: 'placeholder-url' };
+};
 
 const UploadComponent = () => {
   const [file, setFile] = useState<File | null>(null);

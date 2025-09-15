@@ -1,8 +1,7 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from "react";
 import OpportunityList from "../components/OpportunityList";
 import ScholarshipList from "../components/ScholarshipList";
+import { Opportunity } from "../types/opportunities";
 import ProfileCompletion from "../components/ProfileCompletion";
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';

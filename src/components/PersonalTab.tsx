@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import { PersonalInfo } from '../hooks/// useProfileData';
+import type { PersonalInfo } from '../types';
 import { validatePersonalInfo, sanitizeInput } from '../utils/validation';
 
 interface PersonalTabProps {
@@ -33,7 +33,14 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
 
   // Validate field on blur
   const handleFieldBlur = (field: keyof PersonalInfo) => {
-    const validation = validatePersonalInfo(personalInfo);
+    const safe = {
+      name: personalInfo.name || '',
+      email: personalInfo.email,
+      phone: personalInfo.phone,
+      country: personalInfo.country || '',
+      goal: personalInfo.goal || '',
+    };
+    const validation = validatePersonalInfo(safe);
     const fieldError = validation.errors.find(error =>
       error.toLowerCase().includes(field.toLowerCase())
     );
@@ -84,7 +91,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           </label>
           <input
             type="text"
-            value={personalInfo.name}
+            value={personalInfo.name || ''}
             onChange={(e) => handleFieldChange('name', e.target.value)}
             onBlur={() => handleFieldBlur('name')}
             className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${touchedFields.name && !isFieldValid('name')
@@ -166,7 +173,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           Career Goal
         </label>
         <textarea
-          value={personalInfo.goal}
+          value={personalInfo.goal || ''}
           onChange={(e) => handleFieldChange('goal', e.target.value)}
           onBlur={() => handleFieldBlur('goal')}
           rows={3}
@@ -180,7 +187,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           <p className="mt-1 text-sm text-red-600">{getFieldError('goal')}</p>
         )}
         <p className="mt-1 text-xs text-gray-500">
-          {personalInfo.goal.length}/1000 characters
+          {(personalInfo.goal || '').length}/1000 characters
         </p>
       </div>
     </div>

@@ -1,11 +1,18 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import { useState, useEffect } from 'react';
 import { Clock, Bookmark, MapPin, Building2, DollarSign } from 'lucide-react';
-// import { getScholarships } from '../services/scholarships';
 import { useNavigate } from 'react-router-dom';
-// import { getScholarshipApplicationStatus } from '../services/scholarships';
 import ProfileCompletion from './ProfileCompletion';
+
+// Placeholder functions
+const getScholarshipApplicationStatus = async (): Promise<any> => {
+  // TODO: Implement actual API call
+  return { appliedScholarships: [] };
+};
+
+const getScholarships = async (_filters: any): Promise<{ results: any[], count?: number, next?: string, previous?: string }> => {
+  // TODO: Implement actual API call
+  return { results: [], count: 0, next: undefined, previous: undefined };
+};
 
 interface ScholarshipFilters {
   search?: string;
@@ -64,7 +71,7 @@ export default function ScholarshipList({ filters, title, showProfileCompletion 
   }, [filters, page]);
 
   useEffect(() => {
-    getScholarshipApplicationStatus().then(res => {
+    getScholarshipApplicationStatus().then((res: any) => {
       if (res && res.applications) {
         setAppliedScholarships(new Set(
           res.applications

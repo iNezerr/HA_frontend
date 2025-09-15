@@ -133,11 +133,11 @@ class ApiClient {
       // Method 2: Try to get Firebase token directly
       try {
         const { firebaseAuth } = await import('../auth/config/firebase');
-        const currentUser = firebaseAuth.getCurrentUser();
+        const currentUser = firebaseAuth.currentUser;
         
         if (currentUser) {
           console.log('🔥 Getting fresh Firebase token for user:', currentUser.email);
-          token = await firebaseAuth.getIdToken(true); // Force refresh
+          token = await currentUser.getIdToken(true); // Force refresh
           
           if (token) {
             // Store both tokens for future use

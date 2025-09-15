@@ -1,9 +1,7 @@
-// Mock data for UI-only interface
-// import { mockAPI } from "../types/mockData";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Clock, Bookmark as BookmarkIcon, MapPin, Building2 } from 'lucide-react';
-// import { getOpportunities } from '../services/opportunities';
-
+// Use local interface below; avoid importing conflicting core type with numeric id
+import { getOpportunities } from '../services/placeholderAPI';
 
 interface OpportunityFilters {
   search?: string;
@@ -94,14 +92,31 @@ const OpportunityList = React.memo(({ filters, title }: OpportunityListProps) =>
       setError(null);
       const data = await getOpportunities(filters);
 
-      // Accept both array and object with results property, filter for required fields
-      let raw: Opportunity[] = Array.isArray(data) ? data : (data && Array.isArray(data.results) ? data.results : []);
+      // Accept both array and object with results property
+      const incoming: any[] = Array.isArray(data) ? data : (data && Array.isArray((data as any).results) ? (data as any).results : []);
 
-      // Only keep opportunities with company, title, location, and link
-      const filtered = raw.filter(
-        (opp) => opp.company && opp.title && opp.location && opp.link
-      );
-      setOpportunities(filtered);
+      // Map incoming (which may use numeric id and different field names) into local UI shape
+      const raw: Opportunity[] = incoming.map((it: any): Opportunity => ({
+        id: it.id != null ? String(it.id) : it.id_str || undefined,
+        title: it.title || it.job_title || '',
+        company: it.company || it.company_name || '',
+        location: it.location || it.city || it.country || '',
+        link: it.link || it.application_url || it.apply_url,
+        type: it.type || it.job_type,
+        description: it.description,
+        requirements: Array.isArray(it.requirements) ? it.requirements : undefined,
+        salary_range: it.salary_range || (it.salary_min && it.salary_max ? `${it.salary_min}-${it.salary_max} ${it.salary_currency || ''}`.trim() : undefined),
+        deadline: it.deadline,
+        created_at: it.created_at,
+        is_active: it.is_active,
+        match_percentage: it.match_percentage,
+        application_url: it.application_url,
+        skills_required: it.skills_required || it.skills,
+        experience_level: it.experience_level,
+        employment_type: it.employment_type || it.job_type,
+      })).filter(opp => opp.company && opp.title && opp.location);
+
+      setOpportunities(raw);
     } catch (err: any) {
       console.error('Failed to fetch opportunities:', err);
       setError(err.message || 'Failed to load opportunities');
