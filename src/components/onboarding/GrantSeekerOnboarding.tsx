@@ -80,6 +80,12 @@ const GrantSeekerOnboarding: React.FC<GrantSeekerOnboardingProps> = ({
   };
 
   const handleNext = async () => {
+    console.log("current step: ", currentStep);
+    console.log("form step: ", formData);
+    console.log("Org info: ", formData.organization_info);
+    console.log("org name: ", formData.organization_info?.organization_name);
+    console.log("org type: ", formData.organization_info?.organization_type);
+    console.log("is loading: ", isLoading);
     setIsLoading(true);
     
     try {

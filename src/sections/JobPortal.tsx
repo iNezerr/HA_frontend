@@ -1,50 +1,50 @@
 import { useState, useEffect } from "react";
 import OpportunityList from "../components/OpportunityList";
-import ScholarshipList from "../components/ScholarshipList";
+// import ScholarshipList from "../components/ScholarshipList";
 import { Opportunity } from "../types/opportunities";
-import ProfileCompletion from "../components/ProfileCompletion";
+// import ProfileCompletion from "../components/ProfileCompletion";
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
-import { FaSmile } from 'react-icons/fa';
-import {
-  Clock,
-  Bookmark as BookmarkIcon,
-  Briefcase,
-  GraduationCap,
-  DollarSign,
-  Star,
-} from 'lucide-react';
+// import { FaSmile } from 'react-icons/fa';
+// import {
+//   Clock,
+//   Bookmark as BookmarkIcon,
+//   Briefcase,
+//   GraduationCap,
+//   DollarSign,
+//   Star,
+// } from 'lucide-react';
 import { useAuth } from '../auth/context/AuthContext';
-import RecommendedScholarships from '../components/RecommendedScholarships';
-import LoadingSpinner from '../components/LoadingSpinner';
+// import RecommendedScholarships from '../components/RecommendedScholarships';
+// import LoadingSpinner from '../components/LoadingSpinner';
 // import { Opportunity } from '../services/opportunities';
 
-const tabs = [
-  {
-    id: 'jobs',
-    label: 'Jobs',
-    icon: Briefcase,
-    color: 'blue'
-  },
-  {
-    id: 'scholarships',
-    label: 'Scholarships',
-    icon: GraduationCap,
-    color: 'green'
-  },
-  {
-    id: 'recommendedScholarships',
-    label: 'Recommended Scholarships',
-    icon: Star,
-    color: 'green'
-  },
-  {
-    id: 'grants',
-    label: 'Grants',
-    icon: DollarSign,
-    color: 'purple'
-  }
-];
+// const tabs = [
+//   {
+//     id: 'jobs',
+//     label: 'Jobs',
+//     icon: Briefcase,
+//     color: 'blue'
+//   },
+//   {
+//     id: 'scholarships',
+//     label: 'Scholarships',
+//     icon: GraduationCap,
+//     color: 'green'
+//   },
+//   {
+//     id: 'recommendedScholarships',
+//     label: 'Recommended Scholarships',
+//     icon: Star,
+//     color: 'green'
+//   },
+//   {
+//     id: 'grants',
+//     label: 'Grants',
+//     icon: DollarSign,
+//     color: 'purple'
+//   }
+// ];
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('jobs');
@@ -83,31 +83,31 @@ export default function Dashboard() {
 
 
 
-  const filteredSavedOpportunities = savedOpportunities.filter((opportunity) =>
-    opportunity.title?.toLowerCase().includes(search.toLowerCase()) ||
-    opportunity.company?.toLowerCase().includes(search.toLowerCase()) ||
-    opportunity.location?.toLowerCase().includes(search.toLowerCase())
-  );
+  // const filteredSavedOpportunities = savedOpportunities.filter((opportunity) =>
+  //   opportunity.title?.toLowerCase().includes(search.toLowerCase()) ||
+  //   opportunity.company?.toLowerCase().includes(search.toLowerCase()) ||
+  //   opportunity.location?.toLowerCase().includes(search.toLowerCase())
+  // );
 
-  const getTabStyles = (tab: typeof tabs[0], isActive: boolean) => {
-    const baseStyle = "relative flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium text-xs sm:text-sm rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 sm:flex-initial";
+  // const getTabStyles = (tab: typeof tabs[0], isActive: boolean) => {
+  //   const baseStyle = "relative flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium text-xs sm:text-sm rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 sm:flex-initial";
 
-    if (isActive) {
-      const colorMap = {
-        blue: 'bg-blue-600 text-white shadow-lg shadow-blue-200 focus:ring-blue-500',
-        green: 'bg-green-600 text-white shadow-lg shadow-green-200 focus:ring-green-500',
-        purple: 'bg-purple-600 text-white shadow-lg shadow-purple-200 focus:ring-purple-500'
-      };
-      return `${baseStyle} ${colorMap[tab.color as keyof typeof colorMap]}`;
-    } else {
-      const colorMap = {
-        blue: 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md focus:ring-blue-500',
-        green: 'bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-600 hover:shadow-md focus:ring-green-500',
-        purple: 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600 hover:shadow-md focus:ring-purple-500'
-      };
-      return `${baseStyle} ${colorMap[tab.color as keyof typeof colorMap]}`;
-    }
-  };
+  //   if (isActive) {
+  //     const colorMap = {
+  //       blue: 'bg-blue-600 text-white shadow-lg shadow-blue-200 focus:ring-blue-500',
+  //       green: 'bg-green-600 text-white shadow-lg shadow-green-200 focus:ring-green-500',
+  //       purple: 'bg-purple-600 text-white shadow-lg shadow-purple-200 focus:ring-purple-500'
+  //     };
+  //     return `${baseStyle} ${colorMap[tab.color as keyof typeof colorMap]}`;
+  //   } else {
+  //     const colorMap = {
+  //       blue: 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md focus:ring-blue-500',
+  //       green: 'bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-600 hover:shadow-md focus:ring-green-500',
+  //       purple: 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600 hover:shadow-md focus:ring-purple-500'
+  //     };
+  //     return `${baseStyle} ${colorMap[tab.color as keyof typeof colorMap]}`;
+  //   }
+  // };
 
   // SEO meta tags based on active tab
   const getSEOMeta = () => {
@@ -159,17 +159,16 @@ export default function Dashboard() {
         <main className="flex-1 p-4 sm:p-6">
 
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center">
-              Welcome back, Adam 
-              <FaSmile className="ml-2 text-yellow-500" />
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">
+              Job Dashboard
+              {/* <FaSmile className="ml-2 text-yellow-500" /> */}
             </h1>
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <p className="text-sm text-gray-600">Here's what is happening with your job search applications</p>
-          </div>
+          </div> */}
 
-          <div className="mb-8">
-            {/* Mobile View */}
+          {/* <div className="mb-8">
             <div className="flex sm:hidden gap-1 p-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto no-scrollbar w-fit mx-auto translate-z-20">
               {tabs.map((tab) => {
                 const IconComponent = tab.icon;
@@ -191,7 +190,6 @@ export default function Dashboard() {
               })}
             </div>
 
-            {/* Desktop View */}
             <div className="hidden sm:flex gap-3 p-1 bg-white rounded-xl shadow-sm border border-gray-100 w-fit mx-auto lg:mx-0">
               {tabs.map((tab) => {
                 const IconComponent = tab.icon;
@@ -211,13 +209,13 @@ export default function Dashboard() {
                 );
               })}
             </div>
-          </div>
+          </div> */}
 
           {/* Conditional rendering based on activeTab */}
           {activeTab === 'jobs' && (
             <div className="space-y-6 sm:space-y-8">
               {/* Profile Completion Nudge */}
-              <ProfileCompletion />
+              {/* <ProfileCompletion /> */}
               {/* Latest Opportunities from API */}
               <OpportunityList
                 filters={{
@@ -225,12 +223,12 @@ export default function Dashboard() {
                   ordering: '-created_at',
                   show_expired: false
                 }}
-                title="Latest Opportunities"
+                title="Your Job Matches"
               />
             </div>
           )}
 
-          {activeTab === 'scholarships' && (
+          {/* {activeTab === 'scholarships' && (
             <div className="space-y-6 sm:space-y-8">
               <ScholarshipList
                 filters={{
@@ -280,9 +278,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </section>
-          )}
+          )} */}
 
-          <section className="mb-8 sm:mb-10">
+          {/* <section className="mb-8 sm:mb-10">
             <h2 className="text-lg font-semibold mb-4">Saved Opportunities</h2>
 
             {loading ? (
@@ -340,7 +338,7 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </section>
+          </section> */}
 
           <section className="mb-8 sm:mb-10">
             <h2 className="text-lg font-semibold mb-4">Application Progress</h2>
