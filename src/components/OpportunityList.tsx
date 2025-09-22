@@ -44,9 +44,10 @@ function extractHref(htmlString?: string) {
 }
 
 async function getAppliedOpportunities(): Promise<Set<string>> {
+  const res = await fetch('/api/applications/applications/', { credentials: 'include' });
+  const text = await res.json();
   try {
-    const res = await fetch('/api/opportunities/applications/', { credentials: 'include' });
-    const data = await res.json();
+    const data = JSON.parse(text);
     if (data && data.applications) {
       return new Set(data.applications.map((a: any) => String(a.opportunity_id)));
     }

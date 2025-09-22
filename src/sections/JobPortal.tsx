@@ -1,115 +1,164 @@
 import { useState, useEffect } from "react";
 import OpportunityList from "../components/OpportunityList";
-// import ScholarshipList from "../components/ScholarshipList";
 import { Opportunity } from "../types/opportunities";
-// import ProfileCompletion from "../components/ProfileCompletion";
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
-// import { FaSmile } from 'react-icons/fa';
-// import {
-//   Clock,
-//   Bookmark as BookmarkIcon,
-//   Briefcase,
-//   GraduationCap,
-//   DollarSign,
-//   Star,
-// } from 'lucide-react';
 import { useAuth } from '../auth/context/AuthContext';
-// import RecommendedScholarships from '../components/RecommendedScholarships';
-// import LoadingSpinner from '../components/LoadingSpinner';
-// import { Opportunity } from '../services/opportunities';
+import { FaGraduationCap } from 'react-icons/fa';
 
-// const tabs = [
-//   {
-//     id: 'jobs',
-//     label: 'Jobs',
-//     icon: Briefcase,
-//     color: 'blue'
-//   },
-//   {
-//     id: 'scholarships',
-//     label: 'Scholarships',
-//     icon: GraduationCap,
-//     color: 'green'
-//   },
-//   {
-//     id: 'recommendedScholarships',
-//     label: 'Recommended Scholarships',
-//     icon: Star,
-//     color: 'green'
-//   },
-//   {
-//     id: 'grants',
-//     label: 'Grants',
-//     icon: DollarSign,
-//     color: 'purple'
-//   }
-// ];
-
-export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('jobs');
-  const [search] = useState('');
-  const [filter] = useState({
-    search: '',
-    type: '',
-    location: '',
-  });
-  const [savedOpportunities, setSavedOpportunities] = useState<Opportunity[]>([]);
+export default function JobPortal() {
+  const [activeTab, setActiveTab] = useState<'jobs' | 'search' | 'match'>('jobs');
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  // const [hasSearched, setHasSearched] = useState(false);
+  const { user, getIdToken } = useAuth();
 
-  // Fetch saved opportunities
   useEffect(() => {
-    const fetchSavedOpportunities = async () => {
-      if (!user) return;
+    if (activeTab === 'jobs') {
+      fetchJobs();
+    } else {
+      setOpportunities([]);
+      // setHasSearched(false);
+    }
+  }, [user, activeTab]);
 
-      setLoading(true);
-      setError(null);
+  const fetchJobs = async () => {
+    if (!user) {
+      setOpportunities([]);
+      setLoading(false);
+      return;
+    }
 
-      try {
-        // Mock response for now - replace with actual API call
-        setSavedOpportunities([]);
-      } catch (err) {
-        console.error('Error fetching saved opportunities:', err);
-        setError('Failed to load saved opportunities');
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const token = await getIdToken();
+      
+      if (!token) {
+        throw new Error('No authentication token available');
       }
-    };
 
-    fetchSavedOpportunities();
-  }, [user]);
+      const API_BASE = 'http://localhost:8000/api';
+      const endpoint = `${API_BASE}/opportunities/jobs/`;
+      
+      const res = await fetch(endpoint, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!res.ok) throw new Error('Failed to fetch jobs');
+      const data = await res.json();
+      setOpportunities(data.results || data);
+    } catch {
+      setError('Failed to load jobs');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  {/* this is coming when AI search and AI match started */}
 
+  // const handleSearch = async (e?: React.FormEvent) => {
+  //   if (e) e.preventDefault();
+    
+  //   if (!user) return;
 
-  // const filteredSavedOpportunities = savedOpportunities.filter((opportunity) =>
-  //   opportunity.title?.toLowerCase().includes(search.toLowerCase()) ||
-  //   opportunity.company?.toLowerCase().includes(search.toLowerCase()) ||
-  //   opportunity.location?.toLowerCase().includes(search.toLowerCase())
-  // );
+  //   if (!user.user_type) {
+  //     setError('User profile incomplete. Please complete your onboarding.');
+  //     return;
+  //   }
 
-  // const getTabStyles = (tab: typeof tabs[0], isActive: boolean) => {
-  //   const baseStyle = "relative flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium text-xs sm:text-sm rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 sm:flex-initial";
+  //   setLoading(true);
+  //   setError(null);
+    
+  //   try {
+  //     const token = await getIdToken();
+      
+  //     if (!token) {
+  //       throw new Error('No authentication token available');
+  //     }
 
-  //   if (isActive) {
-  //     const colorMap = {
-  //       blue: 'bg-blue-600 text-white shadow-lg shadow-blue-200 focus:ring-blue-500',
-  //       green: 'bg-green-600 text-white shadow-lg shadow-green-200 focus:ring-green-500',
-  //       purple: 'bg-purple-600 text-white shadow-lg shadow-purple-200 focus:ring-purple-500'
+  //     const API_BASE = 'http://localhost:8000/api';
+  //     const endpoint = `${API_BASE}/opportunities/search/unified_search/`;
+      
+  //     const searchData = {
+  //       user_embedding: null,
+  //       user_type: user.user_type,
+  //       limit: 20
   //     };
-  //     return `${baseStyle} ${colorMap[tab.color as keyof typeof colorMap]}`;
-  //   } else {
-  //     const colorMap = {
-  //       blue: 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md focus:ring-blue-500',
-  //       green: 'bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-600 hover:shadow-md focus:ring-green-500',
-  //       purple: 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600 hover:shadow-md focus:ring-purple-500'
-  //     };
-  //     return `${baseStyle} ${colorMap[tab.color as keyof typeof colorMap]}`;
+
+  //     const res = await fetch(endpoint, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify(searchData)
+  //     });
+      
+  //     if (!res.ok) throw new Error('Search failed');
+  //     const data = await res.json();
+  //     setOpportunities(data.results || data);
+  //     setHasSearched(true);
+  //     console.log("search results: ", data);
+  //   } catch (err) {
+  //     setError('Search failed');
+  //     console.error('Search error:', err);
+  //   } finally {
+  //     setLoading(false);
   //   }
   // };
 
-  // SEO meta tags based on active tab
+  // const handleMatch = async () => {
+  //   if (!user) return;
+
+  //   setLoading(true);
+  //   setError(null);
+    
+  //   try {
+  //     const token = await getIdToken();
+      
+  //     if (!token) {
+  //       throw new Error('No authentication token available');
+  //     }
+
+  //     const API_BASE = 'http://localhost:8000/api';
+  //     const endpoint = `${API_BASE}/opportunities/match/match_opportunities/`;
+      
+  //     const res = await fetch(endpoint, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify({}) // Empty body, backend will use user profile
+  //     });
+      
+  //     if (!res.ok) throw new Error('AI matching failed');
+  //     const data = await res.json();
+  //     setOpportunities(data.results || data);
+  //     console.log("AI matched opportunities: ", data);
+  //   } catch (err) {
+  //     setError('AI matching failed');
+  //     console.error('Match error:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const handleTabChange = (tab: 'jobs' | 'search' | 'match') => {
+    setActiveTab(tab);
+    setError(null);
+    
+    // Clear search state when switching tabs
+    if (tab !== 'search') {
+      // setHasSearched(false);
+      };
+  };
+
   const getSEOMeta = () => {
     switch (activeTab) {
       case 'jobs':
@@ -119,19 +168,19 @@ export default function Dashboard() {
           keywords: 'jobs, career opportunities, remote jobs, job search, employment, internships, job applications, career development',
           tags: ['jobs', 'career', 'opportunities', 'employment', 'remote work']
         };
-      case 'scholarships':
+      case 'search':
         return {
-          title: 'Find Scholarships & Education Funding | Hues Apply',
-          description: 'Discover scholarships, grants, and education funding opportunities worldwide. Find scholarships for students, graduate funding, and international education support.',
-          keywords: 'scholarships, education funding, student grants, graduate scholarships, international scholarships, education opportunities',
-          tags: ['scholarships', 'education', 'funding', 'grants', 'student aid']
+          title: 'Search Opportunities | Hues Apply',
+          description: 'Search jobs, scholarships, and grants tailored to your profile.',
+          keywords: 'search, jobs, scholarships, grants, opportunities',
+          tags: ['search', 'jobs', 'scholarships', 'grants']
         };
-      case 'grants':
+      case 'match':
         return {
-          title: 'Find Grants & Funding Opportunities | Hues Apply',
-          description: 'Discover grants, funding opportunities, and financial support for projects, research, and business development. Find government grants and private funding.',
-          keywords: 'grants, funding opportunities, business grants, research funding, government grants, financial support',
-          tags: ['grants', 'funding', 'business', 'research', 'financial support']
+          title: 'AI Match Opportunities | Hues Apply',
+          description: 'AI-powered matching for jobs, scholarships, and grants.',
+          keywords: 'ai match, jobs, scholarships, grants, opportunities',
+          tags: ['ai', 'match', 'jobs', 'scholarships', 'grants']
         };
       default:
         return {
@@ -145,6 +194,67 @@ export default function Dashboard() {
 
   const seoMeta = getSEOMeta();
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'search':
+        return (
+          <div className="p-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-lg font-semibold mb-4 text-gray-700">AI-Powered Search</h2>
+              <div className="text-center py-8">
+                <FaGraduationCap className="text-4xl mb-4 mx-auto text-blue-600" />
+                <p className="text-gray-600 mb-6">
+                  Find opportunities based on your profile and preferences using AI.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-700">
+                    <strong>Coming Soon:</strong> AI-powered search based on your academic background, 
+                    GPA, field of study, and career goals.
+                  </p>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        );
+
+      case 'match':
+        return (
+          <div className="p-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">AI-Powered Opportunity Matching</h2>
+              <div className="text-center py-8">
+                <FaGraduationCap className="text-4xl mb-4 mx-auto text-blue-600" />
+                <p className="text-gray-600 mb-6">
+                  Let our AI find the perfect opportunities based on your profile, skills, and preferences.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-700">
+                    <strong>Coming Soon:</strong> AI-powered Job matching based on your academic background, 
+                    GPA, field of study, and career goals.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default: // jobs
+        return (
+          <div>
+            <OpportunityList
+              opportunities={opportunities.map(opp => ({
+                ...opp,
+                id: opp.id ? String(opp.id) : undefined
+              }))}
+              filters={{}}
+              title="Your Job Matches"
+            />
+          </div>
+        );
+    }
+  };
+
   return (
     <>
       <SEO
@@ -155,202 +265,70 @@ export default function Dashboard() {
         type="website"
       />
       <div className="min-h-screen bg-gray-50">
-        {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6">
-
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">
-              Job Dashboard
-              {/* <FaSmile className="ml-2 text-yellow-500" /> */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
+              {activeTab === 'jobs' && 'Job Dashboard'}
+              {activeTab === 'search' && 'Search Opportunities'}
+              {activeTab === 'match' && 'AI Match Opportunities'}
             </h1>
+            <div className="flex space-x-2">
+              <button
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'jobs' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                }`}
+                onClick={() => handleTabChange('jobs')}
+                type="button"
+              >
+                Jobs
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'search' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                }`}
+                onClick={() => handleTabChange('search')}
+                type="button"
+              >
+                Search
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'match' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                }`}
+                onClick={() => handleTabChange('match')}
+                type="button"
+              >
+                AI Match
+              </button>
+            </div>
           </div>
-          {/* <div className="mb-4">
-            <p className="text-sm text-gray-600">Here's what is happening with your job search applications</p>
-          </div> */}
 
-          {/* <div className="mb-8">
-            <div className="flex sm:hidden gap-1 p-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto no-scrollbar w-fit mx-auto translate-z-20">
-              {tabs.map((tab) => {
-                const IconComponent = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as 'jobs' | 'scholarships' | 'recommendedScholarships' | 'grants')}
-                    className={getTabStyles(tab, activeTab === tab.id)}
-                  >
-                    <IconComponent size={16} />
-                    <span className="hidden xs:inline">{tab.label}</span>
-                    <span className="xs:hidden">{tab.label.slice(0, 4)}</span>
-                    {activeTab === tab.id && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full opacity-75">
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+          {/* Loading and Error States */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Loading...</p>
             </div>
-
-            <div className="hidden sm:flex gap-3 p-1 bg-white rounded-xl shadow-sm border border-gray-100 w-fit mx-auto lg:mx-0">
-              {tabs.map((tab) => {
-                const IconComponent = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as 'jobs' | 'scholarships' | 'recommendedScholarships' | 'grants')}
-                    className={getTabStyles(tab, activeTab === tab.id)}
-                  >
-                    <IconComponent size={18} />
-                    <span>{tab.label}</span>
-                    {activeTab === tab.id && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full opacity-75">
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div> */}
-
-          {/* Conditional rendering based on activeTab */}
-          {activeTab === 'jobs' && (
-            <div className="space-y-6 sm:space-y-8">
-              {/* Profile Completion Nudge */}
-              {/* <ProfileCompletion /> */}
-              {/* Latest Opportunities from API */}
-              <OpportunityList
-                filters={{
-                  ...filter,
-                  ordering: '-created_at',
-                  show_expired: false
-                }}
-                title="Your Job Matches"
-              />
+          )}
+          
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+              {error}
             </div>
           )}
 
-          {/* {activeTab === 'scholarships' && (
-            <div className="space-y-6 sm:space-y-8">
-              <ScholarshipList
-                filters={{
-                  ...filter,
-                  ordering: '-created_at',
-                  show_expired: false,
-                  page_size: 9
-                }}
-                showProfileCompletion={true}
-                title="Latest Scholarships"
-              />
+          {/* Tab Content */}
+          {!loading && !error && (
+            <div className="space-y-6">
+              {renderTabContent()}
             </div>
           )}
-
-          {activeTab === 'recommendedScholarships' && (
-            <div className="space-y-6 sm:space-y-8">
-              <RecommendedScholarships
-                filters={{
-                  ...filter,
-                  ordering: '-created_at',
-                  show_expired: false,
-                  page_size: 10
-                }}
-                title="Recommended Scholarships"
-              />
-            </div>
-          )}
-
-          {activeTab === 'grants' && (
-            <section className="bg-white rounded-xl shadow-sm border border-gray-100 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 mb-8" aria-labelledby="grants-title">
-              <div className="max-w-3xl mx-auto text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 bg-purple-100 rounded-full flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-                </div>
-                <h2
-                  id="grants-title"
-                  className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-purple-500 mb-3 sm:mb-4"
-                >
-                  Grants Section
-                </h2>
-                <p className="text-gray-700 text-sm sm:text-base mb-6 sm:mb-8 px-2">
-                  Grants functionality will be available soon. Stay tuned!
-                </p>
-                <div className="inline-flex items-center px-4 py-2 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Coming Soon
-                </div>
-              </div>
-            </section>
-          )} */}
-
-          {/* <section className="mb-8 sm:mb-10">
-            <h2 className="text-lg font-semibold mb-4">Saved Opportunities</h2>
-
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <LoadingSpinner size="lg" text="Loading saved opportunities..." />
-              </div>
-            ) : error ? (
-              <div className="text-red-500 text-center p-6 sm:p-8 bg-red-50 rounded-lg border border-red-200">
-                <p className="mb-2">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="text-sm text-red-600 hover:text-red-800 underline"
-                >
-                  Try again
-                </button>
-              </div>
-            ) : filteredSavedOpportunities.length === 0 ? (
-              <div className="text-gray-500 text-center p-6 sm:p-8 bg-white rounded-lg shadow">
-                {search ? 'No saved opportunities match your search.' : 'No saved opportunities found. Browse opportunities and save them for later.'}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSavedOpportunities.map((opportunity) => (
-                  <div key={opportunity.id} className="bg-white rounded-xl shadow p-4 relative hover:shadow-md transition-shadow">
-                    <div className="absolute top-4 right-4 text-blue-500">
-                      <BookmarkIcon size={18} />
-                    </div>
-                    <div className="text-lg font-bold mb-1 pr-8">{opportunity.company}</div>
-                    {opportunity.match_percentage && (
-                      <div className="inline-block text-green-600 bg-green-50 px-2 py-0.5 rounded-full text-xs font-semibold mb-3">
-                        {opportunity.match_percentage}% Match
-                      </div>
-                    )}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Role</span>
-                      <span className="font-medium">{opportunity.title}</span>
-                    </div>
-                    <div className="flex justify-between text-sm mb-3">
-                      <span className="text-gray-600">Location</span>
-                      <span className="font-medium">{opportunity.location}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
-                      <span className="flex items-center">
-                        <Clock size={14} className="mr-1" />
-                        {opportunity.deadline ? `Closing ${new Date(opportunity.deadline).toLocaleDateString()}` : 'No deadline'}
-                      </span>
-                      <button
-                        className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        aria-label={`Apply to ${opportunity.title} at ${opportunity.company}`}
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section> */}
-
-          <section className="mb-8 sm:mb-10">
-            <h2 className="text-lg font-semibold mb-4">Application Progress</h2>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="text-center py-8 sm:py-10 text-gray-500">
-                <p className="mb-4 text-sm sm:text-base">You haven't applied to any opportunities yet.</p>
-                <Link to="/" className="text-blue-500 hover:underline text-sm sm:text-base">
-                  Browse opportunities to get started
-                </Link>
-              </div>
-            </div>
-          </section>
         </main>
       </div>
     </>
