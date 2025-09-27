@@ -21,8 +21,17 @@ export interface ApiError {
 }
 
 // Environment configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  console.error('❌ VITE_API_BASE_URL environment variable is not set');
+  throw new Error('API Base URL is required');
+}
+
+console.log('🌐 API Base URL:', API_BASE_URL);
+
 const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://backend.huesapply.com',
+  baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -338,8 +347,27 @@ class ApiClient {
   public getAxiosInstance(): AxiosInstance {
     return this.instance;
   }
+
+  // Debug method to get current base URL
+  public getBaseURL(): string {
+    return API_BASE_URL;
+  }
+
+  // Debug method to log current configuration
+  public debugConfig(): void {
+    console.log('🔧 ApiClient Configuration:', {
+      baseURL: API_BASE_URL,
+      timeout: API_CONFIG.timeout,
+      headers: API_CONFIG.headers,
+      currentToken: this.currentToken ? `${this.currentToken.substring(0, 20)}...` : 'No token',
+    });
+  }
 }
 
 // Export singleton instance
 export const apiClient = ApiClient.getInstance();
 export default apiClient;
+
+// Export configuration for debugging
+export const getApiBaseURL = (): string => API_BASE_URL;
+export const debugApiConfig = (): void => apiClient.debugConfig();

@@ -1,63 +1,20 @@
 import { useState, useEffect } from "react";
 import OpportunityList from "../components/OpportunityList";
-import { Opportunity } from "../types/opportunities";
 import SEO from '../components/SEO';
 import { useAuth } from '../auth/context/AuthContext';
 import { FaGraduationCap } from 'react-icons/fa';
 
 export default function JobPortal() {
   const [activeTab, setActiveTab] = useState<'jobs' | 'search' | 'match'>('jobs');
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // const [hasSearched, setHasSearched] = useState(false);
-  const { user, getIdToken } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (activeTab === 'jobs') {
-      fetchJobs();
-    } else {
-      setOpportunities([]);
+    if (activeTab !== 'jobs') {
       // setHasSearched(false);
     }
   }, [user, activeTab]);
-
-  const fetchJobs = async () => {
-    if (!user) {
-      setOpportunities([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const token = await getIdToken();
-      
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-
-      const API_BASE = 'http://localhost:8000/api';
-      const endpoint = `${API_BASE}/opportunities/jobs/`;
-      
-      const res = await fetch(endpoint, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      if (!res.ok) throw new Error('Failed to fetch jobs');
-      const data = await res.json();
-      setOpportunities(data.results || data);
-    } catch {
-      setError('Failed to load jobs');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   {/* this is coming when AI search and AI match started */}
 
@@ -243,10 +200,6 @@ export default function JobPortal() {
         return (
           <div>
             <OpportunityList
-              opportunities={opportunities.map(opp => ({
-                ...opp,
-                id: opp.id ? String(opp.id) : undefined
-              }))}
               filters={{}}
               title="Your Job Matches"
             />
@@ -309,14 +262,7 @@ export default function JobPortal() {
             </div>
           </div>
 
-          {/* Loading and Error States */}
-          {loading && (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600">Loading...</p>
-            </div>
-          )}
-          
+          {/* Error State */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
               {error}
@@ -324,11 +270,9 @@ export default function JobPortal() {
           )}
 
           {/* Tab Content */}
-          {!loading && !error && (
-            <div className="space-y-6">
-              {renderTabContent()}
-            </div>
-          )}
+          <div className="space-y-6">
+            {renderTabContent()}
+          </div>
         </main>
       </div>
     </>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Clock, Bookmark as BookmarkIcon, MapPin, Building2 } from 'lucide-react';
 // Use local interface below; avoid importing conflicting core type with numeric id
 import { getOpportunities } from '../services/placeholderAPI';
+import { apiClient } from '../services/apiClient';
 
 interface OpportunityFilters {
   search?: string;
@@ -44,12 +45,10 @@ function extractHref(htmlString?: string) {
 }
 
 async function getAppliedOpportunities(): Promise<Set<string>> {
-  const res = await fetch('/api/applications/applications/', { credentials: 'include' });
-  const text = await res.json();
   try {
-    const data = JSON.parse(text);
-    if (data && data.applications) {
-      return new Set(data.applications.map((a: any) => String(a.opportunity_id)));
+    const response = await apiClient.get('/applications/applications/');
+    if (response && response.applications) {
+      return new Set(response.applications.map((a: any) => String(a.opportunity_id)));
     }
   } catch (e) {
     console.error('Failed to fetch applied opportunities:', e);

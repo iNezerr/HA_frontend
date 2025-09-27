@@ -53,8 +53,6 @@ export interface BackendUserData {
 
 // Authentication API Service
 export class AuthAPI {
-  private static readonly BASE_PATH = '';
-
   /**
    * User login - Firebase auth + backend session creation
    */
@@ -70,7 +68,7 @@ export class AuthAPI {
       const idToken = await FirebaseAuthService.getIdToken();
 
       // Send Firebase token to backend for session creation
-      const response = await apiClient.post(`${this.BASE_PATH}/users/login/`, {
+      const response = await apiClient.post(`/users/login/`, {
         firebase_token: idToken,
       });
 
@@ -112,7 +110,7 @@ export class AuthAPI {
       const idToken = await FirebaseAuthService.getIdToken();
 
       // Create user profile in backend and get session
-      const response = await apiClient.post(`${this.BASE_PATH}/users/register/`, {
+      const response = await apiClient.post(`/users/register/`, {
         firebase_token: idToken,
         user_type: userData.userType,
         display_name: userData.displayName,
@@ -150,7 +148,7 @@ export class AuthAPI {
       const token = sessionStorage.getItem('auth_token');
       if (token) {
         try {
-          await apiClient.post(`${this.BASE_PATH}/users/logout/`, {}, {
+          await apiClient.post(`/users/logout/`, {}, {
             headers: { Authorization: `Bearer ${token}` }
           });
         } catch (error) {
@@ -178,7 +176,7 @@ export class AuthAPI {
       const idToken = await FirebaseAuthService.getIdToken(true);
       
       // Send to backend for session refresh
-      const response = await apiClient.post(`${this.BASE_PATH}/users/refresh-session/`, {
+      const response = await apiClient.post(`/users/refresh-session/`, {
         firebase_token: idToken,
       });
 
@@ -226,7 +224,7 @@ export class AuthAPI {
    */
   static async verifyToken(tokenData: VerifyTokenRequest): Promise<{ valid: boolean; user?: any }> {
     try {
-      const response = await apiClient.post(`${this.BASE_PATH}/users/verify-firebase-token/`, tokenData);
+      const response = await apiClient.post(`/users/verify-firebase-token/`, tokenData);
       return response;
     } catch (error: any) {
       console.error('Token verification error:', error);
@@ -262,7 +260,7 @@ export class AuthAPI {
     try {
       // This would need to be implemented via backend since Firebase doesn't
       // provide a direct way to check user existence without authentication
-      const response = await apiClient.get(`${this.BASE_PATH}/users/check-user/?email=${encodeURIComponent(email)}`);
+      const response = await apiClient.get(`/users/check-user/?email=${encodeURIComponent(email)}`);
       return response;
     } catch (error: any) {
       console.error('Check user exists error:', error);
@@ -280,7 +278,7 @@ export class AuthAPI {
         throw new Error('No authentication session available');
       }
 
-      const response = await apiClient.get(`${this.BASE_PATH}/users/me/`, {
+      const response = await apiClient.get(`/users/me/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
