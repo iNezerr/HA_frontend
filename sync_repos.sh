@@ -3,14 +3,14 @@
 # Script to sync changes from organization repo to personal fork for Vercel deployment
 # Author: iNezerr
 
-echo "🔄 Starting synchronization between Hues-Apply/HA_frontend and iNezerr/HA_frontend..."
+echo "🔄 Starting synchronization between Hues-Apply/HA_frontendV1 and iNezerr/HA_frontendV1..."
 
 # Store the current directory
 CURRENT_DIR=$(pwd)
 
 # Check if the local repo exists
-if [ -d "c:/src/HuesApply/HA_frontend" ]; then
-  cd "c:/src/HuesApply/HA_frontend"
+if [ -d "c:/src/HuesApply/HA_frontendV1" ]; then
+  cd "c:/src/HuesApply/HA_frontendV1"
 
   echo "📋 Checking for uncommitted changes in Hues-Apply repo..."
   if [[ $(git status --porcelain) ]]; then
@@ -23,15 +23,19 @@ if [ -d "c:/src/HuesApply/HA_frontend" ]; then
     echo "✅ No uncommitted changes in Hues-Apply repo."
   fi
   
-  # Make sure we have the latest changes
-  echo "⬇️ Pulling latest changes from Hues-Apply repo..."
-  git pull origin main
+  # Get the current branch name
+  CURRENT_BRANCH=$(git branch --show-current)
+  echo "🌿 Current branch: $CURRENT_BRANCH"
+  
+  # Make sure we have the latest changes for current branch
+  echo "⬇️ Pulling latest changes from Hues-Apply repo for branch: $CURRENT_BRANCH..."
+  git pull origin $CURRENT_BRANCH
   
   # Now let's handle the personal fork
   echo "🔍 Checking if iNezerr fork is configured as a remote..."
   if ! git remote | grep -q "personal"; then
     echo "➕ Adding iNezerr fork as 'personal' remote..."
-    git remote add personal https://github.com/iNezerr/HA_frontend.git
+    git remote add personal https://github.com/iNezerr/HA_frontendV1.git
   else
     echo "✅ Remote 'personal' already configured."
   fi
@@ -40,9 +44,17 @@ if [ -d "c:/src/HuesApply/HA_frontend" ]; then
   echo "⬇️ Fetching from iNezerr fork..."
   git fetch personal
   
-  # Push changes to personal fork
-  echo "⬆️ Pushing changes to iNezerr fork..."
-  git push personal main
+  # Check if branch exists on personal fork, if not create it
+  echo "🔍 Checking if branch '$CURRENT_BRANCH' exists on personal fork..."
+  if git ls-remote --heads personal $CURRENT_BRANCH | grep -q $CURRENT_BRANCH; then
+    echo "✅ Branch '$CURRENT_BRANCH' exists on personal fork."
+  else
+    echo "🆕 Branch '$CURRENT_BRANCH' doesn't exist on personal fork. Will create it."
+  fi
+  
+  # Push changes to personal fork (will create branch if it doesn't exist)
+  echo "⬆️ Pushing changes to iNezerr fork on branch: $CURRENT_BRANCH..."
+  git push personal $CURRENT_BRANCH
   
   echo "🎉 Synchronization complete! Vercel should now start deploying automatically."
   echo "📊 Check deployment status at: https://vercel.com/inezerr/ha-frontend"
@@ -50,6 +62,6 @@ if [ -d "c:/src/HuesApply/HA_frontend" ]; then
   # Return to original directory
   cd "$CURRENT_DIR"
 else
-  echo "❌ Error: Repository directory not found at c:/src/HuesApply/HA_frontend"
+  echo "❌ Error: Repository directory not found at c:/src/HuesApply/HA_frontendV1"
   exit 1
 fi
