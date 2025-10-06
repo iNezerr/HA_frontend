@@ -4,9 +4,56 @@ import { UserType } from '../types/user';
 import OnboardingService from '../services/onboarding';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { FaGraduationCap, FaDollarSign } from 'react-icons/fa';
+import { JobList } from '../jobs';
+import ProfileCompletion from '../components/ProfileCompletion';
 
-// Import existing components that we'll repurpose
-import JobPortal from './JobPortal';
+// Job dashboard with actual functionality
+const JobDashboard: React.FC = () => (
+  <div className="min-h-screen bg-gray-50">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Job Dashboard</h1>
+        <p className="text-gray-600">
+          Discover AI-matched job opportunities tailored to your skills and experience
+        </p>
+      </div>
+
+      {/* Profile Completion */}
+      <div className="mb-6">
+        <ProfileCompletion />
+      </div>
+
+      {/* Jobs Section */}
+      <div className="space-y-8">
+        {/* Latest AI-Matched Jobs */}
+        <JobList
+          useDashboard={true}
+          title="AI-Matched Jobs for You"
+          filters={{
+            ordering: '-created_at',
+            show_expired: false,
+            page_size: 10
+          }}
+          showLoadMore={true}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        />
+
+        {/* Recently Posted Jobs */}
+        <JobList
+          useDashboard={false}
+          title="Recently Posted Jobs"
+          filters={{
+            ordering: '-created_at',
+            show_expired: false,
+            page_size: 6
+          }}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        />
+      </div>
+    </div>
+  </div>
+);
 
 // Placeholder components for scholarship and grant dashboards
 const ScholarshipDashboard: React.FC = () => (
@@ -98,7 +145,7 @@ const UnifiedDashboard: React.FC = () => {
   // Render the appropriate dashboard based on user type
   switch (userType) {
     case 'job':
-      return <JobPortal />;
+      return <JobDashboard />;
     case 'scholarship':
       return <ScholarshipDashboard />;
     case 'grant':

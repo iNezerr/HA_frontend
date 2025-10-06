@@ -35,7 +35,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
   const handleFieldBlur = (field: keyof PersonalInfo) => {
     const safe = {
       name: personalInfo.name || '',
-      email: personalInfo.email,
+      email: personalInfo.email || '',
       phone: personalInfo.phone,
       country: personalInfo.country || '',
       goal: personalInfo.goal || '',

@@ -30,10 +30,9 @@ import Profile from "./sections/Profile";
 import AdminDashboard from "./sections/AdminDashboard";
 import AdminScholarshipsList from "./components/AdminScholarshipsList";
 import AdminScholarshipForm from "./components/AdminScholarshipForm";
-import AdminJobsList from "./components/AdminJobsList";
-import AdminJobForm from "./components/AdminJobForm";
+import AdminJobsPlaceholder from "./components/AdminJobsPlaceholder";
+import AdminJobFormPlaceholder from "./components/AdminJobFormPlaceholder";
 import UsersList from "./components/UsersList";
-import ScholarshipDetails from "./sections/ScholarshipDetails";
 import ComingSoon from "./components/ComingSoon";
 import NotFound from "./components/NotFound";
 
@@ -91,7 +90,6 @@ function App() {
                   <Route element={<SidebarWrapper />}>
                     <Route path="/dashboard" element={<UnifiedDashboard />} />
                     <Route path="/profile" element={<Profile />} />
-                    <Route path="/dashboard/scholarships/:id" element={<ScholarshipDetails />} />
                     <Route path="/dashboard/*" element={<ComingSoon />} />
                   </Route>
                 </Route>
@@ -102,9 +100,9 @@ function App() {
                   <Route path="/admin/scholarships" element={<AdminScholarshipsList />} />
                   <Route path="/admin/scholarships/new" element={<AdminScholarshipForm />} />
                   <Route path="/admin/scholarships/edit/:id" element={<AdminScholarshipForm />} />
-                  <Route path="/admin/jobs" element={<AdminJobsList />} />
-                  <Route path="/admin/jobs/new" element={<AdminJobForm />} />
-                  <Route path="/admin/jobs/edit/:id" element={<AdminJobForm />} />
+                  <Route path="/admin/jobs" element={<AdminJobsPlaceholder />} />
+                  <Route path="/admin/jobs/new" element={<AdminJobFormPlaceholder />} />
+                  <Route path="/admin/jobs/edit/:id" element={<AdminJobFormPlaceholder />} />
                   <Route path="/users-list" element={<UsersList />} />
                 </Route>
 

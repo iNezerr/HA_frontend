@@ -1,6 +1,7 @@
 // Additional missing types and functions to fix compilation errors
 
-// JobFormData interface to match AdminJobForm requirements
+// JobFormData interface - DISABLED (Admin job management feature removed)
+// This interface is kept for potential future use but is not currently active
 export interface JobFormData {
   id?: number;
   title: string;

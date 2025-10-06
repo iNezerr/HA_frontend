@@ -4,40 +4,42 @@
 // Import specific types to avoid name collisions with locally-declared types in components
 import type { Opportunity as CoreOpportunity, OpportunityFilters } from '../types/opportunities';
 
-// Job-related API functions
+// Job-related API functions (Admin functionality disabled - placeholders only)
 export const getJobs = async (
   _filters: OpportunityFilters
 ): Promise<{ results: any[]; count: number; next?: string; previous?: string } | any[]> => {
-  // UI stub
+  // Admin job management disabled - placeholder only
+  console.log('Job management feature is disabled - using placeholder');
   return { results: [], count: 0, next: undefined, previous: undefined };
 };
 
 export const getJob = async (id: number | string): Promise<any> => {
-  // UI stub
+  // Admin job management disabled - placeholder only
+  console.log('Job management feature is disabled - using placeholder');
   return {
     id: id,
-    title: '',
-    company: '',
-    location: '',
+    title: 'Feature not available',
+    company: 'Feature not available',
+    location: 'Feature not available',
     job_type: '',
     experience_level: '',
     skills: '',
-    description: '',
+    description: 'Job management is currently disabled',
     requirements: '',
     salary_range: '',
     application_url: '',
-    is_active: true,
+    is_active: false,
   };
 };
 
 export const createJob = async (data: any): Promise<any> => {
-  console.log('createJob called with data:', data);
-  return { success: true };
+  console.log('Job management feature is disabled - createJob called with data:', data);
+  return { success: false, error: 'Job management feature is currently disabled' };
 };
 
 export const updateJob = async (id: number, data: any): Promise<any> => {
-  console.log('updateJob called with id:', id, 'data:', data);
-  return { success: true };
+  console.log('Job management feature is disabled - updateJob called with id:', id, 'data:', data);
+  return { success: false, error: 'Job management feature is currently disabled' };
 };
 
 // Scholarship-related API functions

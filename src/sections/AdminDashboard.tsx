@@ -18,7 +18,6 @@ import {
   Building
 } from 'lucide-react';
 import { FaBriefcase, FaEuroSign, FaSearch, FaRegStar, FaClock, FaBuilding, FaGlobe, FaLaptop } from 'react-icons/fa';
-import JobPreviewModal from '../components/JobPreviewModal';
 
 // Placeholder for LinkedInJobCrawler
 const LinkedInJobCrawler = {
@@ -56,7 +55,6 @@ export default function AdminDashboard() {
   const [isGlobalCrawling, setIsGlobalCrawling] = useState(false);
   const [platformCrawlingStates, setPlatformCrawlingStates] = useState<Record<string, boolean>>({});
   const [crawlResults, setCrawlResults] = useState<Record<string, any>>({});
-  const [showJobPreview, setShowJobPreview] = useState(false);
   const [hasCachedJobs, setHasCachedJobs] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({
     location: '',
@@ -273,7 +271,7 @@ export default function AdminDashboard() {
               <Building className="h-6 w-6 text-blue-600 mr-3" />
               <div className="text-left">
                 <h3 className="font-medium text-gray-900">Manage Jobs</h3>
-                <p className="text-sm text-gray-600">View, add, edit, and delete job listings</p>
+                <p className="text-sm text-gray-600">Job management interface (Coming Soon)</p>
               </div>
             </button>
 
@@ -478,14 +476,14 @@ export default function AdminDashboard() {
               {isGlobalCrawling ? 'Crawling All Platforms...' : 'Start Global Crawl'}
             </button>
 
-            {/* Preview Jobs Button - shown when cached jobs are available */}
+            {/* Preview Jobs Button - Feature disabled for admin management */}
             {hasCachedJobs && (
               <button
-                onClick={() => setShowJobPreview(true)}
-                className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                disabled
+                className="flex items-center px-6 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
               >
                 <Eye className="h-5 w-5 mr-2" />
-                Preview Jobs
+                Preview Jobs (Feature Disabled)
                 {(() => {
                   const cachedData = LinkedInJobCrawler.getJobsFromLocalStorage();
                   const count = cachedData?.jobs?.length || 0;
@@ -650,12 +648,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Job Preview Modal */}
-      <JobPreviewModal
-        isOpen={showJobPreview}
-        onClose={() => setShowJobPreview(false)}
-        job={null}
-      />
+      {/* Job management features will be available soon */}
     </div>
   );
 }

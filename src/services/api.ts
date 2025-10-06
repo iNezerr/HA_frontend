@@ -35,41 +35,41 @@ export type {
   UploadResumeResponse 
 } from '../profile/services/userAPI';
 
-// Jobs
-export { default as JobAPI } from '../jobs/services/jobAPI';
-export type { 
-  JobOpportunity,
-  JobApplication,
-  SavedJob,
-  JobSearchParams,
-  JobSearchResponse,
-  ApplyToJobRequest,
-  UpdateApplicationRequest 
-} from '../jobs/services/jobAPI';
+// Jobs (DISABLED - Admin job management feature removed)
+// export { default as JobAPI } from '../jobs/services/jobAPI';
+// export type { 
+//   JobOpportunity,
+//   JobApplication,
+//   SavedJob,
+//   JobSearchParams,
+//   JobSearchResponse,
+//   ApplyToJobRequest,
+//   UpdateApplicationRequest 
+// } from '../jobs/services/jobAPI';
 
-// Scholarships
-export { default as ScholarshipAPI } from '../scholarships/services/scholarshipAPI';
-export type { 
-  ScholarshipOpportunity,
-  ScholarshipApplication,
-  SavedScholarship,
-  ScholarshipSearchParams,
-  ScholarshipSearchResponse,
-  ApplyToScholarshipRequest,
-  UpdateScholarshipApplicationRequest 
-} from '../scholarships/services/scholarshipAPI';
+// Scholarships (DISABLED - Admin opportunity management feature removed)
+// export { default as ScholarshipAPI } from '../scholarships/services/scholarshipAPI';
+// export type { 
+//   ScholarshipOpportunity,
+//   ScholarshipApplication,
+//   SavedScholarship,
+//   ScholarshipSearchParams,
+//   ScholarshipSearchResponse,
+//   ApplyToScholarshipRequest,
+//   UpdateScholarshipApplicationRequest 
+// } from '../scholarships/services/scholarshipAPI';
 
-// Grants
-export { default as GrantAPI } from '../grants/services/grantAPI';
-export type { 
-  GrantOpportunity,
-  GrantApplication,
-  SavedGrant,
-  GrantSearchParams,
-  GrantSearchResponse,
-  ApplyToGrantRequest,
-  UpdateGrantApplicationRequest 
-} from '../grants/services/grantAPI';
+// Grants (DISABLED - Admin opportunity management feature removed)
+// export { default as GrantAPI } from '../grants/services/grantAPI';
+// export type { 
+//   GrantOpportunity,
+//   GrantApplication,
+//   SavedGrant,
+//   GrantSearchParams,
+//   GrantSearchResponse,
+//   ApplyToGrantRequest,
+//   UpdateGrantApplicationRequest 
+// } from '../grants/services/grantAPI';
 
 // Companies
 export { default as CompanyAPI } from '../companies/services/companyAPI';
@@ -101,8 +101,9 @@ export type { UseMutationOptions, UseMutationResult } from '../hooks/useMutation
 export { default as useAuth } from '../auth/hooks/useAuth';
 export type { UseAuthOptions, UseAuthResult } from '../auth/hooks/useAuth';
 
-export { default as useJobApplications } from '../jobs/hooks/useJobApplications';
-export type { UseJobApplicationsOptions, UseJobApplicationsResult } from '../jobs/hooks/useJobApplications';
+// Job hooks (DISABLED - Admin job management feature removed)
+// export { default as useJobApplications } from '../jobs/hooks/useJobApplications';
+// export type { UseJobApplicationsOptions, UseJobApplicationsResult } from '../jobs/hooks/useJobApplications';
 
 export { default as useUserProfile } from '../profile/hooks/useUserProfile';
 export type { UseUserProfileOptions, UseUserProfileResult } from '../profile/hooks/useUserProfile';

@@ -14,6 +14,14 @@ body {
   overflow: hidden;
 }
 
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Tailwind custom layer (optional) */
 .bg-stars {
   background-image: url('/public/hero/path-to-star-texture.png');
