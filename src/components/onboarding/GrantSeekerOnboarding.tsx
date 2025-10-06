@@ -124,7 +124,7 @@ const GrantSeekerOnboarding: React.FC<GrantSeekerOnboardingProps> = ({
           Project Details
         </h2>
         <p className="text-gray-600">
-          Tell us about your project and funding requirements
+          Tell us about your project, funding requirements, and contact information
         </p>
       </div>
 
@@ -196,58 +196,17 @@ const GrantSeekerOnboarding: React.FC<GrantSeekerOnboardingProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              First Name *
-            </label>
-            <input
-              type="text"
-              value={formData.personal_info?.first_name || ''}
-              onChange={(e) => handlePersonalInfoChange('first_name', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your first name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Last Name *
-            </label>
-            <input
-              type="text"
-              value={formData.personal_info?.last_name || ''}
-              onChange={(e) => handlePersonalInfoChange('last_name', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your last name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email *
-            </label>
-            <input
-              type="email"
-              value={formData.personal_info?.email || ''}
-              onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone
-            </label>
-            <input
-              type="tel"
-              value={formData.personal_info?.phone || ''}
-              onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your phone number"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Phone Number *
+          </label>
+          <input
+            type="tel"
+            value={formData.personal_info?.phone || ''}
+            onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your phone number"
+          />
         </div>
       </div>
 
@@ -263,9 +222,7 @@ const GrantSeekerOnboarding: React.FC<GrantSeekerOnboardingProps> = ({
           disabled={
             !formData.project_details?.project_title ||
             !formData.project_details?.project_description ||
-            !formData.personal_info?.first_name ||
-            !formData.personal_info?.last_name ||
-            !formData.personal_info?.email ||
+            !formData.personal_info?.phone ||
             isLoading
           }
           className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"

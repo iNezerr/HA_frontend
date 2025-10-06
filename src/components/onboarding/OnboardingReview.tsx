@@ -3,6 +3,7 @@ import { CheckCircle, Edit3, User, FileText, Building } from 'lucide-react';
 import { FaCheck } from 'react-icons/fa';
 import OnboardingService from '../../services/onboarding';
 import { UserType, UserProfile, JobSeekerProfile, ScholarshipSeekerProfile, GrantSeekerProfile } from '../../types/user';
+import { useAuth } from '../../auth/context/AuthContext';
 
 interface OnboardingReviewProps {
   userType: UserType;
@@ -17,6 +18,7 @@ const OnboardingReview: React.FC<OnboardingReviewProps> = ({
   onBack,
   error
 }) => {
+  const { user } = useAuth();
   const [profileData, setProfileData] = useState<Partial<UserProfile> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editingSection, setEditingSection] = useState<string | null>(null);
@@ -85,18 +87,19 @@ const OnboardingReview: React.FC<OnboardingReviewProps> = ({
           data={profileData.personal_info}
           onSave={(data) => handleSave('personal_info', data)}
           onCancel={() => setEditingSection(null)}
+          user={user}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-600">Name</p>
             <p className="font-medium">
-              {profileData.personal_info?.first_name} {profileData.personal_info?.last_name}
+              {user?.displayName || `${user?.first_name} ${user?.last_name}`.trim() || 'Not provided'}
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Email</p>
-            <p className="font-medium">{profileData.personal_info?.email}</p>
+            <p className="font-medium">{user?.email || 'Not provided'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Phone</p>
@@ -346,11 +349,9 @@ const PersonalInfoEditor: React.FC<{
   data: any;
   onSave: (data: any) => void;
   onCancel: () => void;
-}> = ({ data, onSave, onCancel }) => {
+  user?: any;
+}> = ({ data, onSave, onCancel, user }) => {
   const [editData, setEditData] = useState({
-    first_name: data?.first_name || '',
-    last_name: data?.last_name || '',
-    email: data?.email || '',
     phone: data?.phone || '',
   });
 
@@ -362,31 +363,26 @@ const PersonalInfoEditor: React.FC<{
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
             type="text"
-            value={editData.first_name}
-            onChange={(e) => setEditData(prev => ({ ...prev, first_name: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={user?.displayName || `${user?.first_name} ${user?.last_name}`.trim() || ''}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100"
+            disabled
+            title="Name cannot be edited here. Please update in your account settings."
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-          <input
-            type="text"
-            value={editData.last_name}
-            onChange={(e) => setEditData(prev => ({ ...prev, last_name: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
+          <p className="text-xs text-gray-500 mt-1">From your account registration</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input
             type="email"
-            value={editData.email}
-            onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={user?.email || ''}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100"
+            disabled
+            title="Email cannot be edited here. Please update in your account settings."
           />
+          <p className="text-xs text-gray-500 mt-1">From your account registration</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
@@ -395,6 +391,7 @@ const PersonalInfoEditor: React.FC<{
             value={editData.phone}
             onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your phone number"
           />
         </div>
       </div>

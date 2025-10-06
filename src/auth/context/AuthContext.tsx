@@ -23,6 +23,9 @@ interface User {
   last_login?: string;
   user_type?: UserType;
   is_onboarding_complete?: boolean;
+  
+  // Computed field for consistency
+  name?: string;
 }
 
 interface UserRole {
@@ -104,6 +107,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Convert Firebase user to app user
   const convertFirebaseUserToAppUser = (fbUser: FirebaseUser): User => {
+    const firstName = fbUser.displayName?.split(' ')[0] || '';
+    const lastName = fbUser.displayName?.split(' ').slice(1).join(' ') || '';
+    
     return {
       uid: fbUser.uid,
       email: fbUser.email,
@@ -111,8 +117,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       photoURL: fbUser.photoURL,
       emailVerified: fbUser.emailVerified,
       // App-specific fields will be populated from backend
-      first_name: fbUser.displayName?.split(' ')[0] || '',
-      last_name: fbUser.displayName?.split(' ').slice(1).join(' ') || '',
+      first_name: firstName,
+      last_name: lastName,
+      name: fbUser.displayName || `${firstName} ${lastName}`.trim(), // Computed name field
       is_active: true,
       is_staff: false,
       is_superuser: false,

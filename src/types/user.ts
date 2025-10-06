@@ -21,11 +21,11 @@ export interface BaseUser {
 }
 
 export interface PersonalInfo {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  address: string;
+  first_name?: string; // Optional - collected during sign-up
+  last_name?: string;  // Optional - collected during sign-up
+  email?: string;      // Optional - collected during sign-up
+  phone: string;       // Required - collected during onboarding
+  address?: string;    // Optional - collected during onboarding if needed
   linkedin?: string;
   portfolio?: string;
   // Component compatibility fields

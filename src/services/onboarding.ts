@@ -1,4 +1,4 @@
-import { UserType, UserProfile, OnboardingState } from '../types/user';
+import { UserType, UserProfile, OnboardingState, PersonalInfo } from '../types/user';
 import { apiClient } from './apiClient';
 
 // Storage keys
@@ -55,12 +55,8 @@ export class OnboardingService {
       current_data: {
         user_type: userType,
         personal_info: {
-          first_name: '',
-          last_name: '',
-          email: '',
           phone: '',
-          address: '',
-        }
+        } as PersonalInfo
       }
     };
 
@@ -200,11 +196,11 @@ export class OnboardingService {
   static getTotalSteps(userType: UserType): number {
     switch (userType) {
       case 'job':
-        return 3; // 1: CV Upload, 2: Skills & Experience, 3: Review
+        return 3; // 1: CV Upload, 2: Contact & Career Preferences, 3: Review
       case 'scholarship':
-        return 3; // 1: Academic Background, 2: CV Upload, 3: Review
+        return 3; // 1: Academic Background & Contact, 2: CV Upload, 3: Review
       case 'grant':
-        return 3; // 1: Project Details, 2: Organization Info, 3: Review
+        return 3; // 1: Project Details & Contact, 2: Organization Info, 3: Review
       default:
         return 3;
     }
@@ -246,10 +242,8 @@ export class OnboardingService {
           errors.push('CV file is required');
         }
         break;
-      case 2: // Skills & Experience
-        if (!data.personal_info?.first_name) errors.push('First name is required');
-        if (!data.personal_info?.last_name) errors.push('Last name is required');
-        if (!data.personal_info?.email) errors.push('Email is required');
+      case 2: // Contact & Career Preferences
+        if (!data.personal_info?.phone) errors.push('Phone number is required');
         break;
     }
     return { isValid: errors.length === 0, errors };
@@ -257,13 +251,16 @@ export class OnboardingService {
 
   private static validateScholarshipSeekerStep(step: number, data: Partial<UserProfile>, errors: string[]): { isValid: boolean; errors: string[] } {
     switch (step) {
-      case 1: // Academic Background
+      case 1: // Academic Background & Contact
         const scholarshipData = data as any;
         if (!scholarshipData.academic_background?.current_level) {
           errors.push('Current academic level is required');
         }
         if (!scholarshipData.academic_background?.field_of_study) {
           errors.push('Field of study is required');
+        }
+        if (!data.personal_info?.phone) {
+          errors.push('Phone number is required');
         }
         break;
       case 2: // CV Upload
@@ -277,13 +274,16 @@ export class OnboardingService {
 
   private static validateGrantSeekerStep(step: number, data: Partial<UserProfile>, errors: string[]): { isValid: boolean; errors: string[] } {
     switch (step) {
-      case 1: // Project Details
+      case 1: // Project Details & Contact
         const grantData = data as any;
         if (!grantData.project_details?.project_title) {
           errors.push('Project title is required');
         }
         if (!grantData.project_details?.project_description) {
           errors.push('Project description is required');
+        }
+        if (!data.personal_info?.phone) {
+          errors.push('Phone number is required');
         }
         break;
       case 2: // Organization Info

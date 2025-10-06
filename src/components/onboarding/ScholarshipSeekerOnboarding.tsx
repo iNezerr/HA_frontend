@@ -114,7 +114,7 @@ const ScholarshipSeekerOnboarding: React.FC<ScholarshipSeekerOnboardingProps> = 
           Academic Background
         </h2>
         <p className="text-gray-600">
-          Tell us about your academic journey and goals
+          Tell us about your academic journey, goals, and contact information
         </p>
       </div>
 
@@ -190,40 +190,14 @@ const ScholarshipSeekerOnboarding: React.FC<ScholarshipSeekerOnboardingProps> = 
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            First Name *
+            Phone Number *
           </label>
           <input
-            type="text"
-            value={formData.personal_info?.first_name || ''}
-            onChange={(e) => handlePersonalInfoChange('first_name', e.target.value)}
+            type="tel"
+            value={formData.personal_info?.phone || ''}
+            onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your first name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Last Name *
-          </label>
-          <input
-            type="text"
-            value={formData.personal_info?.last_name || ''}
-            onChange={(e) => handlePersonalInfoChange('last_name', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your last name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email *
-          </label>
-          <input
-            type="email"
-            value={formData.personal_info?.email || ''}
-            onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your email"
+            placeholder="Enter your phone number"
           />
         </div>
       </div>
@@ -253,9 +227,7 @@ const ScholarshipSeekerOnboarding: React.FC<ScholarshipSeekerOnboardingProps> = 
           disabled={
             !formData.academic_background?.current_level ||
             !formData.academic_background?.field_of_study ||
-            !formData.personal_info?.first_name ||
-            !formData.personal_info?.last_name ||
-            !formData.personal_info?.email ||
+            !formData.personal_info?.phone ||
             isLoading
           }
           className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"

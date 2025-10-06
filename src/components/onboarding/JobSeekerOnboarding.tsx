@@ -238,56 +238,17 @@ const JobSeekerOnboarding: React.FC<JobSeekerOnboardingProps> = ({
       <div className="text-center mb-6">
         <User className="mx-auto text-blue-500 mb-4" size={48} />
         <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-          Personal Information
+          Contact & Career Preferences
         </h2>
         <p className="text-gray-600">
-          Tell us about yourself and your career preferences
+          Provide your contact details and tell us about your career preferences
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            First Name *
-          </label>
-          <input
-            type="text"
-            value={formData.personal_info?.first_name || ''}
-            onChange={(e) => handlePersonalInfoChange('first_name', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your first name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Last Name *
-          </label>
-          <input
-            type="text"
-            value={formData.personal_info?.last_name || ''}
-            onChange={(e) => handlePersonalInfoChange('last_name', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your last name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email *
-          </label>
-          <input
-            type="email"
-            value={formData.personal_info?.email || ''}
-            onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your email"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone
+            Phone Number *
           </label>
           <input
             type="tel"
@@ -295,6 +256,19 @@ const JobSeekerOnboarding: React.FC<JobSeekerOnboardingProps> = ({
             onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your phone number"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Address (Optional)
+          </label>
+          <input
+            type="text"
+            value={formData.personal_info?.address || ''}
+            onChange={(e) => handlePersonalInfoChange('address', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your address"
           />
         </div>
       </div>
@@ -335,9 +309,7 @@ const JobSeekerOnboarding: React.FC<JobSeekerOnboardingProps> = ({
         <button
           onClick={handleNext}
           disabled={
-            !formData.personal_info?.first_name ||
-            !formData.personal_info?.last_name ||
-            !formData.personal_info?.email ||
+            !formData.personal_info?.phone ||
             isLoading
           }
           className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
