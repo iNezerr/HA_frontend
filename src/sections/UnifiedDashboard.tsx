@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserType } from '../types/user';
-import OnboardingService from '../services/onboarding';
+import { OnboardingService } from '../services/onboarding';
+import { useAuth } from '../auth/context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { FaGraduationCap, FaDollarSign } from 'react-icons/fa';
 import { JobList } from '../jobs';
@@ -109,21 +110,33 @@ const UnifiedDashboard: React.FC = () => {
   const [userType, setUserType] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const isOnboardingComplete = OnboardingService.isOnboardingComplete();
-    const currentUserType = OnboardingService.getUserType();
+    // Check onboarding status from backend (stored in auth context)
+    // This is the source of truth, not sessionStorage
+    const isOnboardingComplete = user?.is_onboarding_complete === true;
+    const currentUserType = user?.user_type as UserType | undefined;
+    
+    console.log('🔍 Dashboard onboarding check:', { 
+      isOnboardingComplete, 
+      currentUserType,
+      user: user ? { uid: user.uid, email: user.email } : null
+    });
     
     if (!isOnboardingComplete || !currentUserType) {
       // Redirect to onboarding if not complete
+      console.log('⚠️ Redirecting to onboarding: incomplete or no user type');
       navigate('/onboarding', { replace: true });
       return;
     }
     
+    // Also sync to local storage for offline reference (but backend is source of truth)
+    OnboardingService.saveUserType(currentUserType);
+    
     setUserType(currentUserType);
     setLoading(false);
-  }, [navigate]);
+  }, [navigate, user]);
 
   if (loading) {
     return (

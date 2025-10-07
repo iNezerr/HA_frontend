@@ -149,7 +149,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           secureStorage.setItem('user', JSON.stringify(appUser));
           secureStorage.setItem('firebaseUser', JSON.stringify(fbUser));
           
-          setUser(appUser);
+          // Fetch user data from backend to get onboarding status
+          try {
+            const backendUserData = await apiClient.get('/users/me/');
+            const enrichedUser = {
+              ...appUser,
+              user_type: backendUserData.user_type,
+              is_onboarding_complete: backendUserData.onboarded === true,
+              id: backendUserData.id,
+            };
+            setUser(enrichedUser);
+            
+            // Store enriched user data
+            secureStorage.setItem('user', JSON.stringify(enrichedUser));
+            console.log('✅ User data enriched from backend:', { 
+              user_type: enrichedUser.user_type, 
+              is_onboarding_complete: enrichedUser.is_onboarding_complete 
+            });
+          } catch (backendError) {
+            console.warn('Failed to fetch backend user data, using Firebase data only:', backendError);
+            setUser(appUser);
+          }
           
           // Set default user role (can be updated from backend)
           const defaultRole: UserRole = {
@@ -157,12 +177,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             permissions: ['read'],
           };
           setUserRole(defaultRole);
-          
-          // TODO: Fetch additional user data from backend using the ID token
-          // This is where you would call your backend API to get user profile data
-          // Example:
-          // const backendUserData = await fetchUserProfileFromBackend(idToken);
-          // setUser({ ...appUser, ...backendUserData });
           
         } catch (error) {
           console.error('Error processing authenticated user:', error);

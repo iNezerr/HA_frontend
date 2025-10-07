@@ -83,7 +83,7 @@ export class AuthAPI {
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '',
           userType: response.user.user_type || 'job',
-          isOnboarded: response.user.is_onboarding_complete || false,
+          isOnboarded: response.user.onboarded === true, // Use 'onboarded' field from backend
           emailVerified: firebaseUser.emailVerified,
         },
         token: response.session_token,
@@ -196,7 +196,7 @@ export class AuthAPI {
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '',
           userType: response.user.user_type || 'job',
-          isOnboarded: response.user.is_onboarding_complete || false,
+          isOnboarded: response.user.onboarded === true, // Use 'onboarded' field from backend
           emailVerified: firebaseUser.emailVerified,
         },
         token: response.session_token,
