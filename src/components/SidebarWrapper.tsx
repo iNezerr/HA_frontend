@@ -1,5 +1,6 @@
 import React from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileText,
@@ -15,6 +16,7 @@ import Header from "./Header";
 export default function SidebarWrapper() {
   const { logout, user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const personalInfo = {
@@ -127,7 +129,10 @@ export default function SidebarWrapper() {
                 text="Saved Jobs"
                 link="/saved-jobs"
                 active={isActiveRoute("/saved-jobs")}
-                onClick={() => setMobileOpen(false)}
+                onClick={() => {
+                  setMobileOpen(false);
+                  navigate("/saved-jobs");
+                }}
               />
               <SidebarItem
                 icon={<Search size={20} />}

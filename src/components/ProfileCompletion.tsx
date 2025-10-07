@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, MapPin, User, Briefcase } from 'lucide-react';
-import { getProfileCompletionStatus } from '../services/placeholderAPI';
+import { useProfile } from '../hooks/useProfile';
 
 interface ProfileCompletionProps {
   className?: string;
@@ -10,9 +10,9 @@ interface ProfileCompletionProps {
 }
 
 interface CompletionStatus {
-  completion_percentage: number;
-  missing_sections: string[];
-  completed_sections: string[];
+  percentage: number;
+  missingFields: string[];
+  completedSections?: string[];
 }
 
 const ProfileCompletion = ({
@@ -20,40 +20,59 @@ const ProfileCompletion = ({
   context = 'general',
   isScholarshipPage = false
 }: ProfileCompletionProps) => {
-  const [completionStatus, setCompletionStatus] = useState<CompletionStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  
+  const { user, profileCompletion, loading: isLoading } = useProfile();
+  
+  const [error, setError] = useState<string | null>(null);
 
-  // Determine if this is being used in scholarship context
   const isScholarshipContext = context === 'scholarship' || isScholarshipPage;
 
-  useEffect(() => {
-    const fetchCompletionStatus = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const completionStatus: CompletionStatus | null = profileCompletion ? {
+    percentage: profileCompletion.percentage,
+    missingFields: profileCompletion.missingFields,
+    completedSections: profileCompletion.completedSections
+  } : calculateCompletion(user);
 
-        // Make actual API call
-        const status = await getProfileCompletionStatus();
-        setCompletionStatus(status);
-      } catch (error) {
-        console.error('Failed to fetch profile completion status:', error);
-        setError('Failed to load profile completion status. Please try again later.');
+  function calculateCompletion(userData: any): CompletionStatus {
+    if (!userData) {
+      return { 
+        percentage: 0, 
+        missingFields: ['personal_info', 'career_profile', 'education', 'experience', 'projects', 'ai_preferences'],
+        completedSections: []
+      };
+    }
 
-        // Fallback to empty state if API fails
-        setCompletionStatus({
-          completion_percentage: 0,
-          missing_sections: [],
-          completed_sections: []
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    const sections = {
+      personal_info: Boolean(userData.name && userData.email && userData.profile?.location),
+      career_profile: Boolean(
+        userData.profile_data?.current_role && 
+        userData.profile?.skills?.length > 0
+      ),
+      education: Boolean(userData.profile?.education?.length > 0),
+      experience: Boolean(userData.profile_data?.experience?.length > 0),
+      projects: Boolean(userData.profile_data?.projects?.length > 0),
+      ai_preferences: Boolean(userData.profile_data?.ai_assistance_enabled !== undefined),
     };
 
-    fetchCompletionStatus();
-  }, []);
+    const totalSections = Object.keys(sections).length;
+    const completedCount = Object.values(sections).filter(Boolean).length;
+    const percentage = Math.round((completedCount / totalSections) * 100);
+
+    const missingFields = Object.entries(sections)
+      .filter(([_, completed]) => !completed)
+      .map(([field]) => field);
+
+    const completedSections = Object.entries(sections)
+      .filter(([_, completed]) => completed)
+      .map(([field]) => field);
+
+    return {
+      percentage,
+      missingFields,
+      completedSections
+    };
+  }
 
   const getScholarshipSpecificSections = (missingSections: string[]) => {
     const scholarshipRelevantSections: Record<string, { icon: any; label: string; priority: string }> = {
@@ -129,25 +148,24 @@ const ProfileCompletion = ({
     return null;
   }
 
-  const { completion_percentage, missing_sections } = completionStatus;
+  const { percentage, missingFields } = completionStatus;
 
-  // Don't show if profile is complete
-  if (completion_percentage >= 100) {
+  if (percentage >= 100) {
     return null;
   }
 
   const contextContent = getContextualContent();
-  const scholarshipSections = isScholarshipContext ? getScholarshipSpecificSections(missing_sections) : [];
+  const scholarshipSections = isScholarshipContext ? getScholarshipSpecificSections(missingFields) : [];
 
-  const getColorByPercentage = (percentage: number) => {
-    if (percentage < 30) return 'bg-red-500';
-    if (percentage < 70) return 'bg-yellow-500';
+  const getColorByPercentage = (pct: number) => {
+    if (pct < 30) return 'bg-red-500';
+    if (pct < 70) return 'bg-yellow-500';
     return 'bg-green-500';
   };
 
   const getBorderColor = () => {
     if (isScholarshipContext) {
-      return completion_percentage < 50 ? 'border-orange-500' : 'border-blue-500';
+      return percentage < 50 ? 'border-orange-500' : 'border-blue-500';
     }
     return 'border-blue-500';
   };
@@ -156,16 +174,15 @@ const ProfileCompletion = ({
     <div className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${getBorderColor()} ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800">{contextContent.title}</h3>
-        <span className="text-2xl font-bold text-blue-600">{completion_percentage}%</span>
+        <span className="text-2xl font-bold text-blue-600">{percentage}%</span>
       </div>
 
-      {/* Progress Bar */}
       <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
         <div
-          className={`h-3 rounded-full transition-all duration-300 ${getColorByPercentage(completion_percentage)}`}
-          style={{ width: `${completion_percentage}%` }}
+          className={`h-3 rounded-full transition-all duration-300 ${getColorByPercentage(percentage)}`}
+          style={{ width: `${percentage}%` }}
           role="progressbar"
-          aria-valuenow={completion_percentage}
+          aria-valuenow={percentage}
           aria-valuemin={0}
           aria-valuemax={100}
         ></div>
@@ -175,8 +192,7 @@ const ProfileCompletion = ({
         {contextContent.description}
       </p>
 
-      {/* Scholarship-specific urgency message */}
-      {isScholarshipContext && contextContent.urgencyText && completion_percentage < 70 && (
+      {isScholarshipContext && contextContent.urgencyText && percentage < 70 && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
           <div className="flex items-center">
             <GraduationCap className="w-5 h-5 text-orange-600 mr-2 flex-shrink-0" />
@@ -187,7 +203,6 @@ const ProfileCompletion = ({
         </div>
       )}
 
-      {/* Enhanced Missing Sections for Scholarship Context */}
       {isScholarshipContext && scholarshipSections.length > 0 ? (
         <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-700 mb-3">Critical for scholarship matching:</h4>
@@ -212,11 +227,11 @@ const ProfileCompletion = ({
             })}
           </div>
         </div>
-      ) : missing_sections.length > 0 && (
+      ) : missingFields.length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">Missing sections:</h4>
           <div className="flex flex-wrap gap-2">
-            {missing_sections.map((section, index) => (
+            {missingFields.map((section, index) => (
               <span
                 key={index}
                 className="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full"
