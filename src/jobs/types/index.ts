@@ -10,7 +10,7 @@ export interface Job {
   requirements?: string[];
   skills_required?: string[];
   application_deadline?: string;
-  application_url?: string;
+  url?: string;
   created_at: string;
   is_active: boolean;
   is_saved?: boolean;

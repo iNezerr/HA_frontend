@@ -134,13 +134,13 @@ export default function SidebarWrapper() {
                   navigate("/saved-jobs");
                 }}
               />
-              <SidebarItem
+              {/* <SidebarItem
                 icon={<Search size={20} />}
                 text="Progress Tracker"
                 link="/progress"
                 active={isActiveRoute("/progress")}
                 onClick={() => setMobileOpen(false)}
-              />
+              /> */}
 
             </ul>
           </nav>
