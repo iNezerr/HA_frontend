@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Project {
@@ -23,9 +24,51 @@ export default function ProjectsTab({
   addProject, 
   deleteProjectEntry 
 }: ProjectsTabProps) {
+  // Local state for immediate UI updates
+  const [localProjects, setLocalProjects] = useState<Project[]>(projects);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Update local state when prop changes (e.g., after add/delete)
+  useEffect(() => {
+    setLocalProjects(projects);
+  }, [projects]);
+
+  // Debounced save function
+  const debouncedSave = (updatedProjects: Project[]) => {
+    // Clear existing timeout
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    // Set new timeout for 1 second
+    const timeout = setTimeout(async () => {
+      setIsSaving(true);
+      try {
+        await setProjects(updatedProjects);
+      } catch (error) {
+        console.error('Failed to save projects:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 1000);
+
+    setSaveTimeout(timeout);
+  };
+
+  const handleChange = (index: number, field: keyof Project, value: any) => {
+    const updated = [...localProjects];
+    updated[index] = { ...updated[index], [field]: value };
+    setLocalProjects(updated);
+    debouncedSave(updated);
+  };
+
   return (
     <div className="space-y-6">
-      {projects.map((project, index) => (
+      {isSaving && (
+        <div className="text-sm text-blue-600 mb-2">Saving...</div>
+      )}
+      {localProjects.map((project, index) => (
         <div key={project.id} className="border border-gray-200 rounded-lg p-4 relative">
           {projects.length > 1 && (
             <button
@@ -41,11 +84,7 @@ export default function ProjectsTab({
             <input
               type="text"
               value={project.projectTitle}
-              onChange={(e) => {
-                const updated = [...projects];
-                updated[index].projectTitle = e.target.value;
-                setProjects(updated);
-              }}
+              onChange={(e) => handleChange(index, 'projectTitle', e.target.value)}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -55,11 +94,7 @@ export default function ProjectsTab({
               <input
                 type="date"
                 value={project.startDate}
-                onChange={(e) => {
-                  const updated = [...projects];
-                  updated[index].startDate = e.target.value;
-                  setProjects(updated);
-                }}
+                onChange={(e) => handleChange(index, 'startDate', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -68,11 +103,7 @@ export default function ProjectsTab({
               <input
                 type="date"
                 value={project.endDate}
-                onChange={(e) => {
-                  const updated = [...projects];
-                  updated[index].endDate = e.target.value;
-                  setProjects(updated);
-                }}
+                onChange={(e) => handleChange(index, 'endDate', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 disabled={project.isCurrentlyWorking}
               />
@@ -83,11 +114,7 @@ export default function ProjectsTab({
               <input
                 type="checkbox"
                 checked={project.isCurrentlyWorking}
-                onChange={(e) => {
-                  const updated = [...projects];
-                  updated[index].isCurrentlyWorking = e.target.checked;
-                  setProjects(updated);
-                }}
+                onChange={(e) => handleChange(index, 'isCurrentlyWorking', e.target.checked)}
                 className="mr-2"
               />
               <span className="text-sm text-gray-700">I am still working on this project</span>
@@ -98,11 +125,7 @@ export default function ProjectsTab({
             <input
               type="url"
               value={project.projectLink}
-              onChange={(e) => {
-                const updated = [...projects];
-                updated[index].projectLink = e.target.value;
-                setProjects(updated);
-              }}
+              onChange={(e) => handleChange(index, 'projectLink', e.target.value)}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -110,11 +133,7 @@ export default function ProjectsTab({
             <label className="block text-sm font-medium text-gray-700 mb-1">Describe your project</label>
             <textarea
               value={project.description}
-              onChange={(e) => {
-                const updated = [...projects];
-                updated[index].description = e.target.value;
-                setProjects(updated);
-              }}
+              onChange={(e) => handleChange(index, 'description', e.target.value)}
               rows={3}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />

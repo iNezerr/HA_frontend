@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Education {
@@ -13,7 +13,7 @@ interface Education {
 
 interface EducationTabProps {
   education: Education[];
-  setEducation: React.Dispatch<React.SetStateAction<Education[]>>;
+  setEducation: (education: Education[]) => void;
   addEducation: () => void;
   deleteEducationEntry: (id: string, index: number) => Promise<void>;
 }
@@ -24,9 +24,51 @@ const EducationTab: React.FC<EducationTabProps> = ({
   addEducation, 
   deleteEducationEntry 
 }) => {
+  // Local state for immediate UI updates
+  const [localEducation, setLocalEducation] = useState<Education[]>(education);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Update local state when prop changes (e.g., after add/delete)
+  useEffect(() => {
+    setLocalEducation(education);
+  }, [education]);
+
+  // Debounced save function
+  const debouncedSave = (updatedEducation: Education[]) => {
+    // Clear existing timeout
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    // Set new timeout for 1 second
+    const timeout = setTimeout(async () => {
+      setIsSaving(true);
+      try {
+        await setEducation(updatedEducation);
+      } catch (error) {
+        console.error('Failed to save education:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 1000);
+
+    setSaveTimeout(timeout);
+  };
+
+  const handleChange = (index: number, field: keyof Education, value: any) => {
+    const updated = [...localEducation];
+    updated[index] = { ...updated[index], [field]: value };
+    setLocalEducation(updated);
+    debouncedSave(updated);
+  };
+
   return (
     <div className="space-y-6">
-      {education.map((edu, index) => (
+      {isSaving && (
+        <div className="text-sm text-blue-600 mb-2">Saving...</div>
+      )}
+      {localEducation.map((edu, index) => (
         <div key={edu.id} className="border border-gray-200 rounded-lg p-4 relative">
           {education.length > 1 && (
             <button
@@ -43,11 +85,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="text"
                 value={edu.degree}
-                onChange={(e) => {
-                  const updated = [...education];
-                  updated[index].degree = e.target.value;
-                  setEducation(updated);
-                }}
+                onChange={(e) => handleChange(index, 'degree', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -56,11 +94,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="text"
                 value={edu.school}
-                onChange={(e) => {
-                  const updated = [...education];
-                  updated[index].school = e.target.value;
-                  setEducation(updated);
-                }}
+                onChange={(e) => handleChange(index, 'school', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -71,11 +105,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="date"
                 value={edu.startDate}
-                onChange={(e) => {
-                  const updated = [...education];
-                  updated[index].startDate = e.target.value;
-                  setEducation(updated);
-                }}
+                onChange={(e) => handleChange(index, 'startDate', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -84,11 +114,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="date"
                 value={edu.endDate}
-                onChange={(e) => {
-                  const updated = [...education];
-                  updated[index].endDate = e.target.value;
-                  setEducation(updated);
-                }}
+                onChange={(e) => handleChange(index, 'endDate', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 disabled={edu.isStudying}
               />
@@ -99,11 +125,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="checkbox"
                 checked={edu.isStudying}
-                onChange={(e) => {
-                  const updated = [...education];
-                  updated[index].isStudying = e.target.checked;
-                  setEducation(updated);
-                }}
+                onChange={(e) => handleChange(index, 'isStudying', e.target.checked)}
                 className="mr-2"
               />
               <span className="text-sm text-gray-700">I am still studying</span>
@@ -113,11 +135,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">Describe your extra curricular activities in college</label>
             <textarea
               value={edu.description}
-              onChange={(e) => {
-                const updated = [...education];
-                updated[index].description = e.target.value;
-                setEducation(updated);
-              }}
+              onChange={(e) => handleChange(index, 'description', e.target.value)}
               rows={3}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />

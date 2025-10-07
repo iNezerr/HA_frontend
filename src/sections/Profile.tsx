@@ -69,9 +69,40 @@ export default function Profile() {
       skills: user?.profile?.skills || [],
       preferred_roles: user?.profile_data?.preferred_roles || []
     },
-    education: user?.profile?.education || [],
-    experience: user?.profile_data?.experience || [],
-    projects: user?.profile_data?.projects || [],
+    education: (user?.profile?.education && user.profile.education.length > 0) 
+      ? user.profile.education 
+      : [{
+          id: 'default',
+          degree: '',
+          school: '',
+          startDate: '',
+          endDate: '',
+          isStudying: false,
+          description: ''
+        }],
+    experience: (user?.profile_data?.experience && user.profile_data.experience.length > 0)
+      ? user.profile_data.experience
+      : [{
+          id: 'default',
+          jobTitle: '',
+          companyName: '',
+          location: '',
+          startDate: '',
+          endDate: '',
+          isCurrentlyWorking: false,
+          description: ''
+        }],
+    projects: (user?.profile_data?.projects && user.profile_data.projects.length > 0)
+      ? user.profile_data.projects
+      : [{
+          id: 'default',
+          projectTitle: '',
+          startDate: '',
+          endDate: '',
+          isCurrentlyWorking: false,
+          projectLink: '',
+          description: ''
+        }],
     aiPreferences: {
       ai_assistance_enabled: user?.profile_data?.ai_assistance_enabled ?? true,
       preferred_communication_style: user?.profile_data?.preferred_communication_style || 'Professional',
@@ -144,6 +175,7 @@ export default function Profile() {
         await updateProfile({
           education: newEducation,
         });
+        await refreshProfile(); // Refresh to get updated data
       } catch (err) {
         console.error('Failed to update education:', err);
         throw err;
@@ -159,6 +191,7 @@ export default function Profile() {
         await updateUser({
           profile_data: updatedProfileData,
         });
+        await refreshProfile(); // Refresh to get updated data
       } catch (err) {
         console.error('Failed to update experience:', err);
         throw err;
@@ -174,6 +207,7 @@ export default function Profile() {
         await updateUser({
           profile_data: updatedProfileData,
         });
+        await refreshProfile(); // Refresh to get updated data
       } catch (err) {
         console.error('Failed to update projects:', err);
         throw err;
@@ -198,12 +232,130 @@ export default function Profile() {
     },
     fetchProfileData: refreshProfile,
     handleSave: (_tab?: string) => {}, // Individual saves are handled by each setter
-    addEducation: () => {},
-    deleteEducationEntry: async (_id: string, _index: number) => {},
-    addExperience: () => {},
-    deleteExperienceEntry: async (_id: string, _index: number) => {},
-    addProject: () => {},
-    deleteProjectEntry: (_id: string, _index: number) => {}
+    addEducation: async () => {
+      try {
+        const newEntry = {
+          id: `temp-${Date.now()}`,
+          degree: '',
+          school: '',
+          startDate: '',
+          endDate: '',
+          isStudying: false,
+          description: ''
+        };
+        const updatedEducation = [...(user?.profile?.education || []), newEntry];
+        await updateProfile({
+          education: updatedEducation,
+        });
+        await refreshProfile();
+      } catch (err) {
+        console.error('Failed to add education:', err);
+      }
+    },
+    deleteEducationEntry: async (_id: string, index: number) => {
+      try {
+        const currentEducation = user?.profile?.education || [];
+        // Only allow deletion if there's more than one entry
+        if (currentEducation.length > 1) {
+          const updatedEducation = currentEducation.filter((_: any, i: number) => i !== index);
+          await updateProfile({
+            education: updatedEducation,
+          });
+          await refreshProfile();
+        }
+      } catch (err) {
+        console.error('Failed to delete education:', err);
+      }
+    },
+    addExperience: async () => {
+      try {
+        const newEntry = {
+          id: `temp-${Date.now()}`,
+          jobTitle: '',
+          companyName: '',
+          location: '',
+          startDate: '',
+          endDate: '',
+          isCurrentlyWorking: false,
+          description: ''
+        };
+        const currentExperience = user?.profile_data?.experience || [];
+        const updatedExperience = [...currentExperience, newEntry];
+        const updatedProfileData = {
+          ...user?.profile_data,
+          experience: updatedExperience,
+        };
+        await updateUser({
+          profile_data: updatedProfileData,
+        });
+        await refreshProfile();
+      } catch (err) {
+        console.error('Failed to add experience:', err);
+      }
+    },
+    deleteExperienceEntry: async (_id: string, index: number) => {
+      try {
+        const currentExperience = user?.profile_data?.experience || [];
+        // Only allow deletion if there's more than one entry
+        if (currentExperience.length > 1) {
+          const updatedExperience = currentExperience.filter((_: any, i: number) => i !== index);
+          const updatedProfileData = {
+            ...user?.profile_data,
+            experience: updatedExperience,
+          };
+          await updateUser({
+            profile_data: updatedProfileData,
+          });
+          await refreshProfile();
+        }
+      } catch (err) {
+        console.error('Failed to delete experience:', err);
+      }
+    },
+    addProject: async () => {
+      try {
+        const newEntry = {
+          id: `temp-${Date.now()}`,
+          projectTitle: '',
+          startDate: '',
+          endDate: '',
+          isCurrentlyWorking: false,
+          projectLink: '',
+          description: ''
+        };
+        const currentProjects = user?.profile_data?.projects || [];
+        const updatedProjects = [...currentProjects, newEntry];
+        const updatedProfileData = {
+          ...user?.profile_data,
+          projects: updatedProjects,
+        };
+        await updateUser({
+          profile_data: updatedProfileData,
+        });
+        await refreshProfile();
+      } catch (err) {
+        console.error('Failed to add project:', err);
+      }
+    },
+    deleteProjectEntry: async (_id: string, index: number) => {
+      try {
+        const currentProjects = user?.profile_data?.projects || [];
+        // Only allow deletion if there's more than one entry
+        if (currentProjects.length > 1) {
+          const updatedProjects = currentProjects.filter((_: any, i: number) => i !== index);
+          const updatedProfileData = {
+            ...user?.profile_data,
+            projects: updatedProjects,
+          };
+          await updateUser({
+            profile_data: updatedProfileData,
+          });
+          await refreshProfile();
+        }
+      } catch (err) {
+        console.error('Failed to delete project:', err);
+      }
+    }
   };
 
   // Use the transformed data
