@@ -89,7 +89,7 @@ export class UserAPI {
     onUploadProgress?: (progress: number) => void
   ): Promise<Document> {
     return apiClient.uploadFileWithData(
-      `${this.BASE_PATH}/documents/upload/`, 
+      `${this.BASE_PATH}/profile/upload-document-file/`, 
       file, 
       { document_type: documentType },
       onUploadProgress

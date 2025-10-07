@@ -4,10 +4,11 @@ import { UserType } from '../types/user';
 import { OnboardingService } from '../services/onboarding';
 import { useAuth } from '../auth/context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { FaGraduationCap, FaDollarSign } from 'react-icons/fa';
+import { FaDollarSign } from 'react-icons/fa';
 import { JobList } from '../jobs';
 import ProfileCompletion from '../components/ProfileCompletion';
 import RecommendedOpportunities from '../components/RecommendedOpportunities';
+import { ScholarshipList } from '../scholarships/components/ScholarshipList';
 
 // Job dashboard with actual functionality
 const JobDashboard: React.FC = () => (
@@ -35,7 +36,7 @@ const JobDashboard: React.FC = () => (
         />
 
         {/* Latest AI-Matched Jobs */}
-        <JobList
+        {/* <JobList
           useDashboard={true}
           title="Latest Job Opportunities"
           filters={{
@@ -45,7 +46,7 @@ const JobDashboard: React.FC = () => (
           }}
           showLoadMore={true}
           className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-        />
+        /> */}
 
         {/* Recently Posted Jobs */}
         <JobList
@@ -65,21 +66,27 @@ const JobDashboard: React.FC = () => (
 
 // Placeholder components for scholarship and grant dashboards
 const ScholarshipDashboard: React.FC = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-gray-800 mb-6">Scholarship Dashboard</h1>
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-lg font-semibold text-gray-700 mb-4">Your Scholarship Matches</h2>
-      <div className="text-center py-8">
-        <FaGraduationCap className="text-4xl mb-4 mx-auto text-blue-600" />
-        <p className="text-gray-600 mb-4">
+   <div className='min-h-screen bg-gray-50'>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Scholarship Dashboard</h1>
+        <p className="text-gray-600">
           We're finding the best scholarship opportunities for you based on your academic profile.
         </p>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-700">
-            <strong>Coming Soon:</strong> AI-powered scholarship matching based on your academic background, 
-            GPA, field of study, and career goals.
-          </p>
-        </div>
+      </div>
+
+      {/* Profile Completion */}
+      <div className="mb-6">
+        <ProfileCompletion />
+      </div>
+
+      <div className="space-y-8">
+        <ScholarshipList
+          filters={{ search: 'engineering' }}
+          title="Available Scholarships"
+          showLoadMore={true}
+        />
       </div>
     </div>
   </div>

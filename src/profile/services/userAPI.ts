@@ -109,7 +109,7 @@ export interface UploadResumeResponse {
 
 // User Profile API Service
 export class UserAPI {
-  private static readonly BASE_PATH = '/profile';
+  private static readonly BASE_PATH = '/users/profile';
 
   /**
    * Get current user profile
@@ -168,7 +168,7 @@ export class UserAPI {
     onUploadProgress?: (progress: number) => void
   ): Promise<UploadResumeResponse> {
     return apiClient.uploadFileWithData(
-      `${this.BASE_PATH}/upload-document-file`, 
+      `${this.BASE_PATH}/upload-document-file/`, 
       file, 
       { document_type: documentType },
       onUploadProgress
