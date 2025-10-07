@@ -2,7 +2,13 @@
 // Backend returns: "Administrator", "Employer", "Applicant"
 // Frontend might use: "admin", "employer", "applicant"
 
-export const isAdmin = (role?: string): boolean => {
+// Check if user is admin based on Django's superuser system
+export const isAdmin = (user?: { is_superuser?: boolean; is_staff?: boolean }): boolean => {
+  return user?.is_superuser === true;
+};
+
+// Legacy role-based admin check (deprecated)
+export const isAdminByRole = (role?: string): boolean => {
   return role === 'admin' || role === 'Administrator';
 };
 
@@ -14,20 +20,20 @@ export const isApplicant = (role?: string): boolean => {
   return role === 'applicant' || role === 'Applicant';
 };
 
-export const canAccessAdmin = (role?: string): boolean => {
-  return isAdmin(role);
+export const canAccessAdmin = (user?: { is_superuser?: boolean; is_staff?: boolean }): boolean => {
+  return isAdmin(user);
 };
 
 export const canAccessEmployer = (role?: string): boolean => {
-  return isEmployer(role) || isAdmin(role);
+  return isEmployer(role) || isAdminByRole(role);
 };
 
 export const canCreateJobs = (role?: string): boolean => {
-  return isEmployer(role) || isAdmin(role);
+  return isEmployer(role) || isAdminByRole(role);
 };
 
 export const canManageScholarships = (role?: string): boolean => {
-  return isAdmin(role);
+  return isAdminByRole(role);
 };
 
 export const canApplyToOpportunities = (role?: string): boolean => {

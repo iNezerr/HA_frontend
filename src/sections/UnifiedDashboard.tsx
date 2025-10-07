@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { FaGraduationCap, FaDollarSign } from 'react-icons/fa';
 import { JobList } from '../jobs';
 import ProfileCompletion from '../components/ProfileCompletion';
+import RecommendedOpportunities from '../components/RecommendedOpportunities';
 
 // Job dashboard with actual functionality
 const JobDashboard: React.FC = () => (
@@ -26,10 +27,16 @@ const JobDashboard: React.FC = () => (
 
       {/* Jobs Section */}
       <div className="space-y-8">
+        {/* AI-Powered Job Recommendations */}
+        <RecommendedOpportunities 
+          title="🎯 AI-Powered Job Matches"
+          className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200"
+        />
+
         {/* Latest AI-Matched Jobs */}
         <JobList
           useDashboard={true}
-          title="AI-Matched Jobs for You"
+          title="Latest Job Opportunities"
           filters={{
             ordering: '-created_at',
             show_expired: false,

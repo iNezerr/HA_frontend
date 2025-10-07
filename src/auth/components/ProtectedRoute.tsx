@@ -58,7 +58,7 @@ const AdminRoute = ({
   }
 
   // Redirect to dashboard if not admin
-  if (!user || !isAdmin(user.user_type)) {
+  if (!user || !isAdmin(user)) {
     return <Navigate to={redirectPath} replace />;
   }
 

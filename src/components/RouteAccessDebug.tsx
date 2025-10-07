@@ -1,6 +1,6 @@
 import { useAuth } from '../auth/context/AuthContext';
 import { useLocation } from 'react-router-dom';
-import { isAdmin } from '../utils/roleUtils';
+import { isAdminByRole } from '../utils/roleUtils';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const RouteAccessDebug = () => {
@@ -61,7 +61,7 @@ const RouteAccessDebug = () => {
           </div>
           <div>
             <strong>Can Access Admin:</strong>
-            {isAdmin(user?.user_type) ? (
+            {isAdminByRole(user?.user_type) ? (
               <span className="inline-flex items-center ml-1">
                 <FaCheck className="text-green-500 mr-1" />
                 Yes

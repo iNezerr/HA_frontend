@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useJobMatching } from '../jobs/hooks/useSimpleMatching';
+
 // Local Opportunity shape for UI display
 type Opportunity = {
   id: string;
@@ -9,51 +11,52 @@ type Opportunity = {
   match_percentage?: number;
   skills_required?: string[];
 };
-import { getAIMatches } from '../services/placeholderAPI';
 
 interface RecommendedOpportunitiesProps {
   className?: string;
-  filters?: any;
   title?: string;
 }
 
 export default function RecommendedOpportunities({
   className = '',
-  filters = {},
   title = 'Recommended for You'
 }: RecommendedOpportunitiesProps) {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set());
+  
+  // Use our working simple matching hook
+  const { jobMatches, loading, error, loadJobMatches, clearError } = useJobMatching({
+    autoLoad: true,
+    limit: 10
+  });
 
+  // Convert job matches to opportunities format when data loads
   useEffect(() => {
-    fetchRecommendedOpportunities();
-    fetchSavedOpportunities();
-  }, [filters]);
-
-  const fetchRecommendedOpportunities = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await getAIMatches(filters);
-      const incoming: any[] = Array.isArray((response as any)) ? (response as any) : (response?.results || []);
-      const mapped = incoming.map((it: any): Opportunity => ({
-        id: it.id != null ? String(it.id) : it.id_str,
-        title: it.title || it.job_title || '',
-        company: it.company || it.company_name || '',
-        location: it.location || it.city || it.country || '',
-        salary_range: it.salary_range || (it.salary_min && it.salary_max ? `${it.salary_min}-${it.salary_max} ${it.salary_currency || ''}`.trim() : undefined),
-        match_percentage: it.match_percentage,
-        skills_required: it.skills_required || it.skills,
+    if (jobMatches.length > 0) {
+      const mapped = jobMatches.map((job: any): Opportunity => ({
+        id: String(job.id),
+        title: job.title || job.job_title || '',
+        company: job.company || job.company_name || job.organization || '',
+        location: job.location || job.city || job.country || 'Remote',
+        salary_range: job.salary_range || 
+          (job.salary_min && job.salary_max ? 
+            `${job.salary_min}-${job.salary_max} ${job.salary_currency || 'USD'}`.trim() : 
+            undefined),
+        match_percentage: job.match_score ? Math.round(job.match_score * 100) : undefined,
+        skills_required: job.skills_required || job.skills || job.requirements || [],
       }));
       setOpportunities(mapped);
-    } catch (err) {
-      setError('Failed to load recommended opportunities');
-      console.error('Error fetching recommended opportunities:', err);
-    } finally {
-      setLoading(false);
+      console.log('✅ Mapped job opportunities:', mapped.length);
     }
+  }, [jobMatches]);
+
+  useEffect(() => {
+    fetchSavedOpportunities();
+  }, []);
+
+  const fetchRecommendedOpportunities = async () => {
+    clearError();
+    await loadJobMatches();
   };
 
   const fetchSavedOpportunities = async () => {
@@ -125,25 +128,36 @@ export default function RecommendedOpportunities({
       <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
         <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
         <div className="text-center text-gray-500">
-          <p>{error}</p>
+          <p>⚠️ {error}</p>
           <button
             onClick={fetchRecommendedOpportunities}
-            className="mt-2 text-blue-600 hover:text-blue-800"
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Try again
+            Try Again
           </button>
         </div>
       </div>
     );
   }
 
-  if (opportunities.length === 0) {
+  if (opportunities.length === 0 && !loading) {
     return (
       <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
         <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
         <div className="text-center text-gray-500">
-          <p>No recommendations available yet.</p>
-          <p className="text-sm mt-1">Complete your profile to get personalized recommendations.</p>
+          <div className="mb-4">
+            <svg className="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6.5"/>
+            </svg>
+          </div>
+          <p className="text-lg font-medium text-gray-700 mb-2">🔍 Looking for opportunities...</p>
+          <p className="text-sm">Complete your profile to get AI-powered job recommendations.</p>
+          <button
+            onClick={fetchRecommendedOpportunities}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Refresh Recommendations
+          </button>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getScholarships } from '../services/placeholderAPI';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Plus, Search, Trash2, Eye, AlertCircle, RefreshCw } from 'lucide-react';
+import { apiClient } from '../services/apiClient';
 // import { getScholarships } from '../services/scholarships';
 
 interface Scholarship {
@@ -92,17 +93,7 @@ const AdminScholarshipsList: React.FC = () => {
     try {
       setDeleting(id);
       
-      const response = await fetch(`/api/scholarships/${id}/`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Delete failed: ${response.status}`);
-      }
+      await apiClient.delete(`scholarships/${id}/`);
       
       // Remove from local state immediately
       setScholarships(prev => prev.filter(s => s.id !== id));
