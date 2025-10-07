@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom
 import Navbar from "./components/NavBar";
 import Footer from "./sections/Footer";
 import ProtectedRoute, { AdminRoute } from "./auth/components/ProtectedRoute";
+import PublicRoute from "./auth/components/PublicRoute";
 import SidebarWrapper from "./components/SidebarWrapper";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { AppProvider } from "./context/AppContext";
@@ -31,8 +32,8 @@ import Profile from "./sections/Profile";
 import AdminDashboard from "./sections/AdminDashboard";
 import AdminScholarshipsList from "./components/AdminScholarshipsList";
 import AdminScholarshipForm from "./components/AdminScholarshipForm";
-import AdminJobsPlaceholder from "./components/AdminJobsPlaceholder";
-import AdminJobFormPlaceholder from "./components/AdminJobFormPlaceholder";
+import AdminJobsList from "./components/AdminJobsList";
+import AdminJobForm from "./components/AdminJobForm";
 import UsersList from "./components/UsersList";
 import ComingSoon from "./components/ComingSoon";
 import NotFound from "./components/NotFound";
@@ -72,14 +73,16 @@ function App() {
           <ToastProvider>
             <Router>
                 <Routes>
-                {/* Public routes - No authentication required */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
-
-                {/* Routes with main layout - Public */}
-                <Route element={<MainLayout />}>
-                  <Route index element={<Homepage />} />
+                {/* Public routes - Redirect authenticated users to dashboard */}
+                <Route element={<PublicRoute />}>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
+                  
+                  {/* Routes with main layout - Public */}
+                  <Route element={<MainLayout />}>
+                    <Route index element={<Homepage />} />
+                  </Route>
                 </Route>
 
                 {/* Protected routes - Require authentication */}
@@ -102,9 +105,9 @@ function App() {
                   <Route path="/admin/scholarships" element={<AdminScholarshipsList />} />
                   <Route path="/admin/scholarships/new" element={<AdminScholarshipForm />} />
                   <Route path="/admin/scholarships/edit/:id" element={<AdminScholarshipForm />} />
-                  <Route path="/admin/jobs" element={<AdminJobsPlaceholder />} />
-                  <Route path="/admin/jobs/new" element={<AdminJobFormPlaceholder />} />
-                  <Route path="/admin/jobs/edit/:id" element={<AdminJobFormPlaceholder />} />
+                  <Route path="/admin/jobs" element={<AdminJobsList />} />
+                  <Route path="/admin/jobs/new" element={<AdminJobForm />} />
+                  <Route path="/admin/jobs/edit/:id" element={<AdminJobForm />} />
                   <Route path="/users-list" element={<UsersList />} />
                 </Route>
 

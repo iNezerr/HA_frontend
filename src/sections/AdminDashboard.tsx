@@ -271,7 +271,7 @@ export default function AdminDashboard() {
               <Building className="h-6 w-6 text-blue-600 mr-3" />
               <div className="text-left">
                 <h3 className="font-medium text-gray-900">Manage Jobs</h3>
-                <p className="text-sm text-gray-600">Job management interface (Coming Soon)</p>
+                <p className="text-sm text-gray-600">Job management interface</p>
               </div>
             </button>
 

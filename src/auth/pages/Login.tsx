@@ -1,21 +1,34 @@
 
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import SEO from '../../components/SEO';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth as useAuthHook } from '../hooks/useAuth';
+import { useAuth as useAuthContext } from '../context/AuthContext';
 import { LoginRequest } from '../services/authAPI';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, loginMutation } = useAuth({
+  const { user, isAuthenticated } = useAuthContext();
+  const { login, loginMutation } = useAuthHook({
     onLoginSuccess: () => {
-      navigate('/dashboard');
+      // Let useEffect handle navigation after user data is loaded
     },
     onAuthError: (error) => {
       setErrors({ email: error.message || 'Authentication failed' });
     }
   });
+
+  // Redirect authenticated users to appropriate dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.is_staff) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
   
   // Form state
   const [formData, setFormData] = useState({

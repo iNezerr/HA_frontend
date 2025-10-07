@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { getScholarships } from '../services/placeholderAPI';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Plus, Search, Trash2, Eye, AlertCircle, RefreshCw } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
-// import { getScholarships } from '../services/scholarships';
 
 interface Scholarship {
-  id?: string | number;
+  id?: string;
   title: string;
-  source: string;
-  amount?: string;
-  deadline?: string;
-  location: string;
-  course?: string;
-  gpa?: string;
-  scraped_at?: string;
-  application_link?: string;
+  organization: string;
+  scholarship_type: string;
+  level: string;
+  amount: number | string;
+  amount_type: string;
+  description: string;
+  url?: string;
+  eligibility_criteria?: string[];
+  required_documents?: string[];
+  application_deadline: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const AdminScholarshipsList: React.FC = () => {
@@ -27,7 +30,7 @@ const AdminScholarshipsList: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
-  const [deleting, setDeleting] = useState<string | number | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const pageSize = 20;
@@ -45,16 +48,17 @@ const AdminScholarshipsList: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching scholarships with:', { searchTerm, page, pageSize });
-      
-      const data = await getScholarships({
-        search: searchTerm || undefined, 
+      const params: any = {
         page,
         page_size: pageSize,
-        show_expired: true
-      });
+      };
       
-      console.log('Received data:', data);
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      
+      // Note: apiClient already extracts response.data in the interceptor
+      const data = await apiClient.get('admin/scholarships/', { params });
       
       let scholarshipsList: Scholarship[] = [];
       
@@ -64,17 +68,17 @@ const AdminScholarshipsList: React.FC = () => {
         setHasNext(false);
         setHasPrevious(false);
       } else if (data && typeof data === 'object') {
-        scholarshipsList = Array.isArray(data.results) ? data.results : [];
-        setTotalCount(data.count || 0);
+        if (data.results && Array.isArray(data.results)) {
+          scholarshipsList = data.results;
+        } else if (data.data && Array.isArray(data.data)) {
+          scholarshipsList = data.data;
+        }
+        setTotalCount(data.count || scholarshipsList.length || 0);
         setHasNext(!!data.next);
         setHasPrevious(!!data.previous);
       }
       
-      const validScholarships = scholarshipsList.filter(
-        (scholarship) => scholarship && scholarship.title && scholarship.source && scholarship.location
-      );
-      
-      setScholarships(validScholarships);
+      setScholarships(Array.isArray(scholarshipsList) ? scholarshipsList : []);
       
     } catch (err: any) {
       console.error('Failed to fetch scholarships:', err);
@@ -85,7 +89,7 @@ const AdminScholarshipsList: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string | number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this scholarship?')) {
       return;
     }
@@ -93,7 +97,7 @@ const AdminScholarshipsList: React.FC = () => {
     try {
       setDeleting(id);
       
-      await apiClient.delete(`scholarships/${id}/`);
+      await apiClient.delete(`admin/scholarships/${id}/`);
       
       // Remove from local state immediately
       setScholarships(prev => prev.filter(s => s.id !== id));
@@ -133,6 +137,51 @@ const AdminScholarshipsList: React.FC = () => {
       return new Date(deadline) < new Date();
     } catch {
       return false;
+    }
+  };
+
+  const formatScholarshipType = (type: string) => {
+    const types: Record<string, string> = {
+      'academic': 'Academic Merit',
+      'need_based': 'Need-Based',
+      'athletic': 'Athletic',
+      'minority': 'Minority',
+      'field_specific': 'Field-Specific',
+      'general': 'General',
+    };
+    return types[type] || type;
+  };
+
+  const formatLevel = (level: string) => {
+    const levels: Record<string, string> = {
+      'undergraduate': 'Undergraduate',
+      'graduate': 'Graduate',
+      'phd': 'PhD',
+      'postdoc': 'Postdoctoral',
+    };
+    return levels[level] || level;
+  };
+
+  const formatAmountType = (type: string) => {
+    const types: Record<string, string> = {
+      'fixed': 'Fixed Amount',
+      'tuition': 'Full Tuition',
+      'partial': 'Partial Tuition',
+      'variable': 'Variable Amount',
+    };
+    return types[type] || type;
+  };
+
+  const formatAmount = (scholarship: Scholarship) => {
+    const amount = Number(scholarship.amount);
+    if (isNaN(amount)) return 'Not specified';
+    
+    if (scholarship.amount_type === 'tuition') {
+      return 'Full Tuition';
+    } else if (scholarship.amount_type === 'partial') {
+      return `Partial Tuition ($${amount.toLocaleString()})`;
+    } else {
+      return `$${amount.toLocaleString()}`;
     }
   };
 
@@ -247,16 +296,22 @@ const AdminScholarshipsList: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title & Source
+                  Scholarship Details
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Details
+                  Organization
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Type & Level
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Deadline
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Added
+                  Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -266,7 +321,7 @@ const AdminScholarshipsList: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {scholarships.map((scholarship, index) => {
                 const key = scholarship.id || `scholarship-${index}`;
-                const expired = isExpired(scholarship.deadline);
+                const expired = isExpired(scholarship.application_deadline);
                 
                 return (
                   <tr key={key} className={`hover:bg-gray-50 ${expired ? 'bg-red-50' : ''}`}>
@@ -280,37 +335,37 @@ const AdminScholarshipsList: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500">{scholarship.source}</div>
-                        {!scholarship.id && (
-                          <div className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded mt-1 inline-block">
-                            No ID - Limited Actions
-                          </div>
-                        )}
+                        <div className="text-sm text-gray-500 line-clamp-2">{scholarship.description?.substring(0, 100)}...</div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        <div className="font-medium">{scholarship.location}</div>
-                        {scholarship.amount && (
-                          <div className="text-gray-600">Amount: {scholarship.amount}</div>
-                        )}
-                        {scholarship.course && (
-                          <div className="text-gray-600">Course: {scholarship.course}</div>
-                        )}
-                        {scholarship.gpa && (
-                          <div className="text-gray-600">GPA: {scholarship.gpa}</div>
-                        )}
+                      <div className="text-sm text-gray-900">{scholarship.organization}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{formatScholarshipType(scholarship.scholarship_type)}</div>
+                      <div className="text-sm text-gray-500">{formatLevel(scholarship.level)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{formatAmount(scholarship)}</div>
+                      <div className="text-sm text-gray-500">{formatAmountType(scholarship.amount_type)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className={`text-sm ${expired ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                        {formatDate(scholarship.application_deadline)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      <div className={expired ? 'text-red-600 font-medium' : ''}>
-                        {formatDate(scholarship.deadline)}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          scholarship.is_active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {scholarship.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {formatDate(scholarship.scraped_at)}
-                    </td>
-                    <td className="px-6 py-4 text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center gap-2 justify-end">
                         <button
                           onClick={() => handleViewDetails(scholarship)}
@@ -322,7 +377,7 @@ const AdminScholarshipsList: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleEdit(scholarship)}
-                          className="text-indigo-600 hover:text-indigo-900 p-1 disabled:opacity-50"
+                          className="text-green-600 hover:text-green-900 p-1 disabled:opacity-50"
                           title="Edit"
                           disabled={!scholarship.id}
                         >

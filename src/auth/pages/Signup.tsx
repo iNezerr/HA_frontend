@@ -1,20 +1,36 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import SEO from '../../components/SEO';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth as useAuthHook } from '../hooks/useAuth';
+import { useAuth as useAuthContext } from '../context/AuthContext';
 import { RegisterRequest } from '../services/authAPI';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { register, registerMutation } = useAuth({
+  const { user, isAuthenticated } = useAuthContext();
+  const { register, registerMutation } = useAuthHook({
     onLoginSuccess: () => {
+      // After successful registration, redirect to onboarding
+      // Staff users shouldn't typically register via signup page
       navigate('/onboarding');
     },
     onAuthError: (error) => {
       setErrors({ email: error.message || 'Registration failed' });
     }
   });
+
+  // Redirect authenticated users to appropriate dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.is_staff) {
+        navigate('/admin', { replace: true });
+      } else if (user.is_onboarding_complete) {
+        navigate('/dashboard', { replace: true });
+      }
+      // If not onboarding complete, stay on page (or let onboarding flow handle it)
+    }
+  }, [isAuthenticated, user, navigate]);
   
   // Form state
   const [formData, setFormData] = useState({

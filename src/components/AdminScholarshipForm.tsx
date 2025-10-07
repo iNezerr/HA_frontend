@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getScholarship, createScholarship, updateScholarship } from '../services/placeholderAPI';
-import { ScholarshipFormData } from '../services/additionalTypes';
+import { apiClient } from '../services/apiClient';
 import { ArrowLeft, Save } from 'lucide-react';
 // import { getScholarship, createScholarship, updateScholarship, ScholarshipFormData } from '../services/scholarships';
 
@@ -14,22 +13,19 @@ const AdminScholarshipForm: React.FC = () => {
 
   const isEdit = Boolean(id);
 
-  const [formData, setFormData] = useState<ScholarshipFormData>({
+  const [formData, setFormData] = useState<any>({
     title: '',
     organization: '',
+    scholarship_type: 'academic',
+    level: 'undergraduate',
     amount: '',
-    deadline: '',
+    amount_type: 'fixed',
     description: '',
-    requirements: '',
-    eligibility: '',
-    benefits: [],
-    application_process: '',
-    source: '',
-    location: '',
-    course: '',
-    gpa: '',
-    application_link: '',
-    overview: '',
+    url: '',
+    eligibility_criteria: [],
+    required_documents: [],
+    application_deadline: '',
+    is_active: true,
   });
 
   useEffect(() => {
@@ -42,25 +38,20 @@ const AdminScholarshipForm: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getScholarship(id!);
-
+      const data = await apiClient.get(`admin/scholarships/${id}/`);
       setFormData({
-        id: data.id ? (typeof data.id === 'string' ? parseInt(data.id) : data.id) : undefined,
         title: data.title || '',
-        organization: data.organization || data.source || '',
-        location: data.location || '',
-        amount: data.amount || '',
-        deadline: data.deadline ? data.deadline.split('T')[0] : '',
-        course: data.course || '',
-        gpa: data.gpa || '',
-        application_link: data.application_link || '',
-        overview: data.overview || '',
+        organization: data.organization || '',
+        scholarship_type: data.scholarship_type || 'academic',
+        level: data.level || 'undergraduate',
+        amount: data.amount ? String(data.amount) : '',
+        amount_type: data.amount_type || 'fixed',
         description: data.description || '',
-        requirements: data.requirements || '',
-        eligibility: data.eligibility || '',
-        benefits: Array.isArray(data.benefits) ? data.benefits : [],
-        application_process: data.application_process || '',
-        source: data.source || '',
+        url: data.url || '',
+        eligibility_criteria: Array.isArray(data.eligibility_criteria) ? data.eligibility_criteria : [],
+        required_documents: Array.isArray(data.required_documents) ? data.required_documents : [],
+        application_deadline: data.application_deadline ? data.application_deadline.split('T')[0] : '',
+        is_active: data.is_active !== undefined ? data.is_active : true,
       });
     } catch (err: any) {
       setError('Failed to load scholarship details');
@@ -70,8 +61,8 @@ const AdminScholarshipForm: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: keyof ScholarshipFormData, value: any) => {
-    setFormData(prev => ({
+  const handleInputChange = (field: string, value: any) => {
+    setFormData((prev: any) => ({
       ...prev,
       [field]: value,
     }));
@@ -80,7 +71,7 @@ const AdminScholarshipForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.source || !formData.location) {
+    if (!formData.title || !formData.organization) {
       setError('Please fill in all required fields');
       return;
     }
@@ -89,22 +80,16 @@ const AdminScholarshipForm: React.FC = () => {
       setSaving(true);
       setError(null);
 
-      const submitData = {
+      const submitData: any = {
         ...formData,
-        amount: formData.amount || null,
-        deadline: formData.deadline || null,
-        course: formData.course || null,
-        gpa: formData.gpa || null,
-        application_link: formData.application_link || null,
-        overview: formData.overview || null,
+        amount: formData.amount ? parseFloat(formData.amount) : null,
+        application_deadline: formData.application_deadline ? new Date(formData.application_deadline).toISOString() : null,
       };
 
       if (isEdit && id) {
-        await updateScholarship(parseInt(id), submitData);
-        console.log('Scholarship updated successfully');
+        await apiClient.put(`admin/scholarships/${id}/`, submitData);
       } else {
-        await createScholarship(submitData);
-        console.log('Scholarship created successfully');
+        await apiClient.post('admin/scholarships/', submitData);
       }
 
       navigate('/admin/scholarships');
@@ -168,123 +153,156 @@ const AdminScholarshipForm: React.FC = () => {
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   required
                   disabled={saving}
+                  placeholder="e.g., Merit-Based Scholarship 2025"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Source <span className="text-red-500">*</span>
+                  Organization <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={formData.source}
-                  onChange={(e) => handleInputChange('source', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.organization}
+                  onChange={(e) => handleInputChange('organization', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   required
                   disabled={saving}
+                  placeholder="e.g., University Foundation"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location <span className="text-red-500">*</span>
+                  Scholarship Type <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                <select
+                  value={formData.scholarship_type}
+                  onChange={(e) => handleInputChange('scholarship_type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   disabled={saving}
-                />
+                >
+                  <option value="academic">Academic Merit</option>
+                  <option value="need_based">Need-Based</option>
+                  <option value="athletic">Athletic</option>
+                  <option value="minority">Minority</option>
+                  <option value="field_specific">Field-Specific</option>
+                  <option value="general">General</option>
+                </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Amount
+                  Level <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.level}
+                  onChange={(e) => handleInputChange('level', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  disabled={saving}
+                >
+                  <option value="undergraduate">Undergraduate</option>
+                  <option value="graduate">Graduate</option>
+                  <option value="phd">PhD</option>
+                  <option value="postdoc">Postdoctoral</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Amount <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
-                  value={formData.amount || ''}
+                  type="number"
+                  value={formData.amount}
                   onChange={(e) => handleInputChange('amount', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., $5,000 or ₹50,000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="e.g., 5000"
+                  step="0.01"
+                  min="0"
+                  required
                   disabled={saving}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deadline
+                  Amount Type
+                </label>
+                <select
+                  value={formData.amount_type}
+                  onChange={(e) => handleInputChange('amount_type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  disabled={saving}
+                >
+                  <option value="fixed">Fixed Amount</option>
+                  <option value="tuition">Full Tuition</option>
+                  <option value="partial">Partial Tuition</option>
+                  <option value="variable">Variable Amount</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Application Deadline <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
-                  value={formData.deadline || ''}
-                  onChange={(e) => handleInputChange('deadline', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.application_deadline}
+                  onChange={(e) => handleInputChange('application_deadline', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  required
                   disabled={saving}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Course
-                </label>
-                <input
-                  type="text"
-                  value={formData.course || ''}
-                  onChange={(e) => handleInputChange('course', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Computer Science, Medicine"
-                  disabled={saving}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  GPA Requirement
-                </label>
-                <input
-                  type="text"
-                  value={formData.gpa || ''}
-                  onChange={(e) => handleInputChange('gpa', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., 3.5, 85%"
-                  disabled={saving}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Application Link
+                  Application URL
                 </label>
                 <input
                   type="url"
-                  value={formData.application_link || ''}
-                  onChange={(e) => handleInputChange('application_link', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://..."
+                  value={formData.url}
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="https://example.com/apply"
                   disabled={saving}
                 />
               </div>
             </div>
 
-            {/* Overview field - full width */}
+            {/* Description field - full width */}
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Overview
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
-                rows={4}
-                value={formData.overview || ''}
-                onChange={(e) => handleInputChange('overview', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Detailed overview or description of the scholarship..."
+                rows={6}
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Detailed description of the scholarship opportunity..."
+                required
                 disabled={saving}
               />
+            </div>
+
+            {/* Active Status */}
+            <div className="mt-6 flex items-center">
+              <input
+                type="checkbox"
+                id="is_active"
+                checked={formData.is_active}
+                onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                disabled={saving}
+              />
+              <label htmlFor="is_active" className="ml-2 text-sm font-medium text-gray-700">
+                Active (visible to users)
+              </label>
             </div>
           </div>
 
@@ -300,8 +318,8 @@ const AdminScholarshipForm: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={saving || !formData.title || !formData.source || !formData.location}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={saving || !formData.title || !formData.organization || !formData.amount || !formData.application_deadline || !formData.description}
+              className="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <Save size={16} />
               {saving ? 'Saving...' : (isEdit ? 'Update Scholarship' : 'Create Scholarship')}

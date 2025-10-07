@@ -157,6 +157,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               user_type: backendUserData.user_type,
               is_onboarding_complete: backendUserData.onboarded === true,
               id: backendUserData.id,
+              is_staff: backendUserData.is_staff || false,
+              is_superuser: backendUserData.is_superuser || false,
+              is_active: backendUserData.is_active ?? true,
             };
             setUser(enrichedUser);
             
@@ -164,7 +167,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             secureStorage.setItem('user', JSON.stringify(enrichedUser));
             console.log('✅ User data enriched from backend:', { 
               user_type: enrichedUser.user_type, 
-              is_onboarding_complete: enrichedUser.is_onboarding_complete 
+              is_onboarding_complete: enrichedUser.is_onboarding_complete,
+              is_staff: enrichedUser.is_staff 
             });
           } catch (backendError) {
             console.warn('Failed to fetch backend user data, using Firebase data only:', backendError);
