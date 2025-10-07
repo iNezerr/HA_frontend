@@ -23,7 +23,7 @@ import Login from "./auth/pages/Login";
 import Signup from "./auth/pages/Signup";
 import UnifiedOnboarding from "./sections/UnifiedOnboarding";
 import UnifiedDashboard from "./sections/UnifiedDashboard";
-import SaveJobs  from "./components/SaveJobs";
+import UnifiedSavedPage from "./sections/UnifiedSaved";
 // Import placeholders for components that will be implemented later
 import VerifyEmail from "./auth/pages/VerifyEmail";
 import Profile from "./sections/Profile";
@@ -90,7 +90,7 @@ function App() {
                   {/* Dashboard routes - Require authentication */}
                   <Route element={<SidebarWrapper />}>
                     <Route path="/dashboard" element={<UnifiedDashboard />} />
-                    <Route path="/saved-jobs" element={<SaveJobs />} />
+                    <Route path="/saved-jobs" element={<UnifiedSavedPage />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/dashboard/*" element={<ComingSoon />} />
                   </Route>

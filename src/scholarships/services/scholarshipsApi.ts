@@ -17,7 +17,7 @@ export interface Scholarship {
   course?: string;
   gpa?: string;
   description?: string;
-  application_link?: string;
+  url?: string;
   scraped_at?: string;
   is_active: boolean;
   is_saved?: boolean;

@@ -36,6 +36,12 @@ export const ScholarshipCard: React.FC<ScholarshipCardProps> = ({
   };
 
   const handleApply = async () => {
+    // First open URL immediately
+    if (scholarship.url) {
+      window.open(scholarship.url, '_blank');
+    }
+    
+    // Then update status
     if (!onApply || applying) return;
     
     setApplying(true);
@@ -170,7 +176,12 @@ export const ScholarshipCard: React.FC<ScholarshipCardProps> = ({
               </div>
             ) : (
               <button
-                onClick={handleApply}
+                onClick={() => {
+                  if (scholarship.url) {
+                    window.open(scholarship.url, '_blank');
+                  }
+                  handleApply();
+                }}
                 disabled={applying || isExpired}
                 className={`flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 ${
                   (applying || isExpired) ? 'opacity-50 cursor-not-allowed' : ''
@@ -185,19 +196,6 @@ export const ScholarshipCard: React.FC<ScholarshipCardProps> = ({
                   </>
                 )}
               </button>
-            )}
-
-            {/* External Link */}
-            {scholarship.application_link && !scholarship.is_applied && (
-              <a
-                href={scholarship.application_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                title="Open application link"
-              >
-                <ExternalLink className="w-4 h-4" />
-              </a>
             )}
           </div>
         </div>

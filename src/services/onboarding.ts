@@ -273,27 +273,31 @@ export class OnboardingService {
   }
 
   private static validateGrantSeekerStep(step: number, data: Partial<UserProfile>, errors: string[]): { isValid: boolean; errors: string[] } {
-    switch (step) {
-      case 1: // Project Details & Contact
-        const grantData = data as any;
-        if (!grantData.project_details?.project_title) {
-          errors.push('Project title is required');
-        }
-        if (!grantData.project_details?.project_description) {
-          errors.push('Project description is required');
-        }
-        if (!data.personal_info?.phone) {
-          errors.push('Phone number is required');
-        }
-        break;
-      case 2: // Organization Info
-        if (!grantData.organization_info?.organization_name) {
-          errors.push('Organization name is required');
-        }
-        break;
+      const grantData = data as any;
+      
+      switch (step) {
+        case 1: // Project Details & Contact
+          if (!grantData.project_details?.project_title) {
+            errors.push('Project title is required');
+          }
+          if (!grantData.project_details?.project_description) {
+            errors.push('Project description is required');
+          }
+          if (!data.personal_info?.phone) {
+            errors.push('Phone number is required');
+          }
+          break;
+        case 2: // Organization Info
+          if (!grantData.organization_info?.organization_name) {
+            errors.push('Organization name is required');
+          }
+          if (!grantData.organization_info?.organization_type) {
+            errors.push('Organization type is required');
+          }
+          break;
+      }
+      return { isValid: errors.length === 0, errors };
     }
-    return { isValid: errors.length === 0, errors };
-  }
 
   // Save CV file
   static async saveCVFile(file: File): Promise<string> {
