@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Education {
@@ -29,19 +29,26 @@ const EducationTab: React.FC<EducationTabProps> = ({
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Update local state when prop changes (e.g., after add/delete)
-  useEffect(() => {
-    setLocalEducation(education);
-  }, [education]);
+  const handleBlur = useCallback(async () => {
+    const hasChanges = JSON.stringify(localEducation) !== JSON.stringify(education);
+    if (hasChanges) {
+      setIsSaving(true);
+      try {
+        await setEducation(localEducation);
+      } catch (error) {
+        console.error('Failed to save education:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  }, [localEducation, education, setEducation]);
 
   // Debounced save function
   const debouncedSave = (updatedEducation: Education[]) => {
-    // Clear existing timeout
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
 
-    // Set new timeout for 1 second
     const timeout = setTimeout(async () => {
       setIsSaving(true);
       try {
@@ -85,6 +92,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="text"
                 value={edu.degree}
+                onBlur={handleBlur}
                 onChange={(e) => handleChange(index, 'degree', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -94,6 +102,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="text"
                 value={edu.school}
+                onBlur={handleBlur}
                 onChange={(e) => handleChange(index, 'school', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -105,6 +114,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="date"
                 value={edu.startDate}
+                onClick={handleBlur}
                 onChange={(e) => handleChange(index, 'startDate', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -114,6 +124,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="date"
                 value={edu.endDate}
+                onClick={handleBlur}
                 onChange={(e) => handleChange(index, 'endDate', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 disabled={edu.isStudying}
@@ -125,6 +136,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               <input
                 type="checkbox"
                 checked={edu.isStudying}
+                onClick={handleBlur}
                 onChange={(e) => handleChange(index, 'isStudying', e.target.checked)}
                 className="mr-2"
               />
@@ -135,6 +147,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">Describe your extra curricular activities in college</label>
             <textarea
               value={edu.description}
+              onClick={handleBlur}
               onChange={(e) => handleChange(index, 'description', e.target.value)}
               rows={3}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

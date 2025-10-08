@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, MapPin, User, Briefcase } from 'lucide-react';
 import { useProfile } from '../hooks/useProfile';
@@ -22,9 +21,7 @@ const ProfileCompletion = ({
 }: ProfileCompletionProps) => {
   const navigate = useNavigate();
   
-  const { user, profileCompletion, loading: isLoading } = useProfile();
-  
-  const [error, setError] = useState<string | null>(null);
+  const { user, profileCompletion, loading: isLoading, error } = useProfile();
 
   const isScholarshipContext = context === 'scholarship' || isScholarshipPage;
 

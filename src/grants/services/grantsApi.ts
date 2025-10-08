@@ -15,6 +15,7 @@ export interface Grant {
   description?: string;
   eligibility?: string;
   application_url?: string;
+  saved_grant_id?: string;
   created_at?: string;
   is_active: boolean;
   is_saved?: boolean;

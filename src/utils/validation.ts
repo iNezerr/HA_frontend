@@ -6,7 +6,6 @@ export const sanitizeInput = (input: string): string => {
     .replace(/[<>]/g, '') // Remove potential HTML tags
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+=/gi, '') // Remove event handlers
-    .trim();
 };
 
 // Email validation

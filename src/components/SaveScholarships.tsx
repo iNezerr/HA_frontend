@@ -63,7 +63,7 @@ const SaveScholarships: React.FC = () => {
   const handleUnsave = async (scholarshipId: string) => {
     try {
       const savedScholarship = scholarships.find(scholarship => scholarship.id === scholarshipId);
-      const savedScholarshipId = savedScholarship?.saved_scholarship_id || scholarshipId;
+      const savedScholarshipId = (savedScholarship as any)?.saved_scholarship_id || scholarshipId;
       
       await toggleSaveScholarship(savedScholarshipId);
       

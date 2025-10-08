@@ -11,6 +11,7 @@ export interface Job {
   skills_required?: string[];
   application_deadline?: string;
   url?: string;
+  saved_job_id?: string;
   created_at: string;
   is_active: boolean;
   is_saved?: boolean;

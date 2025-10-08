@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bookmark, Loader2, AlertCircle, Filter, X } from 'lucide-react';
-import { Job, JobFilters } from '../jobs/types';
+import { Job, JobFilters, JobsResponse } from '../jobs/types';
 import { JobCard } from '../jobs/components/JobCard';
 import { getSavedJobs, toggleSaveJob, applyToJob } from '../jobs/services/jobsApi';
-
-interface JobsResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Job[];
-}
 
 const SaveJobs: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -65,7 +58,7 @@ const SaveJobs: React.FC = () => {
   const handleUnsave = async (jobId: string) => {
     try {
       const savedJob = jobs.find(job => job.id === jobId);
-      const savedJobId = savedJob?.saved_job_id || jobId;
+      const savedJobId = (savedJob as any)?.saved_job_id || jobId;
       
       await toggleSaveJob(savedJobId);
       

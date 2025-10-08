@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CareerProfileData, userAPI } from '../services/userAPI';
+import React, { useState, useCallback } from 'react';
+import { CareerProfileData, userAPI } from '../../profile/services/userAPI_new';
 
 interface CareerProfileTabProps {
   careerProfile: CareerProfileData;
@@ -22,6 +22,14 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
   validationErrors = []
 }) => {
   const [uploading, setUploading] = useState(false);
+  const [localProfile, setLocalProfile] = useState(careerProfile);
+
+  const handleBlur = useCallback(() => {
+    const hasChanges = JSON.stringify(localProfile) !== JSON.stringify(careerProfile);
+    if (hasChanges) {
+      setCareerProfile(localProfile);
+    }
+  }, [localProfile, careerProfile, setCareerProfile]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,7 +37,7 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
 
     try {
       setUploading(true);
-      const response = await userAPI.uploadDocument(file);
+      const response = await userAPI.uploadDocument(file, 'cv');
       if (response && onCvUpload) {
         onCvUpload(response);
       }
@@ -42,7 +50,7 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
   };
 
   const handleFieldChange = (field: keyof CareerProfileData, value: string) => {
-    setCareerProfile({ ...careerProfile, [field]: value });
+    setLocalProfile({ ...localProfile, [field]: value });
   };
 
   return (
@@ -128,7 +136,11 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
             </label>
             <input
               type="text"
-              value={careerProfile.industry}
+              value={localProfile.industry}
+              onBlur={(e) => {
+                e.preventDefault();
+                handleBlur();
+              }}
               onChange={(e) => handleFieldChange('industry', e.target.value)}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., Technology, Healthcare, Finance"
@@ -140,8 +152,12 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
             </label>
             <input
               type="text"
-              value={careerProfile.jobTitle}
-              onChange={(e) => handleFieldChange('jobTitle', e.target.value)}
+              value={localProfile.current_role}
+              onBlur={(e) => {
+                e.preventDefault();
+                handleBlur();
+              }}
+              onChange={(e) => handleFieldChange('current_role', e.target.value)}
               className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., Software Engineer, Marketing Manager"
             />
@@ -152,14 +168,18 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
             Profile Summary <span className="text-red-500">*</span>
           </label>
           <textarea
-            value={(careerProfile as any).profileSummary || ''}
+            value={(localProfile as any).profileSummary || ''}
+            onBlur={(e) => {
+              e.preventDefault();
+              handleBlur();
+            }}
             onChange={(e) => handleFieldChange('profileSummary' as keyof CareerProfileData, e.target.value)}
             rows={5}
             className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Write a brief summary of your professional background, skills, and career objectives..."
           />
           <p className="mt-1 text-xs text-gray-500">
-            {((careerProfile as any).profileSummary || '').length}/2000 characters
+            {((localProfile as any).profileSummary || '').length}/2000 characters
           </p>
         </div>
       </div>

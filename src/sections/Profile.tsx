@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import {
   User,
   ExternalLink,
@@ -11,6 +11,7 @@ import { useAuth } from '../auth/context/AuthContext';
 import { useProfile } from '../profile/hooks/useProfile';
 import PersonalTab from '../profile/components/PersonalTab';
 import CareerProfileTab from '../profile/components/CareerProfileTab';
+import { CareerProfileData } from '../profile/services/userAPI_new';
 import EducationTab from '../profile/components/EducationTab';
 import ExperienceTab from '../profile/components/ExperienceTab';
 import ProjectsTab from '../profile/components/ProjectsTab';
@@ -34,8 +35,10 @@ export default function Profile() {
     uploadDocument,
   } = useProfile();
 
+  const personalTabRef = useRef<any>(null);
+
   // Transform the backend data to match the component expectations
-  const transformedData = {
+  const transformedData = useMemo(() => ({
     loading,
     error,
     validationErrors: {} as Record<string, string[]>,
@@ -57,18 +60,24 @@ export default function Profile() {
       bio: user?.profile?.summary || '',
       goal: user?.profile_data?.career_goal || ''
     },
-    cvFile: documents.find(doc => doc.document_type === 'cv') ? {
-      filename: documents.find(doc => doc.document_type === 'cv')?.filename || '',
-      uploadedAt: documents.find(doc => doc.document_type === 'cv')?.uploaded_at || '',
-      downloadUrl: documents.find(doc => doc.document_type === 'cv')?.gcs_url || ''
-    } : undefined,
+    cvFile: (() => {
+      const cvDoc = documents.find(doc => doc.document_type === 'cv');
+      return cvDoc ? {
+        filename: cvDoc.original_filename || cvDoc.filename || '',
+        uploadedAt: cvDoc.uploaded_at || '',
+        downloadUrl: cvDoc.gcs_url || '',
+        hasCvInGcs: true
+      } : undefined;
+    })(),
     careerProfile: {
       current_role: user?.profile_data?.current_role || '',
       career_level: user?.profile_data?.career_level || '',
       industry: user?.profile_data?.industry || '',
       skills: user?.profile?.skills || [],
-      preferred_roles: user?.profile_data?.preferred_roles || []
-    },
+      preferred_roles: user?.profile_data?.preferred_roles || [],
+      jobTitle: user?.profile_data?.current_role || '',
+      profileSummary: user?.profile?.summary || ''
+    } as CareerProfileData,
     education: (user?.profile?.education && user.profile.education.length > 0) 
       ? user.profile.education 
       : [{
@@ -147,16 +156,28 @@ export default function Profile() {
         throw err;
       }
     },
-    setCareerProfile: async (newCareerProfile: any) => {
+    setCareerProfile: async (newCareerProfile: CareerProfileData) => {
       try {
+        const hasChanges = JSON.stringify({
+          skills: user?.profile?.skills,
+          current_role: user?.profile_data?.current_role,
+          career_level: user?.profile_data?.career_level,
+          industry: user?.profile_data?.industry,
+          preferred_roles: user?.profile_data?.preferred_roles,
+          jobTitle: user?.profile_data?.current_role,
+          profileSummary: user?.profile?.summary
+        }) !== JSON.stringify(newCareerProfile);
+        
+        if (!hasChanges) return;
+        
         await updateProfile({
           skills: newCareerProfile.skills,
+          summary: newCareerProfile.profileSummary
         });
         
-        // Update profile_data for other career fields
         const updatedProfileData = {
           ...user?.profile_data,
-          current_role: newCareerProfile.current_role,
+          current_role: newCareerProfile.current_role || newCareerProfile.jobTitle,
           career_level: newCareerProfile.career_level,
           industry: newCareerProfile.industry,
           preferred_roles: newCareerProfile.preferred_roles,
@@ -175,7 +196,7 @@ export default function Profile() {
         await updateProfile({
           education: newEducation,
         });
-        await refreshProfile(); // Refresh to get updated data
+        // await refreshProfile(); // Refresh to get updated data
       } catch (err) {
         console.error('Failed to update education:', err);
         throw err;
@@ -356,7 +377,7 @@ export default function Profile() {
         console.error('Failed to delete project:', err);
       }
     }
-  };
+  }), [user, loading, documents, error, updateProfile, updateUser, refreshProfile, uploadDocument]);
 
   // Use the transformed data
   const {
@@ -525,6 +546,7 @@ export default function Profile() {
                 if (file) {
                   try {
                     await uploadDocument(file, 'cv');
+                    await refreshProfile();
                   } catch (error) {
                     console.error('Upload failed:', error);
                   }
@@ -661,6 +683,7 @@ export default function Profile() {
                 <div className="bg-white rounded-lg p-6">
                   {activeTab === 'Personal' && (
                     <PersonalTab
+                      ref={personalTabRef}
                       personalInfo={personalInfo}
                       setPersonalInfo={setPersonalInfo}
                       validationErrors={validationErrors.personal || []}
@@ -672,9 +695,9 @@ export default function Profile() {
                       careerProfile={careerProfile}
                       setCareerProfile={setCareerProfile}
                       cvFile={cvFile}
-                      onCvUpload={() => {
+                      onCvUpload={async () => {
                         // Refresh profile data after CV upload
-                        fetchProfileData();
+                        await refreshProfile();
                       }}
                       validationErrors={validationErrors.career || []}
                     />
@@ -716,15 +739,35 @@ export default function Profile() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 pt-6 border-t">
-                    <button className="px-6 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
+                    <button
+                      onClick={() => {
+                        const currentIndex = tabs.indexOf(activeTab);
+                        if(currentIndex > 0) {
+                          setActiveTab(tabs[currentIndex - 1]);
+                        }
+                      }}
+                      disabled={tabs.indexOf(activeTab) === 0}
+                      className="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
                       Previous
                     </button>
                     <button
-                      onClick={() => handleSave(activeTab)}
+                      className='px-6 py-2 text-gray-800 border border-gray-300 rounded-lg hover:bg-white bg-blue-600'
+                      onClick={async () => {
+                        try {
+                          if (activeTab === 'Personal' && personalTabRef.current) {
+                            await personalTabRef.current.save();
+                          }
+                          const currentIndex = tabs.indexOf(activeTab);
+                          if (currentIndex < tabs.length - 1) {
+                            setActiveTab(tabs[currentIndex + 1]);
+                          }
+                        } catch (error) {
+                          console.error('Save failed:', error);
+                        }
+                      }}
                       disabled={loading}
-                      className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {loading ? 'Saving...' : (activeTab === 'AI' ? 'Save' : 'Next')}
+                      {loading ? 'Saving...' : 'Save & Next'}
                     </button>
                   </div>
                 </div>
@@ -773,10 +816,11 @@ export default function Profile() {
                     careerProfile={careerProfile}
                     setCareerProfile={setCareerProfile}
                     cvFile={cvFile}
-                    onCvUpload={() => {
+                    onCvUpload={async () => {
                       // Refresh profile data after CV upload
-                      fetchProfileData();
+                      await refreshProfile();
                     }}
+                    validationErrors={validationErrors.career || []}
                   />
                 )}
 

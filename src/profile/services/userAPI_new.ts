@@ -29,6 +29,87 @@ export interface ProfileData {
   last_parsed_at: string | null;
 }
 
+// Add these interfaces after ProfileData interface (around line 28)
+
+export interface CareerProfileData {
+  current_role: string;
+  career_level: string;
+  industry: string;
+  skills: string[];
+  preferred_roles: string[];
+  jobTitle?: string;
+  profileSummary?: string;
+}
+
+export interface JobSeekerProfile {
+  resume?: {
+    filename: string;
+    url: string;
+    uploadedAt: string;
+  };
+  skills: string[];
+  experience: {
+    title: string;
+    company: string;
+    duration: string;
+    description: string;
+  }[];
+  education: {
+    degree: string;
+    institution: string;
+    year: string;
+    gpa?: string;
+  }[];
+  location?: string;
+  preferredJobTypes: string[];
+  salaryExpectation?: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+}
+
+export interface ScholarshipSeekerProfile {
+  academicBackground: {
+    currentLevel: string;
+    institution: string;
+    major: string;
+    gpa: string;
+    expectedGraduation: string;
+  };
+  achievements: string[];
+  goals: string;
+  financialNeed?: string;
+  extracurriculars: string[];
+  resume?: {
+    filename: string;
+    url: string;
+    uploadedAt: string;
+  };
+}
+
+export interface GrantSeekerProfile {
+  organization?: string;
+  projectTitle: string;
+  projectDescription: string;
+  fundingAmount: {
+    requested: number;
+    currency: string;
+  };
+  projectDuration: string;
+  projectCategory: string;
+  teamMembers?: {
+    name: string;
+    role: string;
+    experience: string;
+  }[];
+  proposal?: {
+    filename: string;
+    url: string;
+    uploadedAt: string;
+  };
+}
+
 export interface Document {
   id: string;
   filename: string;
@@ -63,14 +144,14 @@ export class UserAPI {
    * Update user basic information
    */
   static async updateUser(userData: Partial<UserProfile>): Promise<UserProfile> {
-    return apiClient.patch(`${this.BASE_PATH}/me/`, userData);
+    return apiClient.patch(`${this.BASE_PATH}/me/update/`, userData);
   }
 
   /**
    * Update user profile data
    */
   static async updateProfile(profileData: Partial<ProfileData>): Promise<UserProfile> {
-    return apiClient.patch(`${this.BASE_PATH}/profile/`, profileData);
+    return apiClient.patch(`${this.BASE_PATH}/profile/update/`, profileData);
   }
 
   /**

@@ -23,9 +23,11 @@ export interface Scholarship {
   gpa?: string;
   scraped_at?: string;
   application_link?: string;
+  url?: string;
   description?: string;
   is_saved?: boolean;
   is_applied?: boolean;
+  similarity_score?: number;
 }
 
 export interface ScholarshipsResponse {
