@@ -39,13 +39,15 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
       setUploading(true);
       const response = await userAPI.uploadDocument(file, 'cv');
       if (response && onCvUpload) {
-        onCvUpload(response);
+        await onCvUpload(response);
       }
+      
     } catch (error) {
       console.error('Failed to upload CV:', error);
       alert('Failed to upload CV. Please try again.');
     } finally {
       setUploading(false);
+      event.target.value = '';
     }
   };
 
@@ -70,37 +72,57 @@ const CareerProfileTab: React.FC<CareerProfileTabProps> = ({
         </div>
       )}
 
-      {/* CV Upload Section */}
+      {/* CV Upload Section - ADD Replace button */}
       <div className="border border-gray-200 rounded-lg p-4">
         <h3 className="text-sm font-medium text-gray-900 mb-3">CV/Resume</h3>
 
         {cvFile?.filename ? (
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">{cvFile.filename}</p>
-                {cvFile.uploadedAt && (
-                  <p className="text-xs text-gray-500">
-                    Uploaded {new Date(cvFile.uploadedAt).toLocaleDateString()}
-                  </p>
-                )}
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{cvFile.filename}</p>
+                  {cvFile.uploadedAt && (
+                    <p className="text-xs text-gray-500">
+                      Uploaded {new Date(cvFile.uploadedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-            {cvFile.downloadUrl && (
-              <a
-                href={cvFile.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {cvFile.downloadUrl && (
+                <a
+                  href={cvFile.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-center px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium border border-blue-300 rounded hover:bg-blue-50"
+                >
+                  View
+                </a>
+              )}
+              <label
+                htmlFor="cv-replace-tab"
+                className="flex-1 text-center px-3 py-1.5 text-sm text-orange-600 hover:text-orange-700 font-medium border border-orange-300 rounded hover:bg-orange-50 cursor-pointer"
               >
-                View
-              </a>
-            )}
+                Replace
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                className="hidden"
+                id="cv-replace-tab"
+              />
+            </div>
           </div>
         ) : (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">

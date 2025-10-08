@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import {
   User,
   ExternalLink,
@@ -20,6 +20,8 @@ import AITab from '../profile/components/AITab';
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
   const { user: _authUser } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
+const [forceDocuments, setForceDocuments] = useState<any[]>([]);
   
   // Use the profile hook from the profile module
   const {
@@ -34,6 +36,12 @@ export default function Profile() {
     updateUser,
     uploadDocument,
   } = useProfile();
+
+  useEffect(() => {
+    if (documents && documents.length > 0) {
+      setForceDocuments(documents);
+    }
+  }, [documents]);
 
   const personalTabRef = useRef<any>(null);
 
@@ -61,13 +69,19 @@ export default function Profile() {
       goal: user?.profile_data?.career_goal || ''
     },
     cvFile: (() => {
-      const cvDoc = documents.find(doc => doc.document_type === 'cv');
-      return cvDoc ? {
-        filename: cvDoc.original_filename || cvDoc.filename || '',
-        uploadedAt: cvDoc.uploaded_at || '',
-        downloadUrl: cvDoc.gcs_url || '',
-        hasCvInGcs: true
-      } : undefined;
+      const allDocs = forceDocuments.length > 0 ? forceDocuments : (documents || []);
+      const cvDoc = allDocs.find(doc => doc.document_type === 'cv');
+      
+      if (cvDoc) {
+        return {
+          filename: cvDoc.original_filename || cvDoc.filename || 'Resume.pdf',
+          uploadedAt: cvDoc.uploaded_at || '',
+          downloadUrl: cvDoc.signed_download_url || cvDoc.gcs_url || '',
+          hasCvInGcs: !!(cvDoc.signed_download_url || cvDoc.gcs_url)
+        };
+      }
+      
+      return undefined;
     })(),
     careerProfile: {
       current_role: user?.profile_data?.current_role || '',
@@ -159,6 +173,7 @@ export default function Profile() {
     setCareerProfile: async (newCareerProfile: CareerProfileData) => {
       try {
         const hasChanges = JSON.stringify({
+          gcs_url: user?.profile_data?.gcs_url,
           skills: user?.profile?.skills,
           current_role: user?.profile_data?.current_role,
           career_level: user?.profile_data?.career_level,
@@ -377,7 +392,7 @@ export default function Profile() {
         console.error('Failed to delete project:', err);
       }
     }
-  }), [user, loading, documents, error, updateProfile, updateUser, refreshProfile, uploadDocument]);
+  }), [user, loading, documents, error, forceDocuments, updateProfile, updateUser, refreshProfile, uploadDocument, refreshKey]);
 
   // Use the transformed data
   const {
@@ -498,32 +513,63 @@ export default function Profile() {
       {/* CV File Section */}
       {cvFile && (
         <div className="mt-6 sm:mt-8 p-3 bg-gray-50 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-900 truncate">{cvFile.filename}</p>
-                {cvFile.uploadedAt && (
-                  <p className="text-xs text-gray-500">
-                    Uploaded {new Date(cvFile.uploadedAt).toLocaleDateString()}
-                  </p>
-                )}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-900 truncate" title={cvFile.filename}>{cvFile.filename}</p>
+                  {cvFile.uploadedAt && (
+                    <p className="text-xs text-gray-500">
+                      Uploaded {new Date(cvFile.uploadedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-            {cvFile.downloadUrl && (
-              <a
-                href={cvFile.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 text-xs font-medium"
+            
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {cvFile.downloadUrl && (
+                <a
+                  href={cvFile.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-center px-3 py-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium border border-blue-300 rounded hover:bg-blue-50"
+                >
+                  View
+                </a>
+              )}
+              <label
+                htmlFor="cv-sidebar-replace"
+                className="flex-1 text-center px-3 py-1.5 text-xs text-orange-600 hover:text-orange-700 font-medium border border-orange-300 rounded hover:bg-orange-50 cursor-pointer"
               >
-                View
-              </a>
-            )}
+                Replace
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      await uploadDocument(file, 'cv');
+                      await refreshProfile();
+                      setRefreshKey(prev => prev + 1);
+                    } catch (error) {
+                      console.error('Upload failed:', error);
+                    }
+                  }
+                  e.target.value = '';
+                }}
+                className="hidden"
+                id="cv-sidebar-replace"
+              />
+            </div>
           </div>
         </div>
       )}
@@ -695,9 +741,17 @@ export default function Profile() {
                       careerProfile={careerProfile}
                       setCareerProfile={setCareerProfile}
                       cvFile={cvFile}
-                      onCvUpload={async () => {
-                        // Refresh profile data after CV upload
+                      onCvUpload={async (uploadedDoc) => {
+                        if (uploadedDoc) {
+                          setForceDocuments(prev => {
+                            const filtered = prev.filter(doc => doc.document_type !== 'cv');
+                            return [...filtered, uploadedDoc];
+                          });
+                        }
+                        
+                        await new Promise(resolve => setTimeout(resolve, 300));
                         await refreshProfile();
+                        setRefreshKey(prev => prev + 1);
                       }}
                       validationErrors={validationErrors.career || []}
                     />
@@ -816,9 +870,17 @@ export default function Profile() {
                     careerProfile={careerProfile}
                     setCareerProfile={setCareerProfile}
                     cvFile={cvFile}
-                    onCvUpload={async () => {
-                      // Refresh profile data after CV upload
+                    onCvUpload={async (uploadedDoc) => {
+                      if (uploadedDoc) {
+                        setForceDocuments(prev => {
+                          const filtered = prev.filter(doc => doc.document_type !== 'cv');
+                          return [...filtered, uploadedDoc];
+                        });
+                      }
+                  
+                      await new Promise(resolve => setTimeout(resolve, 300));
                       await refreshProfile();
+                      setRefreshKey(prev => prev + 1);
                     }}
                     validationErrors={validationErrors.career || []}
                   />

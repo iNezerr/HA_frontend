@@ -30,12 +30,16 @@ const JobSeekerOnboarding: React.FC<JobSeekerOnboardingProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [skillsInput, setSkillsInput] = useState("");
 
   useEffect(() => {
     // Load existing data
     const existingData = OnboardingService.getProfileData() as Partial<JobSeekerProfile>;
     if (existingData) {
       setFormData(existingData);
+      if(existingData.skills && Array.isArray(existingData.skills)) {
+        setSkillsInput(existingData.skills.join(', '));
+      }
     }
   }, []);
 
@@ -292,8 +296,17 @@ const JobSeekerOnboarding: React.FC<JobSeekerOnboardingProps> = ({
         </label>
         <input
           type="text"
-          value={formData.skills?.join(', ') || ''}
-          onChange={(e) => handleInputChange('skills', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
+          value={skillsInput}
+          onChange={(e) => {
+            const inputValue = e.target.value;
+            setSkillsInput(inputValue);
+            const skillsArray = inputValue
+              .split(',')
+              .map(s => s.trim())
+              .filter(s => s.length > 0);
+
+            handleInputChange("skills", skillsArray);
+          }}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="e.g., JavaScript, React, Node.js, Project Management"
         />

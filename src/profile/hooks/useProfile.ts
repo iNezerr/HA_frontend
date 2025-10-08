@@ -107,24 +107,25 @@ export function useProfile(): UseProfileResult {
       // Fetch documents
       try {
         const documentsResponse = await userAPI.getDocuments();
-        console.log('Documents API response:', {
-          type: typeof documentsResponse,
-          isArray: Array.isArray(documentsResponse),
-          value: documentsResponse
-        });
+        console.log('Documents API response:', documentsResponse);
         
-        // Ensure documents is always an array
+        // Handle different response formats
+        let documentsArray: Document[] = [];
+        
         if (Array.isArray(documentsResponse)) {
-          setDocuments(documentsResponse);
-        } else {
-          console.warn('Documents API returned non-array:', documentsResponse);
-          setDocuments([]);
+          documentsArray = documentsResponse;
+        } else if (documentsResponse) {
+          // Use type assertion for object responses
+          const objResponse = documentsResponse as Record<string, any>;
+          documentsArray = objResponse.documents || objResponse.results || [];
         }
+        
+        setDocuments(documentsArray);
+        
       } catch (documentsError) {
         console.warn('Documents endpoint not available:', documentsError);
         setDocuments([]);
       }
-
     } catch (err: any) {
       console.error('Failed to fetch profile data:', err);
       setError(err.message || 'Failed to load profile data');

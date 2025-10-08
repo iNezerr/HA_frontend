@@ -32,6 +32,7 @@ export interface ProfileData {
 // Add these interfaces after ProfileData interface (around line 28)
 
 export interface CareerProfileData {
+  gcs_url?: string;
   current_role: string;
   career_level: string;
   industry: string;
