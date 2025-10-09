@@ -2,21 +2,6 @@ import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import SEO from '../components/SEO';
 
 const Hero = () => {
-    const images = [[
-        "/hero/google.svg",
-        "/hero/samsung.svg",
-        "/hero/meta.svg",
-        "/hero/wipro.svg",
-        "/hero/infosys.svg",
-        "/hero/slack.svg"
-    ], [
-        "/hero/mastercard.svg",
-        "/hero/jpmorgan.svg",
-        "/hero/americanairline.svg",
-        "/hero/zomato.svg",
-        "/hero/visa.svg",
-        "/hero/airbnb.svg"
-    ]];
 
     return (
         <>

@@ -21,6 +21,7 @@ export interface Grant {
   is_applied?: boolean;
   similarity_score?: number;
   opportunity_type: 'grant';
+  saved_grant_id?: string;
 }
 
 export interface GrantFilters {
@@ -39,8 +40,8 @@ export interface GrantFilters {
 export interface GrantsResponse {
   results: Grant[];
   count: number;
-  next?: string;
-  previous?: string;
+  next: string | null;
+  previous: string | null;
 }
 
 export interface GrantInteraction {

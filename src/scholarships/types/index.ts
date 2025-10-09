@@ -24,13 +24,16 @@ export interface Scholarship {
   scraped_at?: string;
   application_link?: string;
   description?: string;
+  url?: string;
   is_saved?: boolean;
   is_applied?: boolean;
+  similarity_score?: number;
+  saved_scholarship_id?: string;
 }
 
 export interface ScholarshipsResponse {
   results: Scholarship[];
   count: number;
-  next?: string;
-  previous?: string;
+  next: string | null;
+  previous: string | null;
 }

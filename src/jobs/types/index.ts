@@ -17,6 +17,7 @@ export interface Job {
   is_applied?: boolean;
   similarity_score?: number;
   opportunity_type: 'job';
+  saved_job_id?: string;
 }
 
 export interface JobFilters {
@@ -37,8 +38,8 @@ export interface JobFilters {
 export interface JobsResponse {
   results: Job[];
   count: number;
-  next?: string;
-  previous?: string;
+  next: string | null;
+  previous: string | null;
 }
 
 export interface JobInteraction {
