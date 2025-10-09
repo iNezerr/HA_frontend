@@ -35,12 +35,14 @@ import AdminScholarshipForm from "./components/AdminScholarshipForm";
 import AdminJobsList from "./components/AdminJobsList";
 import AdminJobForm from "./components/AdminJobForm";
 import UsersList from "./components/UsersList";
+import AuthenticatedUserBanner from "./components/AuthenticatedUserBanner";
 import ComingSoon from "./components/ComingSoon";
 import NotFound from "./components/NotFound";
 
 // Homepage component
 const Homepage = () => (
   <>
+    <AuthenticatedUserBanner />
     <Hero />
     <HowItWorks />
     <Testimonials />
