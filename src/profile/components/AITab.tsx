@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
+
 interface AIPreferences {
   opportunities: string[];
   prioritizeBy: string[];
@@ -10,29 +11,20 @@ interface AITabProps {
   setAIPreferences: (preferences: AIPreferences) => void;
 }
 
-export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
+const AITab = forwardRef(({ aiPreferences, setAIPreferences }: AITabProps, ref) => {
   const [localPreferences, setLocalPreferences] = useState<AIPreferences>(aiPreferences);
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
-  const debouncedSave = (updatedPreferences: AIPreferences) => {
-    if (saveTimeout) {
-      clearTimeout(saveTimeout);
+  const handleSave = async () => {
+    try {
+      await setAIPreferences(localPreferences);
+    } catch (error) {
+      console.error("Failed to save AI preference:", error);
     }
-
-    const timeout = setTimeout(async () => {
-      setIsSaving(true);
-      try {
-        await setAIPreferences(updatedPreferences);
-      } catch (error) {
-        console.error('Failed to save AI preferences:', error);
-      } finally {
-        setIsSaving(false);
-      }
-    }, 1000);
-
-    setSaveTimeout(timeout);
   };
+
+  useImperativeHandle(ref, () => ({
+    save: handleSave
+  }));
 
   return (
     <div className="space-y-6">
@@ -50,7 +42,6 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
                     : { ...localPreferences, opportunities: localPreferences.opportunities.filter(o => o !== opportunity)};
 
                   setLocalPreferences(updated);
-                  debouncedSave(updated);
                 }}
                 className="mr-2"
               />
@@ -74,7 +65,6 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
                     : { ...localPreferences, prioritizeBy: localPreferences.prioritizeBy.filter(p => p !== priority) };
                   
                   setLocalPreferences(updated);
-                  debouncedSave(updated);
                 }}
                 className="mr-2"
               />
@@ -91,15 +81,15 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
           onChange={(e) => {
             const updated = {...localPreferences, salaryExpectation: e.target.value};
             setLocalPreferences(updated);
-            debouncedSave(updated);
           }}
           rows={2}
           className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
-        {isSaving && (
-          <div className="text-sm text-blue-600 mb-2">Saving...</div>
-        )}
       </div>
     </div>
   );
-}
+});
+
+AITab.displayName = 'AITab';
+
+export default AITab;

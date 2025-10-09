@@ -21,7 +21,7 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
   const { user: _authUser } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
-const [forceDocuments, setForceDocuments] = useState<any[]>([]);
+  const [forceDocuments, setForceDocuments] = useState<any[]>([]);
   
   // Use the profile hook from the profile module
   const {
@@ -44,6 +44,10 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
   }, [documents]);
 
   const personalTabRef = useRef<any>(null);
+  const aiTabRef = useRef<any>(null);
+  const educationTabRef = useRef<any>(null);
+  const experienceTabRef = useRef<any>(null);
+  const projectTabRef = useRef<any>(null);
 
   // Transform the backend data to match the component expectations
   const transformedData = useMemo(() => ({
@@ -211,7 +215,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
         await updateProfile({
           education: newEducation,
         });
-        // await refreshProfile(); // Refresh to get updated data
+        await refreshProfile(); // Refresh to get updated data
       } catch (err) {
         console.error('Failed to update education:', err);
         throw err;
@@ -256,11 +260,16 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
           ai_assistance_enabled: newAIPreferences.ai_assistance_enabled,
           preferred_communication_style: newAIPreferences.preferred_communication_style,
           job_alert_frequency: newAIPreferences.job_alert_frequency,
+          opportunities: newAIPreferences.opportunities,
+          prioritizeBy: newAIPreferences.prioritizeBy,
+          salaryExpectation: newAIPreferences.salaryExpectation,
         };
         
         await updateUser({
           profile_data: updatedProfileData,
         });
+
+        await refreshProfile();
       } catch (err) {
         console.error('Failed to update AI preferences:', err);
         throw err;
@@ -414,7 +423,6 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
     setProjects,
     setAIPreferences,
     fetchProfileData,
-    handleSave,
     addEducation,
     deleteEducationEntry,
     addExperience,
@@ -759,6 +767,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                   {activeTab === 'Education' && (
                     <EducationTab
+                      ref={educationTabRef}
                       education={education}
                       setEducation={setEducation}
                       addEducation={addEducation}
@@ -768,6 +777,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                   {activeTab === 'Experience' && (
                     <ExperienceTab
+                      ref={experienceTabRef}
                       experience={experience}
                       setExperience={setExperience}
                       addExperience={addExperience}
@@ -777,6 +787,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                   {activeTab === 'Projects' && (
                     <ProjectsTab
+                      ref={projectTabRef}
                       projects={projects}
                       setProjects={setProjects}
                       addProject={addProject}
@@ -786,6 +797,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                   {activeTab === 'AI' && (
                     <AITab
+                      ref={aiTabRef}
                       aiPreferences={aiPreferences}
                       setAIPreferences={setAIPreferences}
                     />
@@ -811,6 +823,18 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
                           if (activeTab === 'Personal' && personalTabRef.current) {
                             await personalTabRef.current.save();
                           }
+                          if (activeTab === 'Education' && educationTabRef.current) {
+                            await educationTabRef.current.save();
+                          }
+                          if (activeTab === 'Experience' && experienceTabRef.current) {
+                            await experienceTabRef.current.save();
+                          }
+                          if (activeTab === 'Projects' && projectTabRef.current) {
+                            await projectTabRef.current.save();
+                          }
+                          if (activeTab === 'AI' && aiTabRef.current) {
+                            await aiTabRef.current.save();
+                          }
                           const currentIndex = tabs.indexOf(activeTab);
                           if (currentIndex < tabs.length - 1) {
                             setActiveTab(tabs[currentIndex + 1]);
@@ -821,7 +845,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
                       }}
                       disabled={loading}
                     >
-                      {loading ? 'Saving...' : 'Save & Next'}
+                      {loading ? 'Saving...' : (activeTab === 'AI' ? 'Save' : 'Save & Next')}
                     </button>
                   </div>
                 </div>
@@ -888,6 +912,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                 {activeTab === 'Education' && (
                   <EducationTab
+                    ref={educationTabRef}
                     education={education}
                     setEducation={setEducation}
                     addEducation={addEducation}
@@ -897,6 +922,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                 {activeTab === 'Experience' && (
                   <ExperienceTab
+                    ref={experienceTabRef}
                     experience={experience}
                     setExperience={setExperience}
                     addExperience={addExperience}
@@ -906,6 +932,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                 {activeTab === 'Projects' && (
                   <ProjectsTab
+                    ref={projectTabRef}
                     projects={projects}
                     setProjects={setProjects}
                     addProject={addProject}
@@ -915,6 +942,7 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
 
                 {activeTab === 'AI' && (
                   <AITab
+                    ref={aiTabRef}
                     aiPreferences={aiPreferences}
                     setAIPreferences={setAIPreferences}
                   />
@@ -923,7 +951,28 @@ const [forceDocuments, setForceDocuments] = useState<any[]>([]);
                 {/* Mobile Action Buttons */}
                 <div className="flex flex-col gap-3 mt-6 pt-6 border-t">
                   <button
-                    onClick={() => handleSave(activeTab)}
+                    onClick={async () => {
+                        try {
+                          if (activeTab === 'Personal' && personalTabRef.current) {
+                            await personalTabRef.current.save();
+                          }
+                          if (activeTab === 'Education' && educationTabRef.current) {
+                            await educationTabRef.current.save();
+                          }
+                          if (activeTab === 'Experience' && experienceTabRef.current) {
+                            await experienceTabRef.current.save();
+                          }
+                          if (activeTab === 'AI' && aiTabRef.current) {
+                            await aiTabRef.current.save();
+                          }
+                          const currentIndex = tabs.indexOf(activeTab);
+                          if (currentIndex < tabs.length - 1) {
+                            setActiveTab(tabs[currentIndex + 1]);
+                          }
+                        } catch (error) {
+                          console.error('Save failed:', error);
+                        }
+                    }}
                     disabled={loading}
                     className="w-full px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                   >
