@@ -73,16 +73,16 @@ function App() {
           <ToastProvider>
             <Router>
                 <Routes>
-                {/* Public routes - Redirect authenticated users to dashboard */}
+                {/* Authentication routes - Redirect authenticated users to dashboard */}
                 <Route element={<PublicRoute />}>
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
-                  
-                  {/* Routes with main layout - Public */}
-                  <Route element={<MainLayout />}>
-                    <Route index element={<Homepage />} />
-                  </Route>
+                </Route>
+
+                {/* Public routes - Always accessible */}
+                <Route element={<MainLayout />}>
+                  <Route index element={<Homepage />} />
                 </Route>
 
                 {/* Protected routes - Require authentication */}
