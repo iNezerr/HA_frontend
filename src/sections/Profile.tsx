@@ -48,6 +48,7 @@ export default function Profile() {
   const educationTabRef = useRef<any>(null);
   const experienceTabRef = useRef<any>(null);
   const projectTabRef = useRef<any>(null);
+  const careerProfileRef = useRef<any>(null);
 
   // Transform the backend data to match the component expectations
   const transformedData = useMemo(() => ({
@@ -746,6 +747,7 @@ export default function Profile() {
 
                   {activeTab === 'Career Profile' && (
                     <CareerProfileTab
+                      ref={careerProfileRef}
                       careerProfile={careerProfile}
                       setCareerProfile={setCareerProfile}
                       cvFile={cvFile}
@@ -823,6 +825,9 @@ export default function Profile() {
                           if (activeTab === 'Personal' && personalTabRef.current) {
                             await personalTabRef.current.save();
                           }
+                          if (activeTab === 'Career Profile' && careerProfileRef.current) {
+                            await careerProfileRef.current.save();
+                          }
                           if (activeTab === 'Education' && educationTabRef.current) {
                             await educationTabRef.current.save();
                           }
@@ -891,6 +896,7 @@ export default function Profile() {
 
                 {activeTab === 'Career Profile' && (
                   <CareerProfileTab
+                    ref={careerProfileRef}
                     careerProfile={careerProfile}
                     setCareerProfile={setCareerProfile}
                     cvFile={cvFile}
@@ -952,26 +958,32 @@ export default function Profile() {
                 <div className="flex flex-col gap-3 mt-6 pt-6 border-t">
                   <button
                     onClick={async () => {
-                        try {
-                          if (activeTab === 'Personal' && personalTabRef.current) {
-                            await personalTabRef.current.save();
-                          }
-                          if (activeTab === 'Education' && educationTabRef.current) {
-                            await educationTabRef.current.save();
-                          }
-                          if (activeTab === 'Experience' && experienceTabRef.current) {
-                            await experienceTabRef.current.save();
-                          }
-                          if (activeTab === 'AI' && aiTabRef.current) {
-                            await aiTabRef.current.save();
-                          }
-                          const currentIndex = tabs.indexOf(activeTab);
-                          if (currentIndex < tabs.length - 1) {
-                            setActiveTab(tabs[currentIndex + 1]);
-                          }
-                        } catch (error) {
-                          console.error('Save failed:', error);
+                      try {
+                        if (activeTab === 'Personal' && personalTabRef.current) {
+                          await personalTabRef.current.save();
                         }
+                        if (activeTab === 'Career Profile' && careerProfileRef.current) {
+                          await careerProfileRef.current.save();
+                        }
+                        if (activeTab === 'Education' && educationTabRef.current) {
+                          await educationTabRef.current.save();
+                        }
+                        if (activeTab === 'Experience' && experienceTabRef.current) {
+                          await experienceTabRef.current.save();
+                        }
+                        if (activeTab === 'Projects' && projectTabRef.current) {
+                          await projectTabRef.current.save();
+                        }
+                        if (activeTab === 'AI' && aiTabRef.current) {
+                          await aiTabRef.current.save();
+                        }
+                        const currentIndex = tabs.indexOf(activeTab);
+                        if (currentIndex < tabs.length - 1) {
+                          setActiveTab(tabs[currentIndex + 1]);
+                        }
+                      } catch (error) {
+                        console.error('Save failed:', error);
+                      }
                     }}
                     disabled={loading}
                     className="w-full px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"

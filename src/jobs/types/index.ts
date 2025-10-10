@@ -16,6 +16,8 @@ export interface Job {
   is_active: boolean;
   is_saved?: boolean;
   is_applied?: boolean;
+  apply_link?: string;
+  application_url?:  string;
   similarity_score?: number;
   opportunity_type: 'job';
 }

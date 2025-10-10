@@ -2,21 +2,21 @@ import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import SEO from '../components/SEO';
 
 const Hero = () => {
-    const images = [[
-        "/hero/google.svg",
-        "/hero/samsung.svg",
-        "/hero/meta.svg",
-        "/hero/wipro.svg",
-        "/hero/infosys.svg",
-        "/hero/slack.svg"
-    ], [
-        "/hero/mastercard.svg",
-        "/hero/jpmorgan.svg",
-        "/hero/americanairline.svg",
-        "/hero/zomato.svg",
-        "/hero/visa.svg",
-        "/hero/airbnb.svg"
-    ]];
+    // const images = [[
+    //     "/hero/google.svg",
+    //     "/hero/samsung.svg",
+    //     "/hero/meta.svg",
+    //     "/hero/wipro.svg",
+    //     "/hero/infosys.svg",
+    //     "/hero/slack.svg"
+    // ], [
+    //     "/hero/mastercard.svg",
+    //     "/hero/jpmorgan.svg",
+    //     "/hero/americanairline.svg",
+    //     "/hero/zomato.svg",
+    //     "/hero/visa.svg",
+    //     "/hero/airbnb.svg"
+    // ]];
 
     return (
         <>
@@ -76,7 +76,7 @@ const Hero = () => {
                     Upload or create a resume to easily apply to job
                 </p>
 
-                <h2 className="text-[#3D84FF] font-semibold text-sm px-6 py-2 bg-[#4B9CD31A] rounded-full flex items-center justify-center leading-tight mt-6">
+                {/* <h2 className="text-[#3D84FF] font-semibold text-sm px-6 py-2 bg-[#4B9CD31A] rounded-full flex items-center justify-center leading-tight mt-6">
                     collaboration partners
                 </h2>
 
@@ -100,7 +100,7 @@ const Hero = () => {
                             })}
                         </div>
                     ))}
-                </div>
+                </div> */}
             </section>
         </>
     );

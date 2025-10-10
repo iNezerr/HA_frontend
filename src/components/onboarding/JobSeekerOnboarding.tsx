@@ -80,9 +80,12 @@ const JobSeekerOnboarding: React.FC<JobSeekerOnboardingProps> = ({
       let updatedData = { ...formData };
       
       if (currentStep === 1 && file) {
-        // Upload CV file to GCS through backend with progress tracking
         const uploadResponse = await uploadDocumentWithProgress(file) as DocumentUploadResponse;
         updatedData.cv_file_url = uploadResponse.document_id;
+      }
+      
+      if (currentStep === 2 && updatedData.personal_info?.phone) {
+        updatedData.phone = updatedData.personal_info.phone;
       }
       
       onStepComplete(updatedData);

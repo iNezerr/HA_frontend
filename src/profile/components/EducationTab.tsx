@@ -120,6 +120,7 @@ const EducationTab = forwardRef<{ save: () => Promise<void> }, EducationTabProps
           </div>
         ))}
         <button
+          type="button"
           onClick={addEducation}
           className="flex items-center text-blue-600 hover:text-blue-800"
         >

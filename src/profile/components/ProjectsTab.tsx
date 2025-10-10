@@ -115,6 +115,7 @@ const ProjectsTab = forwardRef<{ save: () => Promise<void> }, ProjectsTabProps>(
           </div>
         ))}
         <button
+          type="button"
           onClick={addProject}
           className="flex items-center text-blue-600 hover:text-blue-800"
         >

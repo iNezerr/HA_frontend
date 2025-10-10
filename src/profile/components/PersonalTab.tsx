@@ -240,4 +240,6 @@ const PersonalTab = forwardRef<PersonalTabRef, PersonalTabProps>(({
   );
 });
 
+PersonalTab.displayName = 'PersonalTab';
+
 export default PersonalTab;

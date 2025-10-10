@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Bookmark, Loader2, AlertCircle, Filter, X } from 'lucide-react';
 import { Job, JobFilters, JobsResponse } from '../jobs/types';
 import { JobCard } from '../jobs/components/JobCard';
-import { getSavedJobs, toggleSaveJob, applyToJob } from '../jobs/services/jobsApi';
+import { getSavedJobs, unsaveJob, applyToJob } from '../jobs/services/jobsApi';
 
 const SaveJobs: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -30,7 +30,8 @@ const SaveJobs: React.FC = () => {
         if (item.opportunity_details) {
           return {
             ...item.opportunity_details,
-            id: item.id || item.opportunity_details.id,
+            id: item.opportunity_details.id,
+            // saved_job_id: item.id,
             is_saved: item.is_saved ?? true,
             is_applied: item.is_applied ?? false,
           };
@@ -57,10 +58,7 @@ const SaveJobs: React.FC = () => {
 
   const handleUnsave = async (jobId: string) => {
     try {
-      const savedJob = jobs.find(job => job.id === jobId);
-      const savedJobId = (savedJob as any)?.saved_job_id || jobId;
-      
-      await toggleSaveJob(savedJobId);
+      await unsaveJob(jobId);
       
       setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
       setTotalCount(prev => prev - 1);
@@ -72,7 +70,13 @@ const SaveJobs: React.FC = () => {
   };
 
   const handleApply = async (jobId: string) => {
-    try {
+  try {
+    const job = jobs.find(j => j.id === jobId);
+    const applyUrl = job?.apply_link || job?.application_url || job?.url;
+    
+    if (applyUrl) {
+      window.open(applyUrl, '_blank', 'noopener,noreferrer');
+      
       await applyToJob(jobId);
       
       setJobs(prevJobs =>
@@ -80,12 +84,16 @@ const SaveJobs: React.FC = () => {
           job.id === jobId ? { ...job, is_applied: true } : job
         )
       );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to apply to job';
-      console.error('Error applying to job:', err);
-      setError(errorMessage);
+    } else {
+      console.warn('No application URL found for job:', job);
+      setError('Application link not available for this job');
     }
-  };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to apply to job';
+    console.error('Error applying to job:', err);
+    setError(errorMessage);
+  }
+};
 
   const handleFilterChange = (key: keyof JobFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
@@ -228,18 +236,9 @@ const SaveJobs: React.FC = () => {
               <div key={job.id} className="relative">
                 <JobCard
                   job={job}
-                  onSave={undefined} // Don't show save button on saved jobs page
+                  onSave={handleUnsave}
                   onApply={handleApply}
                 />
-                {/* Add unsave button in top right */}
-                <button
-                  onClick={() => handleUnsave(job.id)}
-                  className="absolute top-4 right-4 flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
-                  title="Remove from saved jobs"
-                >
-                  <X className="w-4 h-4" />
-                  Remove
-                </button>
               </div>
             ))}
           </div>

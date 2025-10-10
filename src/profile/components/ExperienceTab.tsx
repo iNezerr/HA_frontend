@@ -117,6 +117,7 @@ const ExperienceTab = forwardRef<{ save: () => Promise<void> }, ExperienceTabPro
         </div>
       ))}
       <button
+        type="button"
         onClick={addExperience}
         className="flex items-center text-blue-600 hover:text-blue-800"
       >

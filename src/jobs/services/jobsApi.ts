@@ -57,10 +57,17 @@ export const getJob = async (jobId: string): Promise<Job> => {
 };
 
 /**
- * Save/unsave a job
+ * Save a job
  */
 export const toggleSaveJob = async (jobId: string): Promise<JobInteraction> => {
   return client.post(`${APPLICATIONS_API_BASE}/opportunities/${jobId}/save/`);
+};
+
+/**
+ * Unsave a job
+ */
+export const unsaveJob = async (jobId: string): Promise<JobInteraction> => {
+  return client.post(`${APPLICATIONS_API_BASE}/opportunities/${jobId}/unsave/`);
 };
 
 /**
