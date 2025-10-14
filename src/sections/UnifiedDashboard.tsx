@@ -137,9 +137,11 @@ const UnifiedDashboard: React.FC = () => {
       user: user ? { uid: user.uid, email: user.email } : null
     });
     
-    if (!isOnboardingComplete || !currentUserType) {
-      // Redirect to onboarding if not complete
-      console.log('⚠️ Redirecting to onboarding: incomplete or no user type');
+    // Only redirect to onboarding if user has no user_type at all
+    // If they have a user_type but onboarding is not complete, show dashboard with completion prompt
+    if (!currentUserType) {
+      // No user type selected - redirect to onboarding for user type selection
+      console.log('⚠️ Redirecting to onboarding: no user type selected');
       navigate('/onboarding', { replace: true });
       return;
     }

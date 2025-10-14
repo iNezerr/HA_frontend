@@ -25,6 +25,7 @@ export interface Scholarship {
   application_link?: string;
   url?: string;
   description?: string;
+  url?: string;
   is_saved?: boolean;
   is_applied?: boolean;
   similarity_score?: number;
@@ -33,6 +34,6 @@ export interface Scholarship {
 export interface ScholarshipsResponse {
   results: Scholarship[];
   count: number;
-  next?: string;
-  previous?: string;
+  next: string | null;
+  previous: string | null;
 }

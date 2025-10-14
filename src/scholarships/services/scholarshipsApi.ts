@@ -25,6 +25,7 @@ export interface Scholarship {
   is_applied?: boolean;
   similarity_score?: number;
   opportunity_type: 'scholarship';
+  saved_scholarship_id?: string;
 }
 
 // ScholarshipFilters interface
@@ -47,8 +48,8 @@ export interface ScholarshipFilters {
 export interface ScholarshipsResponse {
   results: Scholarship[];
   count: number;
-  next?: string;
-  previous?: string;
+  next: string | null;
+  previous: string | null;
 }
 
 // ScholarshipInteraction interface

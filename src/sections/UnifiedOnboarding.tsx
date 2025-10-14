@@ -26,7 +26,7 @@ const UnifiedOnboarding: React.FC = () => {
   useEffect(() => {
     // Check if user is authenticated
     if (!isAuthenticated) {
-      navigate('/auth/login', { replace: true });
+      navigate('/login', { replace: true });
       return;
     }
 

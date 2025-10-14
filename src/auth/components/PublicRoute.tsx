@@ -6,11 +6,13 @@ interface PublicRouteProps {
 }
 
 /**
- * PublicRoute component that redirects authenticated users away from public pages
- * (like login, signup, landing) to their appropriate dashboard.
- * 
+ * PublicRoute component that redirects authenticated users away from auth pages
+ * (like login, signup) to their appropriate dashboard.
+ *
  * Staff users are redirected to /admin
  * Regular users are redirected to /dashboard
+ * 
+ * Note: This component should only wrap authentication pages, not general public pages like homepage
  */
 const PublicRoute = ({ children }: PublicRouteProps) => {
   const { isAuthenticated, user, loading } = useAuth();
