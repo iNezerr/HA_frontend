@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { validatePersonalInfo, sanitizeInput } from '../../utils/validation';
 
 interface PersonalInfo {
@@ -13,25 +13,58 @@ interface PersonalInfo {
   goal?: string;
 }
 
+interface PersonalTabRef {
+  save: () => Promise<void>;
+}
+
 interface PersonalTabProps {
   personalInfo: PersonalInfo;
   setPersonalInfo: (info: PersonalInfo) => void;
   validationErrors?: string[];
 }
 
-const PersonalTab: React.FC<PersonalTabProps> = ({
+const PersonalTab = forwardRef<PersonalTabRef, PersonalTabProps>(({
   personalInfo,
   setPersonalInfo,
   validationErrors = []
-}) => {
+}, ref) => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [localInfo, setLocalInfo] = useState<PersonalInfo>(personalInfo);
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      const validationData = {
+        name: localInfo.name || '',
+        email: localInfo.email || '',
+        phone: localInfo.phone || '',
+        country: localInfo.country || '',
+        goal: localInfo.goal || ''
+      };
+      
+      const validation = validatePersonalInfo(validationData);
+      
+      if (!validation.isValid) {
+        const errors: Record<string, string> = {};
+        validation.errors.forEach(error => {
+          if (error.includes('Name')) errors.name = error;
+          if (error.includes('Email')) errors.email = error;
+          if (error.includes('Phone')) errors.phone = error;
+          if (error.includes('Country')) errors.country = error;
+        });
+        setFieldErrors(errors);
+        throw new Error('Validation failed');
+      }
+
+      await setPersonalInfo(localInfo);
+    }
+  }));
 
   // Real-time validation on field change
   const handleFieldChange = (field: keyof PersonalInfo, value: string) => {
     const sanitizedValue = sanitizeInput(value);
 
-    setPersonalInfo({ ...personalInfo, [field]: sanitizedValue });
+    setLocalInfo({ ...localInfo, [field]: sanitizedValue });
 
     // Mark field as touched
     setTouchedFields((prev: Record<string, boolean>) => ({ ...prev, [field]: true }));
@@ -46,11 +79,11 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
   const handleFieldBlur = (field: keyof PersonalInfo) => {
     // Create validation data object with required fields
     const validationData = {
-      name: personalInfo.name || '',
-      email: personalInfo.email || '',
-      phone: personalInfo.phone || '',
-      country: personalInfo.country || '',
-      goal: personalInfo.goal || ''
+      name: localInfo.name || '',
+      email: localInfo.email || '',
+      phone: localInfo.phone || '',
+      country: localInfo.country || '',
+      goal: localInfo.goal || ''
     };
     
     const validation = validatePersonalInfo(validationData);
@@ -104,7 +137,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           </label>
           <input
             type="text"
-            value={personalInfo.name || ''}
+            value={localInfo.name || ''}
             onChange={(e) => handleFieldChange('name', e.target.value)}
             onBlur={() => handleFieldBlur('name')}
             className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${touchedFields.name && !isFieldValid('name')
@@ -124,7 +157,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           </label>
           <input
             type="email"
-            value={personalInfo.email}
+            value={localInfo.email}
             onChange={(e) => handleFieldChange('email', e.target.value)}
             onBlur={() => handleFieldBlur('email')}
             className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${touchedFields.email && !isFieldValid('email')
@@ -146,7 +179,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           </label>
           <input
             type="tel"
-            value={personalInfo.phone}
+            value={localInfo.phone}
             onChange={(e) => handleFieldChange('phone', e.target.value)}
             onBlur={() => handleFieldBlur('phone')}
             className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${touchedFields.phone && !isFieldValid('phone')
@@ -166,7 +199,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           </label>
           <input
             type="text"
-            value={personalInfo.country || ''}
+            value={localInfo.country || ''}
             onChange={(e) => handleFieldChange('country', e.target.value)}
             onBlur={() => handleFieldBlur('country')}
             className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${touchedFields.country && !isFieldValid('country')
@@ -186,7 +219,7 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
           Career Goal
         </label>
         <textarea
-          value={personalInfo.goal || ''}
+          value={localInfo.goal || ''}
           onChange={(e) => handleFieldChange('goal', e.target.value)}
           onBlur={() => handleFieldBlur('goal')}
           rows={3}
@@ -205,6 +238,8 @@ const PersonalTab: React.FC<PersonalTabProps> = ({
       </div>
     </div>
   );
-};
+});
+
+PersonalTab.displayName = 'PersonalTab';
 
 export default PersonalTab;

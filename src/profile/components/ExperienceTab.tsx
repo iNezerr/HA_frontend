@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Experience } from '../../types/user';
 
@@ -9,56 +9,30 @@ interface ExperienceTabProps {
   deleteExperienceEntry: (id: string, index: number) => Promise<void>;
 }
 
-const ExperienceTab: React.FC<ExperienceTabProps> = ({ 
-  experience, 
-  setExperience, 
-  addExperience, 
-  deleteExperienceEntry 
-}) => {
+const ExperienceTab = forwardRef<{ save: () => Promise<void> }, ExperienceTabProps>(({ experience, setExperience, addExperience, deleteExperienceEntry }, ref) => {
   // Local state for immediate UI updates
   const [localExperience, setLocalExperience] = useState<Experience[]>(experience);
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Update local state when prop changes (e.g., after add/delete)
-  useEffect(() => {
-    setLocalExperience(experience);
-  }, [experience]);
-
-  // Debounced save function
-  const debouncedSave = (updatedExperience: Experience[]) => {
-    // Clear existing timeout
-    if (saveTimeout) {
-      clearTimeout(saveTimeout);
-    }
-
-    // Set new timeout for 1 second
-    const timeout = setTimeout(async () => {
-      setIsSaving(true);
-      try {
-        await setExperience(updatedExperience);
-      } catch (error) {
-        console.error('Failed to save experience:', error);
-      } finally {
-        setIsSaving(false);
-      }
-    }, 1000);
-
-    setSaveTimeout(timeout);
-  };
 
   const handleChange = (index: number, field: keyof Experience, value: any) => {
     const updated = [...localExperience];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = { ...updated[index], [field]: value};
     setLocalExperience(updated);
-    debouncedSave(updated);
   };
+
+  const handleSave = async () => {
+    try {
+      await setExperience(localExperience);
+    } catch (error) {
+      console.log("failed to save experience:", error);
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    save: handleSave
+  }));
 
   return (
     <div className="space-y-6">
-      {isSaving && (
-        <div className="text-sm text-blue-600 mb-2">Saving...</div>
-      )}
       {localExperience.map((exp, index) => (
         <div key={exp.id} className="border border-gray-200 rounded-lg p-4 relative">
           {experience.length > 1 && (
@@ -143,6 +117,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
         </div>
       ))}
       <button
+        type="button"
         onClick={addExperience}
         className="flex items-center text-blue-600 hover:text-blue-800"
       >
@@ -151,6 +126,8 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
       </button>
     </div>
   );
-};
+});
+
+ExperienceTab.displayName = 'ExperienceTab';
 
 export default ExperienceTab;

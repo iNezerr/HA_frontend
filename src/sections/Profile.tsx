@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import {
   User,
   ExternalLink,
@@ -11,6 +11,7 @@ import { useAuth } from '../auth/context/AuthContext';
 import { useProfile } from '../profile/hooks/useProfile';
 import PersonalTab from '../profile/components/PersonalTab';
 import CareerProfileTab from '../profile/components/CareerProfileTab';
+import { CareerProfileData } from '../profile/services/userAPI_new';
 import EducationTab from '../profile/components/EducationTab';
 import ExperienceTab from '../profile/components/ExperienceTab';
 import ProjectsTab from '../profile/components/ProjectsTab';
@@ -19,6 +20,8 @@ import AITab from '../profile/components/AITab';
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('Personal');
   const { user: _authUser } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [forceDocuments, setForceDocuments] = useState<any[]>([]);
   
   // Use the profile hook from the profile module
   const {
@@ -34,8 +37,21 @@ export default function Profile() {
     uploadDocument,
   } = useProfile();
 
+  useEffect(() => {
+    if (documents && documents.length > 0) {
+      setForceDocuments(documents);
+    }
+  }, [documents]);
+
+  const personalTabRef = useRef<any>(null);
+  const aiTabRef = useRef<any>(null);
+  const educationTabRef = useRef<any>(null);
+  const experienceTabRef = useRef<any>(null);
+  const projectTabRef = useRef<any>(null);
+  const careerProfileRef = useRef<any>(null);
+
   // Transform the backend data to match the component expectations
-  const transformedData = {
+  const transformedData = useMemo(() => ({
     loading,
     error,
     validationErrors: {} as Record<string, string[]>,
@@ -57,18 +73,30 @@ export default function Profile() {
       bio: user?.profile?.summary || '',
       goal: user?.profile_data?.career_goal || ''
     },
-    cvFile: documents.find(doc => doc.document_type === 'cv') ? {
-      filename: documents.find(doc => doc.document_type === 'cv')?.filename || '',
-      uploadedAt: documents.find(doc => doc.document_type === 'cv')?.uploaded_at || '',
-      downloadUrl: documents.find(doc => doc.document_type === 'cv')?.gcs_url || ''
-    } : undefined,
+    cvFile: (() => {
+      const allDocs = forceDocuments.length > 0 ? forceDocuments : (documents || []);
+      const cvDoc = allDocs.find(doc => doc.document_type === 'cv');
+      
+      if (cvDoc) {
+        return {
+          filename: cvDoc.original_filename || cvDoc.filename || 'Resume.pdf',
+          uploadedAt: cvDoc.uploaded_at || '',
+          downloadUrl: cvDoc.signed_download_url || cvDoc.gcs_url || '',
+          hasCvInGcs: !!(cvDoc.signed_download_url || cvDoc.gcs_url)
+        };
+      }
+      
+      return undefined;
+    })(),
     careerProfile: {
       current_role: user?.profile_data?.current_role || '',
       career_level: user?.profile_data?.career_level || '',
       industry: user?.profile_data?.industry || '',
       skills: user?.profile?.skills || [],
-      preferred_roles: user?.profile_data?.preferred_roles || []
-    },
+      preferred_roles: user?.profile_data?.preferred_roles || [],
+      jobTitle: user?.profile_data?.current_role || '',
+      profileSummary: user?.profile?.summary || ''
+    } as CareerProfileData,
     education: (user?.profile?.education && user.profile.education.length > 0) 
       ? user.profile.education 
       : [{
@@ -147,16 +175,29 @@ export default function Profile() {
         throw err;
       }
     },
-    setCareerProfile: async (newCareerProfile: any) => {
+    setCareerProfile: async (newCareerProfile: CareerProfileData) => {
       try {
+        const hasChanges = JSON.stringify({
+          gcs_url: user?.profile_data?.gcs_url,
+          skills: user?.profile?.skills,
+          current_role: user?.profile_data?.current_role,
+          career_level: user?.profile_data?.career_level,
+          industry: user?.profile_data?.industry,
+          preferred_roles: user?.profile_data?.preferred_roles,
+          jobTitle: user?.profile_data?.current_role,
+          profileSummary: user?.profile?.summary
+        }) !== JSON.stringify(newCareerProfile);
+        
+        if (!hasChanges) return;
+        
         await updateProfile({
           skills: newCareerProfile.skills,
+          summary: newCareerProfile.profileSummary
         });
         
-        // Update profile_data for other career fields
         const updatedProfileData = {
           ...user?.profile_data,
-          current_role: newCareerProfile.current_role,
+          current_role: newCareerProfile.current_role || newCareerProfile.jobTitle,
           career_level: newCareerProfile.career_level,
           industry: newCareerProfile.industry,
           preferred_roles: newCareerProfile.preferred_roles,
@@ -220,11 +261,16 @@ export default function Profile() {
           ai_assistance_enabled: newAIPreferences.ai_assistance_enabled,
           preferred_communication_style: newAIPreferences.preferred_communication_style,
           job_alert_frequency: newAIPreferences.job_alert_frequency,
+          opportunities: newAIPreferences.opportunities,
+          prioritizeBy: newAIPreferences.prioritizeBy,
+          salaryExpectation: newAIPreferences.salaryExpectation,
         };
         
         await updateUser({
           profile_data: updatedProfileData,
         });
+
+        await refreshProfile();
       } catch (err) {
         console.error('Failed to update AI preferences:', err);
         throw err;
@@ -356,7 +402,7 @@ export default function Profile() {
         console.error('Failed to delete project:', err);
       }
     }
-  };
+  }), [user, loading, documents, error, forceDocuments, updateProfile, updateUser, refreshProfile, uploadDocument, refreshKey]);
 
   // Use the transformed data
   const {
@@ -378,7 +424,6 @@ export default function Profile() {
     setProjects,
     setAIPreferences,
     fetchProfileData,
-    handleSave,
     addEducation,
     deleteEducationEntry,
     addExperience,
@@ -477,32 +522,63 @@ export default function Profile() {
       {/* CV File Section */}
       {cvFile && (
         <div className="mt-6 sm:mt-8 p-3 bg-gray-50 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-900 truncate">{cvFile.filename}</p>
-                {cvFile.uploadedAt && (
-                  <p className="text-xs text-gray-500">
-                    Uploaded {new Date(cvFile.uploadedAt).toLocaleDateString()}
-                  </p>
-                )}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-900 truncate" title={cvFile.filename}>{cvFile.filename}</p>
+                  {cvFile.uploadedAt && (
+                    <p className="text-xs text-gray-500">
+                      Uploaded {new Date(cvFile.uploadedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-            {cvFile.downloadUrl && (
-              <a
-                href={cvFile.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 text-xs font-medium"
+            
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {cvFile.downloadUrl && (
+                <a
+                  href={cvFile.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-center px-3 py-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium border border-blue-300 rounded hover:bg-blue-50"
+                >
+                  View
+                </a>
+              )}
+              <label
+                htmlFor="cv-sidebar-replace"
+                className="flex-1 text-center px-3 py-1.5 text-xs text-orange-600 hover:text-orange-700 font-medium border border-orange-300 rounded hover:bg-orange-50 cursor-pointer"
               >
-                View
-              </a>
-            )}
+                Replace
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      await uploadDocument(file, 'cv');
+                      await refreshProfile();
+                      setRefreshKey(prev => prev + 1);
+                    } catch (error) {
+                      console.error('Upload failed:', error);
+                    }
+                  }
+                  e.target.value = '';
+                }}
+                className="hidden"
+                id="cv-sidebar-replace"
+              />
+            </div>
           </div>
         </div>
       )}
@@ -525,6 +601,7 @@ export default function Profile() {
                 if (file) {
                   try {
                     await uploadDocument(file, 'cv');
+                    await refreshProfile();
                   } catch (error) {
                     console.error('Upload failed:', error);
                   }
@@ -661,6 +738,7 @@ export default function Profile() {
                 <div className="bg-white rounded-lg p-6">
                   {activeTab === 'Personal' && (
                     <PersonalTab
+                      ref={personalTabRef}
                       personalInfo={personalInfo}
                       setPersonalInfo={setPersonalInfo}
                       validationErrors={validationErrors.personal || []}
@@ -669,12 +747,21 @@ export default function Profile() {
 
                   {activeTab === 'Career Profile' && (
                     <CareerProfileTab
+                      ref={careerProfileRef}
                       careerProfile={careerProfile}
                       setCareerProfile={setCareerProfile}
                       cvFile={cvFile}
-                      onCvUpload={() => {
-                        // Refresh profile data after CV upload
-                        fetchProfileData();
+                      onCvUpload={async (uploadedDoc) => {
+                        if (uploadedDoc) {
+                          setForceDocuments(prev => {
+                            const filtered = prev.filter(doc => doc.document_type !== 'cv');
+                            return [...filtered, uploadedDoc];
+                          });
+                        }
+                        
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        await refreshProfile();
+                        setRefreshKey(prev => prev + 1);
                       }}
                       validationErrors={validationErrors.career || []}
                     />
@@ -682,6 +769,7 @@ export default function Profile() {
 
                   {activeTab === 'Education' && (
                     <EducationTab
+                      ref={educationTabRef}
                       education={education}
                       setEducation={setEducation}
                       addEducation={addEducation}
@@ -691,6 +779,7 @@ export default function Profile() {
 
                   {activeTab === 'Experience' && (
                     <ExperienceTab
+                      ref={experienceTabRef}
                       experience={experience}
                       setExperience={setExperience}
                       addExperience={addExperience}
@@ -700,6 +789,7 @@ export default function Profile() {
 
                   {activeTab === 'Projects' && (
                     <ProjectsTab
+                      ref={projectTabRef}
                       projects={projects}
                       setProjects={setProjects}
                       addProject={addProject}
@@ -709,6 +799,7 @@ export default function Profile() {
 
                   {activeTab === 'AI' && (
                     <AITab
+                      ref={aiTabRef}
                       aiPreferences={aiPreferences}
                       setAIPreferences={setAIPreferences}
                     />
@@ -716,15 +807,50 @@ export default function Profile() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 pt-6 border-t">
-                    <button className="px-6 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
+                    <button
+                      onClick={() => {
+                        const currentIndex = tabs.indexOf(activeTab);
+                        if(currentIndex > 0) {
+                          setActiveTab(tabs[currentIndex - 1]);
+                        }
+                      }}
+                      disabled={tabs.indexOf(activeTab) === 0}
+                      className="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
                       Previous
                     </button>
                     <button
-                      onClick={() => handleSave(activeTab)}
+                      className='px-6 py-2 text-gray-800 border border-gray-300 rounded-lg hover:bg-white bg-blue-600'
+                      onClick={async () => {
+                        try {
+                          if (activeTab === 'Personal' && personalTabRef.current) {
+                            await personalTabRef.current.save();
+                          }
+                          if (activeTab === 'Career Profile' && careerProfileRef.current) {
+                            await careerProfileRef.current.save();
+                          }
+                          if (activeTab === 'Education' && educationTabRef.current) {
+                            await educationTabRef.current.save();
+                          }
+                          if (activeTab === 'Experience' && experienceTabRef.current) {
+                            await experienceTabRef.current.save();
+                          }
+                          if (activeTab === 'Projects' && projectTabRef.current) {
+                            await projectTabRef.current.save();
+                          }
+                          if (activeTab === 'AI' && aiTabRef.current) {
+                            await aiTabRef.current.save();
+                          }
+                          const currentIndex = tabs.indexOf(activeTab);
+                          if (currentIndex < tabs.length - 1) {
+                            setActiveTab(tabs[currentIndex + 1]);
+                          }
+                        } catch (error) {
+                          console.error('Save failed:', error);
+                        }
+                      }}
                       disabled={loading}
-                      className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {loading ? 'Saving...' : (activeTab === 'AI' ? 'Save' : 'Next')}
+                      {loading ? 'Saving...' : (activeTab === 'AI' ? 'Save' : 'Save & Next')}
                     </button>
                   </div>
                 </div>
@@ -770,18 +896,29 @@ export default function Profile() {
 
                 {activeTab === 'Career Profile' && (
                   <CareerProfileTab
+                    ref={careerProfileRef}
                     careerProfile={careerProfile}
                     setCareerProfile={setCareerProfile}
                     cvFile={cvFile}
-                    onCvUpload={() => {
-                      // Refresh profile data after CV upload
-                      fetchProfileData();
+                    onCvUpload={async (uploadedDoc) => {
+                      if (uploadedDoc) {
+                        setForceDocuments(prev => {
+                          const filtered = prev.filter(doc => doc.document_type !== 'cv');
+                          return [...filtered, uploadedDoc];
+                        });
+                      }
+                  
+                      await new Promise(resolve => setTimeout(resolve, 300));
+                      await refreshProfile();
+                      setRefreshKey(prev => prev + 1);
                     }}
+                    validationErrors={validationErrors.career || []}
                   />
                 )}
 
                 {activeTab === 'Education' && (
                   <EducationTab
+                    ref={educationTabRef}
                     education={education}
                     setEducation={setEducation}
                     addEducation={addEducation}
@@ -791,6 +928,7 @@ export default function Profile() {
 
                 {activeTab === 'Experience' && (
                   <ExperienceTab
+                    ref={experienceTabRef}
                     experience={experience}
                     setExperience={setExperience}
                     addExperience={addExperience}
@@ -800,6 +938,7 @@ export default function Profile() {
 
                 {activeTab === 'Projects' && (
                   <ProjectsTab
+                    ref={projectTabRef}
                     projects={projects}
                     setProjects={setProjects}
                     addProject={addProject}
@@ -809,6 +948,7 @@ export default function Profile() {
 
                 {activeTab === 'AI' && (
                   <AITab
+                    ref={aiTabRef}
                     aiPreferences={aiPreferences}
                     setAIPreferences={setAIPreferences}
                   />
@@ -817,7 +957,34 @@ export default function Profile() {
                 {/* Mobile Action Buttons */}
                 <div className="flex flex-col gap-3 mt-6 pt-6 border-t">
                   <button
-                    onClick={() => handleSave(activeTab)}
+                    onClick={async () => {
+                      try {
+                        if (activeTab === 'Personal' && personalTabRef.current) {
+                          await personalTabRef.current.save();
+                        }
+                        if (activeTab === 'Career Profile' && careerProfileRef.current) {
+                          await careerProfileRef.current.save();
+                        }
+                        if (activeTab === 'Education' && educationTabRef.current) {
+                          await educationTabRef.current.save();
+                        }
+                        if (activeTab === 'Experience' && experienceTabRef.current) {
+                          await experienceTabRef.current.save();
+                        }
+                        if (activeTab === 'Projects' && projectTabRef.current) {
+                          await projectTabRef.current.save();
+                        }
+                        if (activeTab === 'AI' && aiTabRef.current) {
+                          await aiTabRef.current.save();
+                        }
+                        const currentIndex = tabs.indexOf(activeTab);
+                        if (currentIndex < tabs.length - 1) {
+                          setActiveTab(tabs[currentIndex + 1]);
+                        }
+                      } catch (error) {
+                        console.error('Save failed:', error);
+                      }
+                    }}
                     disabled={loading}
                     className="w-full px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                   >

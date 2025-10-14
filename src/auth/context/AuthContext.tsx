@@ -14,8 +14,8 @@ interface User {
   
   // App-specific fields (to be populated from backend)
   id?: number;
-  first_name?: string;
-  last_name?: string;
+  first_name: string;
+  last_name: string;
   is_active?: boolean;
   is_staff?: boolean;
   is_superuser?: boolean;

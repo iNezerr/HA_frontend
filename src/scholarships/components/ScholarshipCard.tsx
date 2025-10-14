@@ -27,7 +27,7 @@ export const ScholarshipCard: React.FC<ScholarshipCardProps> = ({
     
     setSaving(true);
     try {
-      await onSave(scholarship.id.toString());
+      await onSave(String(scholarship.id));
     } catch (error) {
       console.error('Failed to save scholarship:', error);
     } finally {
@@ -46,7 +46,7 @@ export const ScholarshipCard: React.FC<ScholarshipCardProps> = ({
     
     setApplying(true);
     try {
-      await onApply(scholarship.id.toString());
+      await onApply(String(scholarship.id));
     } catch (error) {
       console.error('Failed to apply to scholarship:', error);
     } finally {

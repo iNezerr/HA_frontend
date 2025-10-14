@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useJobMatching } from '../jobs/hooks/useSimpleMatching';
+import { getSavedJobs, toggleSaveJob } from '../jobs/services/jobsApi';
 
 // Local Opportunity shape for UI display
 type Opportunity = {
@@ -10,6 +11,8 @@ type Opportunity = {
   salary_range?: string;
   match_percentage?: number;
   skills_required?: string[];
+  apply_link?: string;
+  application_url?: string;
 };
 
 interface RecommendedOpportunitiesProps {
@@ -32,7 +35,9 @@ export default function RecommendedOpportunities({
 
   // Convert job matches to opportunities format when data loads
   useEffect(() => {
+  const markSavedJobs = async () => {
     if (jobMatches.length > 0) {
+      // First map the jobs
       const mapped = jobMatches.map((job: any): Opportunity => ({
         id: String(job.id),
         title: job.title || job.job_title || '',
@@ -44,11 +49,30 @@ export default function RecommendedOpportunities({
             undefined),
         match_percentage: job.match_score ? Math.round(job.match_score * 100) : undefined,
         skills_required: job.skills_required || job.skills || job.requirements || [],
+        apply_link: job.apply_link || job.application_url || job.url || job.link || undefined,
+        application_url: job.application_url || job.apply_link || job.url || job.link || undefined,
       }));
+
+      // Fetch saved jobs and mark them
+      try {
+        const savedResponse = await getSavedJobs({ page: 1, page_size: 1000 });
+        const savedIds = new Set(
+          savedResponse.results?.map((item: any) => 
+            String(item.opportunity_details?.id || item.id)
+          ) || []
+        );
+        
+        setSavedOpportunities(savedIds); 
+      } catch (err) {
+        console.error('Error fetching saved status:', err);
+      }
+
       setOpportunities(mapped);
-      console.log('✅ Mapped job opportunities:', mapped.length);
     }
-  }, [jobMatches]);
+  };
+
+  markSavedJobs();
+}, [jobMatches]);
 
   useEffect(() => {
     fetchSavedOpportunities();
@@ -60,44 +84,53 @@ export default function RecommendedOpportunities({
   };
 
   const fetchSavedOpportunities = async () => {
-    try {
-      // This would typically call an API to get saved opportunities
-      // For now, we'll use localStorage as a fallback
-      const saved = sessionStorage.getItem('savedOpportunities');
-      if (saved) {
-        setSavedOpportunities(new Set(JSON.parse(saved)));
-      }
-    } catch (err) {
-      console.error('Error fetching saved opportunities:', err);
-    }
-  };
+  try {
+    // Call API to get saved job IDs from backend
+    const response = await getSavedJobs({ page: 1, page_size: 1000 });
+    const savedIds = response.results?.map((item: any) => 
+      String(item.opportunity_details?.id || item.id)
+    ) || [];
+    setSavedOpportunities(new Set(savedIds));
+  } catch (err) {
+    console.error('Error fetching saved opportunities:', err);
+  }
+};
 
   const toggleSave = async (opportunityId: string) => {
-    try {
-      const newSaved = new Set(savedOpportunities);
-      if (newSaved.has(opportunityId)) {
-        newSaved.delete(opportunityId);
-      } else {
-        newSaved.add(opportunityId);
-      }
-      setSavedOpportunities(newSaved);
-      sessionStorage.setItem('savedOpportunities', JSON.stringify([...newSaved]));
-    } catch (err) {
-      console.error('Error toggling save:', err);
+  try {
+    // Call the actual API to save/unsave
+    await toggleSaveJob(opportunityId);
+    
+    // Update local state
+    const newSaved = new Set(savedOpportunities);
+    if (newSaved.has(opportunityId)) {
+      newSaved.delete(opportunityId);
+    } else {
+      newSaved.add(opportunityId);
     }
-  };
+    setSavedOpportunities(newSaved);
+  } catch (err) {
+    console.error('Error toggling save:', err);
+  }
+};
 
-  const handleApply = async (opportunityId: string) => {
+  const handleApply = async (opportunity: Opportunity) => {
     try {
-      // This would typically call an API to apply
-      console.log('Applying to opportunity:', opportunityId);
-      // You can implement the actual apply logic here
+      const applyUrl = opportunity.apply_link || opportunity.application_url;
+      
+      if (applyUrl) {
+        // Open the job application link in a new tab
+        window.open(applyUrl, '_blank', 'noopener,noreferrer');
+        console.log('Opening application URL:', applyUrl);
+      } else {
+        // Fallback: if no link, just log
+        console.log('No application URL available for opportunity:', opportunity.id);
+        alert('Application link not available for this job.');
+      }
     } catch (err) {
       console.error('Error applying to opportunity:', err);
     }
   };
-
-
 
   const getMatchColor = (percentage?: number) => {
     if (!percentage) return 'text-gray-500';
@@ -228,7 +261,7 @@ export default function RecommendedOpportunities({
 
               <div className="flex space-x-2">
                 <button
-                  onClick={() => handleApply(opportunity.id)}
+                  onClick={() => handleApply(opportunity)}
                   className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Apply
@@ -241,4 +274,3 @@ export default function RecommendedOpportunities({
     </div>
   );
 }
-

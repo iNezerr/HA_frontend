@@ -19,6 +19,7 @@ export interface Scholarship {
   description?: string;
   url?: string;
   scraped_at?: string;
+  saved_scholarship_id?: string;
   is_active: boolean;
   is_saved?: boolean;
   is_applied?: boolean;

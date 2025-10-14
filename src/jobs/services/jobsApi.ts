@@ -8,9 +8,9 @@ const JOBS_API_BASE = '/opportunities/jobs';
 const APPLICATIONS_API_BASE = '/applications';
 
 /**
- * Get jobs based on filters
+ * Get jobs based on filters (with optional public access)
  */
-export const getJobs = async (filters: JobFilters = {}): Promise<JobsResponse> => {
+export const getJobs = async (filters: JobFilters = {}, isPublic: boolean = false): Promise<JobsResponse> => {
   const params = new URLSearchParams();
 
   // Add filter parameters
@@ -27,6 +27,30 @@ export const getJobs = async (filters: JobFilters = {}): Promise<JobsResponse> =
   const queryString = params.toString();
   const endpoint = `${JOBS_API_BASE}/${queryString ? `?${queryString}` : ''}`;
 
+  // If public, use fetch directly without authentication
+  if (isPublic) {
+    try {
+      // Get base URL from apiClient or use default
+      const baseURL = 'http://127.0.0.1:8000/api'; // Yahan apna backend URL daalo
+      
+      const response = await fetch(`${baseURL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Otherwise use apiClient with authentication
   return client.get(endpoint);
 };
 
@@ -57,10 +81,17 @@ export const getJob = async (jobId: string): Promise<Job> => {
 };
 
 /**
- * Save/unsave a job
+ * Save a job
  */
 export const toggleSaveJob = async (jobId: string): Promise<JobInteraction> => {
   return client.post(`${APPLICATIONS_API_BASE}/opportunities/${jobId}/save/`);
+};
+
+/**
+ * Unsave a job
+ */
+export const unsaveJob = async (jobId: string): Promise<JobInteraction> => {
+  return client.post(`${APPLICATIONS_API_BASE}/opportunities/${jobId}/unsave/`);
 };
 
 /**

@@ -1,3 +1,5 @@
+import { forwardRef, useImperativeHandle, useState } from "react";
+
 interface AIPreferences {
   opportunities: string[];
   prioritizeBy: string[];
@@ -9,7 +11,21 @@ interface AITabProps {
   setAIPreferences: (preferences: AIPreferences) => void;
 }
 
-export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
+const AITab = forwardRef(({ aiPreferences, setAIPreferences }: AITabProps, ref) => {
+  const [localPreferences, setLocalPreferences] = useState<AIPreferences>(aiPreferences);
+
+  const handleSave = async () => {
+    try {
+      await setAIPreferences(localPreferences);
+    } catch (error) {
+      console.error("Failed to save AI preference:", error);
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    save: handleSave
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -19,19 +35,13 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
             <label key={opportunity} className="flex items-center">
               <input
                 type="checkbox"
-                checked={aiPreferences.opportunities.includes(opportunity)}
+                checked={localPreferences.opportunities.includes(opportunity)}
                 onChange={(e) => {
-                  if (e.target.checked) {
-                    setAIPreferences({
-                      ...aiPreferences,
-                      opportunities: [...aiPreferences.opportunities, opportunity]
-                    });
-                  } else {
-                    setAIPreferences({
-                      ...aiPreferences,
-                      opportunities: aiPreferences.opportunities.filter(o => o !== opportunity)
-                    });
-                  }
+                  const updated = e.target.checked
+                    ? { ...localPreferences, opportunities: [...localPreferences.opportunities, opportunity]}
+                    : { ...localPreferences, opportunities: localPreferences.opportunities.filter(o => o !== opportunity)};
+
+                  setLocalPreferences(updated);
                 }}
                 className="mr-2"
               />
@@ -48,19 +58,13 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
             <label key={priority} className="flex items-center">
               <input
                 type="checkbox"
-                checked={aiPreferences.prioritizeBy.includes(priority)}
+                checked={localPreferences.prioritizeBy.includes(priority)}
                 onChange={(e) => {
-                  if (e.target.checked) {
-                    setAIPreferences({
-                      ...aiPreferences,
-                      prioritizeBy: [...aiPreferences.prioritizeBy, priority]
-                    });
-                  } else {
-                    setAIPreferences({
-                      ...aiPreferences,
-                      prioritizeBy: aiPreferences.prioritizeBy.filter(p => p !== priority)
-                    });
-                  }
+                  const updated = e.target.checked
+                    ? { ...localPreferences, prioritizeBy: [...localPreferences.prioritizeBy, priority] }
+                    : { ...localPreferences, prioritizeBy: localPreferences.prioritizeBy.filter(p => p !== priority) };
+                  
+                  setLocalPreferences(updated);
                 }}
                 className="mr-2"
               />
@@ -73,12 +77,19 @@ export default function AITab({ aiPreferences, setAIPreferences }: AITabProps) {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Additional preferences</label>
         <textarea
-          value={aiPreferences.salaryExpectation}
-          onChange={(e) => setAIPreferences({...aiPreferences, salaryExpectation: e.target.value})}
+          value={localPreferences.salaryExpectation}
+          onChange={(e) => {
+            const updated = {...localPreferences, salaryExpectation: e.target.value};
+            setLocalPreferences(updated);
+          }}
           rows={2}
           className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
     </div>
   );
-}
+});
+
+AITab.displayName = 'AITab';
+
+export default AITab;

@@ -2,14 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Bookmark, Loader2, AlertCircle, Filter, X } from 'lucide-react';
 import { Grant, GrantFilters } from '../grants/types';
 import { GrantCard } from '../grants/components/GrantCard';
-import { getSavedGrants, toggleSaveGrant, applyToGrant } from '../grants/services/grantsApi';
-
-interface GrantsResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Grant[];
-}
+import { GrantsResponse, getSavedGrants, toggleSaveGrant, applyToGrant } from '../grants/services/grantsApi';
 
 const SaveGrants: React.FC = () => {
   const [grants, setGrants] = useState<Grant[]>([]);
@@ -29,10 +22,6 @@ const SaveGrants: React.FC = () => {
 
     try {
       const response: GrantsResponse = await getSavedGrants(filters);
-      
-      console.log('Saved grants response:', response);
-      console.log('Grants array:', response.results);
-      
       const transformedGrants = response.results?.map((item: any) => {
         if (item.opportunity_details) {
           return {
@@ -65,7 +54,7 @@ const SaveGrants: React.FC = () => {
   const handleUnsave = async (grantId: string) => {
     try {
       const savedGrant = grants.find(grant => grant.id === grantId);
-      const savedGrantId = savedGrant?.saved_grant_id || grantId;
+      const savedGrantId = (savedGrant as any)?.saved_grant_id || grantId;
       
       await toggleSaveGrant(savedGrantId);
       

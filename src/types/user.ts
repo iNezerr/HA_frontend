@@ -92,6 +92,7 @@ export interface BaseProfile {
 // Job seeker specific profile
 export interface JobSeekerProfile extends BaseProfile {
   user_type: 'job';
+  phone: string;
   summary: string;
   skills: string[];
   experience: Experience[];

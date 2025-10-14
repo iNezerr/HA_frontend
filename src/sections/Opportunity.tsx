@@ -1,5 +1,6 @@
 import React from 'react';
 import SEO from '../components/SEO';
+import { Link } from 'react-router-dom';
 
 const Opportunity: React.FC = () => {
   return (
@@ -25,13 +26,14 @@ const Opportunity: React.FC = () => {
           </p>
 
           <div className="flex justify-center">
+            <Link to="/signup">
             <a
-              href="/register"
               className="bg-[#4B9CD3] text-white font-medium py-2 px-6 rounded-full transition hover:bg-[#3D84FF] focus:outline-none focus:ring-2 focus:ring-[#4B9CD3] focus:ring-offset-2"
               aria-label="Get started with Hues Apply"
             >
               Get Started
             </a>
+            </Link>
           </div>
         </div>
       </section>

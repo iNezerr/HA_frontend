@@ -11,10 +11,13 @@ export interface Job {
   skills_required?: string[];
   application_deadline?: string;
   url?: string;
+  saved_job_id?: string;
   created_at: string;
   is_active: boolean;
   is_saved?: boolean;
   is_applied?: boolean;
+  apply_link?: string;
+  application_url?:  string;
   similarity_score?: number;
   opportunity_type: 'job';
   saved_job_id?: string;

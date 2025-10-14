@@ -104,7 +104,7 @@ export const JobList: React.FC<JobListProps> = ({
       )}
 
       <div className="space-y-4">
-        {jobs.map((job) => (
+        {(useDashboard ? jobs : jobs.slice(0, 4)).map((job) => (
           <JobCard
             key={job.id}
             job={job}

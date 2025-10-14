@@ -1,7 +1,32 @@
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 import SEO from '../components/SEO';
+import { JobList } from "../jobs";
+import { useState } from "react";
 
 const Hero = () => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [locationQuery, setLocationQuery] = useState("");
+
+    const [activeFilters, setActiveFilters] = useState({
+        search: "",
+        location: "",
+        ordering: "-created_at",
+        show_expired: false,
+        page_size: 4
+    });
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        // Update active filters with current search values
+        setActiveFilters({
+            search: searchQuery,
+            location: locationQuery,
+            ordering: "-created_at",
+            show_expired: false,
+            page_size: 4
+        });
+    };
 
     return (
         <>
@@ -25,7 +50,12 @@ const Hero = () => {
                     opportunities worldwide to empower you
                 </p>
 
-                <form role="search" aria-label="Job search" className="flex flex-col lg:flex-row items-stretch justify-between w-[90%] lg:w-full max-w-[60rem] mt-8 py-2 lg:px-4 rounded-xl lg:rounded-4xl lg:border lg:border-gray-200 lg:shadow-sm gap-2 lg:gap-4">
+                <form 
+                    role="search" 
+                    aria-label="Job search" 
+                    className="flex flex-col lg:flex-row items-stretch justify-between w-[90%] lg:w-full max-w-[60rem] mt-8 py-2 lg:px-4 rounded-xl lg:rounded-4xl lg:border lg:border-gray-200 lg:shadow-sm gap-2 lg:gap-4"
+                    onSubmit={handleSearch}
+                    >
                     <div className="flex items-center flex-1 px-4 border border-gray-100 lg:border-none rounded-full bg-white">
                         <label htmlFor="job-search" className="sr-only">Search for jobs</label>
                         <FaSearch className="text-gray-400 mr-2" aria-hidden="true" />
@@ -34,6 +64,8 @@ const Hero = () => {
                             type="text"
                             placeholder="Job title, Keyword, company"
                             className="w-full bg-transparent focus:outline-none text-sm text-gray-700 py-2"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                     <div className="hidden lg:block w-px h-8 bg-gray-300 mx-2" aria-hidden="true"></div>
@@ -46,6 +78,8 @@ const Hero = () => {
                             type="text"
                             placeholder="City, state, or remote"
                             className="w-full bg-transparent focus:outline-none text-sm text-gray-700 py-2"
+                            value={locationQuery}
+                            onChange={(e) => setLocationQuery(e.target.value)}
                         />
                     </div>
                     <button
@@ -57,35 +91,21 @@ const Hero = () => {
                     </button>
                 </form>
 
+                <div className="w-full max-w-[75rem] mt-12">
+                    <div className="job-list-container flex flex-wrap -m-1.5">
+                        <JobList
+                        key={JSON.stringify(activeFilters)}
+                        useDashboard={false}
+                        title="Recently Posted Jobs"
+                        filters={activeFilters}
+                        showLoadMore={false}
+                        />
+                    </div>
+                </div>
+
                 <p className="font-medium text-[#333333CC] pt-6 text-center">
                     Upload or create a resume to easily apply to job
                 </p>
-
-                {/* <h2 className="text-[#3D84FF] font-semibold text-sm px-6 py-2 bg-[#4B9CD31A] rounded-full flex items-center justify-center leading-tight mt-6">
-                    collaboration partners
-                </h2>
-
-                <div className="bg-[#EDF5FB] mt-6 rounded-3xl w-fit max-w-6xl px-4 sm:px-12 py-8 flex flex-col gap-6 mb-20" aria-label="Partner companies">
-                    {images.map((row, i) => (
-                        <div key={i} className="flex flex-wrap justify-center gap-4">
-                            {row.map((src, idx) => {
-                                const companyName = src.split('/').pop()?.replace('.svg', '') || 'company';
-                                return (
-                                    <div
-                                        key={idx}
-                                        className="bg-white w-[100px] sm:w-[120px] h-[60px] rounded-lg flex items-center justify-center"
-                                    >
-                                        <img
-                                            src={src}
-                                            alt={`${companyName} logo`}
-                                            className="max-h-[32px] object-contain"
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
-                </div> */}
             </section>
         </>
     );
