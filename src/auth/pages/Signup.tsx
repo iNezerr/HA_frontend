@@ -265,22 +265,6 @@ export default function Signup() {
               )}
             </div>
 
-            <div>
-              <label htmlFor="userType" className="block text-sm font-medium text-gray-700 mb-1">
-                I'm interested in
-              </label>
-              <select
-                id="userType"
-                value={formData.userType}
-                onChange={(e) => setFormData({ ...formData, userType: e.target.value as 'job' | 'scholarship' | 'grant' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="job">Jobs & Career Opportunities</option>
-                <option value="scholarship">Scholarships & Educational Funding</option>
-                <option value="grant">Grants & Research Funding</option>
-              </select>
-            </div>
-
             <div className="flex items-start">
               <div className="flex items-center h-5">
                 <input

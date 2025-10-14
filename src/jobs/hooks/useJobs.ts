@@ -10,16 +10,28 @@ export const useJobs = (filters: JobFilters = {}, useDashboard: boolean = true) 
   const [hasMore, setHasMore] = useState(false);
 
   const fetchJobs = useCallback(async (additionalFilters: JobFilters = {}) => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      const mergedFilters = { ...filters, ...additionalFilters };
-      const response = useDashboard 
-        ? await getDashboardJobs(mergedFilters)
-        : await getJobs(mergedFilters);
+  try {
+    const mergedFilters = { ...filters, ...additionalFilters };
+    const response = useDashboard 
+      ? await getDashboardJobs(mergedFilters)
+      : await getJobs(mergedFilters, true); // Pass true for public access
 
-      // Get saved jobs to mark which ones are saved
+    // For public access, don't fetch saved jobs
+    if (!useDashboard) {
+      const jobsWithSavedStatus = response.results.map((job: Job) => ({
+        ...job,
+        is_saved: false, // Default false for public view
+        is_applied: false
+      }));
+
+      setJobs(jobsWithSavedStatus);
+      setTotalCount(response.count || 0);
+      setHasMore(!!response.next);
+    } else {
+      // Get saved jobs to mark which ones are saved (only for authenticated users)
       const savedJobsResponse = await getSavedJobs({ page: 1, page_size: 1000 });
       const savedJobIds = new Set(
         savedJobsResponse.results?.map((item: any) => 
@@ -27,7 +39,6 @@ export const useJobs = (filters: JobFilters = {}, useDashboard: boolean = true) 
         ) || []
       );
 
-      // Map jobs and mark saved ones
       const jobsWithSavedStatus = response.results.map((job: Job) => ({
         ...job,
         is_saved: savedJobIds.has(String(job.id))
@@ -36,13 +47,14 @@ export const useJobs = (filters: JobFilters = {}, useDashboard: boolean = true) 
       setJobs(jobsWithSavedStatus);
       setTotalCount(response.count || 0);
       setHasMore(!!response.next);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch jobs');
-      console.error('Error fetching jobs:', err);
-    } finally {
-      setLoading(false);
     }
-  }, [filters, useDashboard]);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to fetch jobs');
+    console.error('Error fetching jobs:', err);
+  } finally {
+    setLoading(false);
+  }
+}, [filters, useDashboard]);
 
   const saveJob = useCallback(async (jobId: string) => {
     try {

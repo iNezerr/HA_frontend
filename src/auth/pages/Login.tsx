@@ -73,15 +73,6 @@ export default function Login() {
     }
   };
 
-  const handleDemoLogin = () => {
-    // For demo purposes, you can either use a demo account
-    // or redirect to a demo page
-    setFormData({
-      email: 'demo@huesapply.com',
-      password: 'demo123'
-    });
-    // Optionally auto-submit the form
-  };
   return (
     <>
       <SEO
@@ -213,14 +204,6 @@ export default function Login() {
           </form>
 
           <div className="text-center space-y-4">
-            <div>
-              <button
-                onClick={handleDemoLogin}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm"
-              >
-                Try Demo Account
-              </button>
-            </div>
 
             <p className="text-xs text-gray-500 leading-relaxed">
               By clicking continue, you agree to our{' '}

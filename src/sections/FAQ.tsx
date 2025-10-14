@@ -6,20 +6,24 @@ const FAQ: React.FC = () => {
 
   const faqItems = [
     {
-      question: "How do I sign up for ViviFiy?",
-      answer: "Simply click on \"Sign Up\" at the top of the page, choose your preferences as an user, and follow the registration process."
+      question: "How do I get started with Hues Apply?",
+      answer: "Getting started is easy. Sign up for free, complete your profile, and upload your key documents. Hues Apply will use this information to match you with scholarships, jobs, internships, and other opportunities tailored to your goals."
     },
     {
-      question: "How do I sign up to Hues Apply?",
-      answer: "Visit our website, click on the 'Register' button in the top-right corner, fill in your details, and follow the on-screen instructions to complete the registration process."
+      question: "Who is Hues Apply for?",
+      answer: "Hues Apply is built for students, recent graduates, early-career professionals, and underrepresented individuals who are looking for scholarships, grants, fellowships, and career development opportunities."
     },
     {
-      question: "What should I do if I forget my password?",
-      answer: "Click on the 'Forgot Password' link on the login page, enter your registered email address, and follow the instructions to reset your password."
+      question: "What makes Hues Apply different from job boards or scholarship websites?",
+      answer: "Hues Apply focuses on more than just jobs. We prioritise scholarships and grants and use AI to personalise recommendations. Our platform also offers guided support to help users complete strong applications and improve their chances of success."
     },
     {
-      question: "Can I update my profile information after registration?",
-      answer: "Yes, you can update your profile information by navigating to the 'Profile' section in your account settings."
+      question: "How does the AI matching system work?",
+      answer: "After you complete your profile, our AI reviews your information including your academic background, interests, and goals. It then recommends the most relevant opportunities, helping you save time and find the right fit."
+    },
+    {
+      question: "What types of opportunities are listed on Hues Apply?",
+      answer: "You will find a wide range of opportunities including scholarships, fellowships, internships, jobs, academic programmes, exchange opportunities, and grants. All are personalised to match your profile and goals."
     }
   ];
 
