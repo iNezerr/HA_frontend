@@ -31,7 +31,7 @@ export const getJobs = async (filters: JobFilters = {}, isPublic: boolean = fals
   if (isPublic) {
     try {
       // Get base URL from apiClient or use default
-      const baseURL = 'http://127.0.0.1:8000/api'; // Yahan apna backend URL daalo
+      const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://huesapply-backend-555108752266.africa-south1.run.app/api';
       
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'GET',
