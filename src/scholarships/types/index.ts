@@ -25,7 +25,6 @@ export interface Scholarship {
   application_link?: string;
   url?: string;
   description?: string;
-  url?: string;
   is_saved?: boolean;
   is_applied?: boolean;
   similarity_score?: number;

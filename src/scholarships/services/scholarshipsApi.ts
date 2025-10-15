@@ -25,7 +25,6 @@ export interface Scholarship {
   is_applied?: boolean;
   similarity_score?: number;
   opportunity_type: 'scholarship';
-  saved_scholarship_id?: string;
 }
 
 // ScholarshipFilters interface

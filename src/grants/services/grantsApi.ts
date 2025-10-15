@@ -22,7 +22,6 @@ export interface Grant {
   is_applied?: boolean;
   similarity_score?: number;
   opportunity_type: 'grant';
-  saved_grant_id?: string;
 }
 
 export interface GrantFilters {

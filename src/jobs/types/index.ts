@@ -20,7 +20,6 @@ export interface Job {
   application_url?:  string;
   similarity_score?: number;
   opportunity_type: 'job';
-  saved_job_id?: string;
 }
 
 export interface JobFilters {
