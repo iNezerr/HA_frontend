@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Job, JobFilters } from '../types';
-import { getDashboardJobs, getJobs, toggleSaveJob, applyToJob, getSavedJobs } from '../services/jobsApi';
+import { getDashboardJobs, getJobs, getPublicJobs, toggleSaveJob, applyToJob, getSavedJobs } from '../services/jobsApi';
 
 export const useJobs = (filters: JobFilters = {}, useDashboard: boolean = true) => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -14,12 +14,18 @@ export const useJobs = (filters: JobFilters = {}, useDashboard: boolean = true) 
   setError(null);
 
   try {
-    const mergedFilters = { ...filters, ...additionalFilters };
-    const response = useDashboard 
-      ? await getDashboardJobs(mergedFilters)
-      : await getJobs(mergedFilters, true); // Pass true for public access
+    let response: any;
+    
+    if (!useDashboard) {
+      // Use public endpoint for landing page (no authentication required)
+      response = await getPublicJobs();
+    } else {
+      // Use authenticated endpoints for dashboard
+      const mergedFilters = { ...filters, ...additionalFilters };
+      response = await getDashboardJobs(mergedFilters);
+    }
 
-    // For public access, don't fetch saved jobs
+    // For public access (landing page), don't fetch saved jobs
     if (!useDashboard) {
       const jobsWithSavedStatus = response.results.map((job: Job) => ({
         ...job,

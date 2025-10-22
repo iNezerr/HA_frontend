@@ -34,9 +34,29 @@ const SaveJobs: React.FC = () => {
             // saved_job_id: item.id,
             is_saved: item.is_saved ?? true,
             is_applied: item.is_applied ?? false,
+            // Ensure required fields have fallback values
+            title: item.opportunity_details.title || 'Job Title Not Available',
+            company: item.opportunity_details.company || 'Company Not Available',
+            location: item.opportunity_details.location || 'Location Not Available',
+            employment_type: item.opportunity_details.employment_type || 'full-time',
+            description: item.opportunity_details.description || '',
+            created_at: item.opportunity_details.created_at || new Date().toISOString(),
+            is_active: item.opportunity_details.is_active ?? true,
+            opportunity_type: 'job' as const,
           };
         }
-        return item;
+        return {
+          ...item,
+          // Ensure required fields have fallback values for direct items
+          title: item.title || 'Job Title Not Available',
+          company: item.company || 'Company Not Available', 
+          location: item.location || 'Location Not Available',
+          employment_type: item.employment_type || 'full-time',
+          description: item.description || '',
+          created_at: item.created_at || new Date().toISOString(),
+          is_active: item.is_active ?? true,
+          opportunity_type: 'job' as const,
+        };
       }) || [];
       
       console.log('Transformed jobs:', transformedJobs);
@@ -229,15 +249,16 @@ const SaveJobs: React.FC = () => {
           </div>
         )}
 
-        {/* Jobs List - Using existing JobCard component */}
+        {/* Jobs Grid - Using existing JobCard component */}
         {jobs.length > 0 && (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {jobs.map((job) => (
               <div key={job.id} className="relative">
                 <JobCard
                   job={job}
                   onSave={handleUnsave}
                   onApply={handleApply}
+                  className="h-full"
                 />
               </div>
             ))}

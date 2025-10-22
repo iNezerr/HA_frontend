@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapPin, Building2, Clock, Bookmark, CheckCircle, ExternalLink } from 'lucide-react';
 import { Job } from '../types';
 
@@ -17,6 +18,7 @@ export const JobCard: React.FC<JobCardProps> = ({
 }) => {
   const [saving, setSaving] = useState(false);
   const [applying, setApplying] = useState(false);
+  const navigate = useNavigate();
 
   const handleSave = async () => {
     if (!onSave || saving) return;
@@ -34,10 +36,8 @@ export const JobCard: React.FC<JobCardProps> = ({
   const handleApply = async () => {
     if (applying) return;
     
-    // If url exists, open it in a new tab
-    if (job.url) {
-      window.open(job.url, '_blank', 'noopener,noreferrer');
-    }
+    // Redirect to signup page instead of opening job URL
+    navigate('/signup');
     
     // If onApply callback exists, call it
     if (onApply) {
@@ -73,11 +73,11 @@ export const JobCard: React.FC<JobCardProps> = ({
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-gray-900 truncate mb-1">
-              {job.title}
+              {job.title || 'Job Title Not Available'}
             </h3>
             <div className="flex items-center text-gray-600 mb-2">
               <Building2 className="w-4 h-4 mr-1.5 flex-shrink-0" />
-              <span className="font-medium truncate">{job.company}</span>
+              <span className="font-medium truncate">{job.company || 'Company Not Available'}</span>
             </div>
           </div>
           
@@ -91,15 +91,19 @@ export const JobCard: React.FC<JobCardProps> = ({
 
         {/* Meta Information */}
         <div className="flex flex-wrap gap-4 mb-3 text-sm text-gray-600">
-          <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-1.5" />
-            <span>{job.location}</span>
-          </div>
+          {job.location && (
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-1.5" />
+              <span>{job.location}</span>
+            </div>
+          )}
           
-          <div className="flex items-center capitalize">
-            <Clock className="w-4 h-4 mr-1.5" />
-            <span>{job.employment_type.replace('-', ' ')}</span>
-          </div>
+          {job.employment_type && (
+            <div className="flex items-center capitalize">
+              <Clock className="w-4 h-4 mr-1.5" />
+              <span>{job.employment_type?.replace('-', ' ') || 'Not specified'}</span>
+            </div>
+          )}
           
           {getSalaryDisplay(job.salary_range) && (
             <div className="font-medium text-gray-700">
@@ -109,9 +113,11 @@ export const JobCard: React.FC<JobCardProps> = ({
         </div>
 
         {/* Description */}
-        <p className="text-gray-700 text-sm mb-4 line-clamp-3">
-          {job.description}
-        </p>
+        {job.description && (
+          <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+            {job.description}
+          </p>
+        )}
 
         {/* Skills */}
         {job.skills_required && job.skills_required.length > 0 && (
@@ -169,12 +175,7 @@ export const JobCard: React.FC<JobCardProps> = ({
               </div>
             ) : (
               <button
-                onClick={() => {
-                  if (job.url) {
-                    window.open(job.url, '_blank');
-                  }
-                  handleApply();
-                }}
+                onClick={handleApply}
                 disabled={applying}
                 className={`flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 ${
                   applying ? 'opacity-50 cursor-not-allowed' : ''

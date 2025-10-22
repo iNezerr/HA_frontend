@@ -22,7 +22,6 @@ export const JobList: React.FC<JobListProps> = ({
     jobs, 
     loading, 
     error, 
-    totalCount, 
     hasMore, 
     saveJob, 
     applyJob, 
@@ -97,13 +96,10 @@ export const JobList: React.FC<JobListProps> = ({
       {title && (
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <div className="text-sm text-gray-600">
-            {totalCount} job{totalCount !== 1 ? 's' : ''} found
-          </div>
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className={useDashboard ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"}>
         {(useDashboard ? jobs : jobs.slice(0, 4)).map((job) => (
           <JobCard
             key={job.id}

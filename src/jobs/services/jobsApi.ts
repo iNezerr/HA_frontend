@@ -8,6 +8,31 @@ const JOBS_API_BASE = '/opportunities/jobs';
 const APPLICATIONS_API_BASE = '/applications';
 
 /**
+ * Get public jobs for landing page (no authentication required)
+ */
+export const getPublicJobs = async (): Promise<JobsResponse> => {
+  try {
+    // Get base URL from apiClient or use default
+    const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://huesapply-backend-555108752266.africa-south1.run.app/api';
+    
+    const response = await fetch(`${baseURL}/opportunities/jobs/public/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch public jobs');
+    }
+
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
  * Get jobs based on filters (with optional public access)
  */
 export const getJobs = async (filters: JobFilters = {}, isPublic: boolean = false): Promise<JobsResponse> => {

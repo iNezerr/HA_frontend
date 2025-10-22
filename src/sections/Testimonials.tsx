@@ -6,7 +6,7 @@ const testimonials = [
   {
     id: 1,
     text: "Hues Apply's clear guidance and thoughtful coaching have turned so many of our 'what ifs' into confident next steps. Thank you for the impact you make. We wish you a future of rewarding breakthroughs and inspiring clients.",
-    name: "Addokumi Ent",
+    name: "Addo Kumi",
     title: "Addokumi Ent",
     image: "/hero/addo_kumi.jpg",
   },

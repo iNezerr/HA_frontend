@@ -30,7 +30,7 @@ export default function RecommendedOpportunities({
   // Use our working simple matching hook
   const { jobMatches, loading, error, loadJobMatches, clearError } = useJobMatching({
     autoLoad: true,
-    limit: 10
+    limit: 12 // Show more opportunities in grid
   });
 
   // Convert job matches to opportunities format when data loads
@@ -143,12 +143,26 @@ export default function RecommendedOpportunities({
   if (loading) {
     return (
       <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-6">{title}</h3>
+        <div className="job-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-xl p-6 animate-pulse">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-lg mr-4 flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="space-y-3 mb-4">
+                <div className="h-3 bg-gray-200 rounded w-full"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+              <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
+                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-8 bg-gray-200 rounded w-16"></div>
+              </div>
             </div>
           ))}
         </div>
@@ -198,76 +212,106 @@ export default function RecommendedOpportunities({
 
   return (
     <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
-      <div className="space-y-4">
+      <h3 className="text-xl font-semibold text-gray-800 mb-6">{title}</h3>
+      
+      {/* Grid Layout for Job Cards */}
+      <div className="job-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {opportunities.map((opportunity) => (
-          <div key={opportunity.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-2">
-              <h4 className="font-medium text-gray-900 line-clamp-2">
-                {opportunity.title}
-              </h4>
-              <button
-                onClick={() => toggleSave(opportunity.id)}
-                className={`ml-2 p-1 rounded-full hover:bg-gray-100 ${savedOpportunities.has(opportunity.id) ? 'text-blue-600' : 'text-gray-400'
-                  }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                </svg>
-              </button>
-            </div>
+          <div key={opportunity.id} className="job-card-hover bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200 relative">
+            {/* Save/Bookmark Button - Top Right */}
+            <button
+              onClick={() => toggleSave(opportunity.id)}
+              className={`absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors ${
+                savedOpportunities.has(opportunity.id) ? 'text-blue-600' : 'text-gray-400'
+              }`}
+            >
+              <svg className="w-5 h-5" fill={savedOpportunities.has(opportunity.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </button>
 
-            <p className="text-sm text-gray-600 mb-2">{opportunity.company}</p>
-
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {opportunity.location}
-                </span>
-                {opportunity.salary_range && (
-                  <span className="flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                    {opportunity.salary_range}
-                  </span>
+            {/* Company Logo/Icon */}
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-lg mr-4 flex-shrink-0">
+                {opportunity.company.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-2">
+                  {opportunity.company}
+                </h4>
+                {opportunity.match_percentage && (
+                  <div className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold match-badge ${
+                    opportunity.match_percentage >= 90 ? 'bg-green-100 text-green-700' :
+                    opportunity.match_percentage >= 70 ? 'bg-blue-100 text-blue-700' :
+                    opportunity.match_percentage >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {opportunity.match_percentage}% Match
+                  </div>
                 )}
               </div>
+            </div>
 
-              {opportunity.match_percentage && (
-                <span className={`text-sm font-medium ${getMatchColor(opportunity.match_percentage)}`}>
-                  {opportunity.match_percentage}% match
+            {/* Job Details */}
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 font-medium">Role</span>
+                <span className="font-semibold text-gray-900 text-right flex-1 ml-4 line-clamp-2">
+                  {opportunity.title}
                 </span>
+              </div>
+              
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 font-medium">Location</span>
+                <span className="font-semibold text-gray-900 text-right flex-1 ml-4">
+                  {opportunity.location}
+                </span>
+              </div>
+
+              {opportunity.salary_range && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Salary</span>
+                  <span className="font-semibold text-gray-900 text-right flex-1 ml-4">
+                    {opportunity.salary_range}
+                  </span>
+                </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex flex-wrap gap-1">
-                {opportunity.skills_required?.slice(0, 3).map((skill: string, index: number) => (
-                  <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                    {skill}
-                  </span>
-                ))}
-                {opportunity.skills_required && opportunity.skills_required.length > 3 && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                    +{opportunity.skills_required.length - 3} more
-                  </span>
-                )}
+            {/* Closing Date and Apply Button */}
+            <div className="border-t border-gray-100 pt-4 flex items-center justify-between text-xs text-gray-500">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Closing today</span>
               </div>
-
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleApply(opportunity)}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Apply
-                </button>
-              </div>
+              
+              <button
+                onClick={() => handleApply(opportunity)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Apply
+              </button>
             </div>
+
+            {/* Skills Tags */}
+            {opportunity.skills_required && opportunity.skills_required.length > 0 && (
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <div className="flex flex-wrap gap-1">
+                  {opportunity.skills_required.slice(0, 3).map((skill: string, index: number) => (
+                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                      {skill}
+                    </span>
+                  ))}
+                  {opportunity.skills_required.length > 3 && (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-md">
+                      +{opportunity.skills_required.length - 3}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
