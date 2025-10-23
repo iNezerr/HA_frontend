@@ -132,13 +132,7 @@ export default function RecommendedOpportunities({
     }
   };
 
-  const getMatchColor = (percentage?: number) => {
-    if (!percentage) return 'text-gray-500';
-    if (percentage >= 90) return 'text-green-600';
-    if (percentage >= 70) return 'text-blue-600';
-    if (percentage >= 50) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+
 
   if (loading) {
     return (

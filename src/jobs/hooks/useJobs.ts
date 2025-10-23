@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Job, JobFilters } from '../types';
-import { getDashboardJobs, getJobs, getPublicJobs, toggleSaveJob, applyToJob, getSavedJobs } from '../services/jobsApi';
+import { getDashboardJobs, getPublicJobs, toggleSaveJob, applyToJob, getSavedJobs } from '../services/jobsApi';
 
 export const useJobs = (filters: JobFilters = {}, useDashboard: boolean = true) => {
   const [jobs, setJobs] = useState<Job[]>([]);
